@@ -4,7 +4,7 @@ window.PageModules.users = {
     const state = Store.getState();
     UI.$("#pageContent").innerHTML = `
       <section class="user-grid reveal">
-        ${state.users.map(u => {
+        ${state.users && state.users.length ? state.users.map(u => {
           const trips = state.trips.filter(t => t.participantIds.includes(u.id));
           const visits = state.visits.filter(v => v.userId === u.id);
           const expenses = state.expenses.filter(e => e.userId === u.id);
@@ -43,7 +43,7 @@ window.PageModules.users = {
               ${state.activities.filter(a=>a.userId===u.id).slice(0,1).map(a=>`<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; font-size:11px; color:#334155;"><span style="line-height:1.4;">${a.text}</span><span style="white-space:nowrap; color:#94a3b8;">${UI.shortDate(a.date)}</span></div>`).join("") || `<span style="font-size:11px; color:#94a3b8;">Sem atividade recente no sistema.</span>`}
             </div>
           </a>`;
-        }).join("")}
+        }).join("") : UI.empty("Nenhum usuário", "A equipe comercial ainda não possui usuários cadastrados na base de dados.")}
       </section>
     `;
   }
