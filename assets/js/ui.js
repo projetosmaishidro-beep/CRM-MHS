@@ -675,7 +675,7 @@ window.UI = (() => {
         status: row.status === "PLANEJADO" ? "Planejado" : row.status === "EM_ANDAMENTO" ? "Em andamento" : row.status === "REALIZADO" ? "Realizado" : row.status || "Planejado",
         role: row.tipo_participacao === "EXPOSITOR" ? "Expositor" : "Participante",
         notes: row.notas_estrategicas || "",
-        participantIds: [],
+        participantIds: Array.isArray(row.participantes) ? row.participantes : (typeof row.participantes === "string" ? JSON.parse(row.participantes || "[]") : []),
         attachments: Array.isArray(row.anexos) ? row.anexos : (typeof row.anexos === "string" ? JSON.parse(row.anexos || "[]") : []),
         links: Array.isArray(row.links) ? row.links : (typeof row.links === "string" ? JSON.parse(row.links || "[]") : []),
         contacts: Array.isArray(row.contatos) ? row.contatos : (typeof row.contatos === "string" ? JSON.parse(row.contatos || "[]") : []),
@@ -754,6 +754,7 @@ window.UI = (() => {
       return result?.despesa_id || null;
     } catch (err) {
       console.warn("[Central] Despesa não salva no Supabase:", err);
+      alert("ERRO SUPABASE (Criar Despesa): " + (err.message || JSON.stringify(err)));
       return null;
     }
   }
@@ -1115,8 +1116,7 @@ window.UI = (() => {
       if (error) throw error;
       return true;
     } catch (err) {
-      console.warn("[Central] Erro ao deletar despesa:", err);
-      return false;
+      console.warn("[Central] Erro ao deletar despesa:", err); alert("ERRO SUPABASE (Deletar Despesa): " + (err.message || JSON.stringify(err))); return false;
     }
   }
 
@@ -1138,8 +1138,7 @@ window.UI = (() => {
       if (error) throw error;
       return true;
     } catch (err) {
-      console.warn("[Central] Erro ao atualizar despesa:", err);
-      return false;
+      console.warn("[Central] Erro ao atualizar despesa:", err); alert("ERRO SUPABASE (Atualizar Despesa): " + (err.message || JSON.stringify(err))); return false;
     }
   }
 
@@ -1169,8 +1168,7 @@ window.UI = (() => {
       if (error) throw error;
       return true;
     } catch (err) {
-      console.warn("[Central] Erro ao atualizar evento:", err);
-      return false;
+      console.warn("[Central] Erro ao atualizar evento:", err); alert("ERRO SUPABASE (Atualizar Evento): " + (err.message || JSON.stringify(err))); return false;
     }
   }
 
@@ -1183,3 +1181,4 @@ window.UI = (() => {
     uploadToStorage, updateRemoteEventMedia
   };
 })();
+

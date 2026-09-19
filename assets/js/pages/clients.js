@@ -51,8 +51,8 @@ window.PageModules.clients = {
           }
         </style>
         <section class="client-browser-bar reveal" style="position:relative; z-index:20;">
-          <div class="modern-dropdown-wrapper" style="position:relative;">
-            <button class="modern-dropdown-trigger ${filtersOpen ? "active" : ""}" id="clientFilterToggle" type="button" aria-expanded="${filtersOpen}" style="display:flex; justify-content:space-between; align-items:center; width:280px; max-width:100%; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 14px; cursor:pointer; text-align:left; box-shadow:0 2px 5px rgba(0,0,0,0.02); transition:all 0.2s ease;">
+          <div class="modern-dropdown-wrapper" style="position:relative; width:100%;">
+            <button class="modern-dropdown-trigger ${filtersOpen ? "active" : ""}" id="clientFilterToggle" type="button" aria-expanded="${filtersOpen}" style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:100%; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 14px; cursor:pointer; text-align:left; box-shadow:0 2px 5px rgba(0,0,0,0.02); transition:all 0.2s ease;">
               <span style="display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;">
                 <small style="font-size:10px; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Segmento de Clientes</small>
                 <strong style="font-size:15px; color:var(--text);">${browserLabel}</strong>
@@ -60,7 +60,7 @@ window.PageModules.clients = {
               <span class="dropdown-icon" style="color:var(--muted);">${UI.icon("chevron-down", 16)}</span>
             </button>
             
-            <div class="modern-dropdown-menu ${filtersOpen ? "open" : ""}" id="clientCategoryPanel" style="position:absolute; top:calc(100% + 8px); left:0; width:280px; max-width:calc(100vw - 32px); background:#fff; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04); padding:8px; display:flex; flex-direction:column; gap:2px;">
+            <div class="modern-dropdown-menu ${filtersOpen ? "open" : ""}" id="clientCategoryPanel" style="position:absolute; top:calc(100% + 8px); left:0; width:100%; min-width:100%; max-width:100vw; background:#fff; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04); padding:8px; display:flex; flex-direction:column; gap:2px;">
               ${categories.map(item => `
                 <button class="modern-dropdown-item ${item === category ? "active" : ""}" data-category="${item}" type="button" style="width:100%; display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border:none; background:${item === category ? '#f3f8f5' : 'transparent'}; border-radius:8px; cursor:pointer; text-align:left; transition:background 0.15s ease;" onmouseover="this.style.background='${item === category ? '#f3f8f5' : '#f9fafa'}'" onmouseout="this.style.background='${item === category ? '#f3f8f5' : 'transparent'}'">
                   <span style="font-size:13px; font-weight:${item === category ? '750' : '500'}; color:${item === category ? 'var(--primary)' : 'var(--text)'};">${item}</span>

@@ -23,6 +23,71 @@ window.PageModules.event = {
       render();
     };
 
+    
+    window.editLink = (index) => {
+      const ev = Store.getState().events.find(e => e.id === eventId);
+      if (!ev) return;
+      const lnk = (ev.links || [])[index];
+      if (!lnk) return;
+      const form = UI.$("#eventLinkForm");
+      form.elements["title"].value = lnk.title;
+      form.elements["url"].value = lnk.url;
+      let hiddenInput = form.querySelector('input[name="editIndex"]');
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'editIndex';
+        form.appendChild(hiddenInput);
+      }
+      hiddenInput.value = index;
+      UI.openDialog('eventLinkDialog');
+    };
+
+    
+    window.editParticipants = () => {
+      const state = Store.getState();
+      const ev = state.events.find(e => e.id === eventId);
+      if (!ev) return;
+      const currentIds = ev.participantIds || [];
+      const users = state.users || [];
+      
+      const listEl = document.getElementById("participantsList");
+      listEl.innerHTML = users.map(u => `
+        <label style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--line); border-radius:10px; cursor:pointer; background:#fbfcfb; transition:border-color 0.2s;">
+          <input type="checkbox" name="participants" value="${u.id}" ${currentIds.includes(u.id) ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="avatar mini" style="min-width:36px; width:36px; height:36px; font-size:12px; background:#e8f4ed; color:#235b46;">${u.initials}</span>
+            <div style="display:flex; flex-direction:column;">
+              <strong style="font-size:14px; color:var(--text);">${u.name}</strong>
+              <small style="color:var(--muted); font-size:12px;">${u.role}</small>
+            </div>
+          </div>
+        </label>
+      `).join("");
+      
+      UI.openDialog('eventParticipantsDialog');
+    };
+
+    window.editContact = (index) => {
+      const ev = Store.getState().events.find(e => e.id === eventId);
+      if (!ev) return;
+      const ctc = (ev.contacts || [])[index];
+      if (!ctc) return;
+      const form = UI.$("#eventContactForm");
+      form.elements["name"].value = ctc.name;
+      form.elements["role"].value = ctc.role;
+      form.elements["phone"].value = ctc.phone || "";
+      let hiddenInput = form.querySelector('input[name="editIndex"]');
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'editIndex';
+        form.appendChild(hiddenInput);
+      }
+      hiddenInput.value = index;
+      UI.openDialog('eventContactDialog');
+    };
+
     window.deleteContact = (index) => {
       if (!confirm("Remover este contato?")) return;
       const ev = Store.getState().events.find(e => e.id === eventId);
@@ -121,6 +186,19 @@ window.PageModules.event = {
         </dialog>
         </dialog>
 
+        <dialog id="eventParticipantsDialog" class="form-dialog">
+          <form method="dialog" id="eventParticipantsForm">
+            <div class="dialog-head"><div><span class="eyebrow">Equipe CRM</span><h2>Gerenciar Equipe</h2></div><button class="icon-btn" type="button" onclick="UI.closeDialog('eventParticipantsDialog')">${UI.icon("x")}</button></div>
+            <div class="form-grid" id="participantsList" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; padding-right:8px; padding-bottom:8px;">
+               <!-- Preenchido via JS -->
+            </div>
+            <div class="dialog-actions" style="margin-top:20px; border-top:1px solid var(--line); padding-top:16px;">
+              <button class="btn btn-secondary" type="button" onclick="UI.closeDialog('eventParticipantsDialog')">Cancelar</button>
+              <button class="btn btn-primary" type="submit">Salvar Equipe</button>
+            </div>
+          </form>
+        </dialog>
+
         <dialog id="galleryDialog" style="border:none; padding:0; background:transparent; width:100vw; max-width:100vw; height:100vh; max-height:100vh; overflow:hidden;">
           <form method="dialog" style="width:100%; height:100%; display:flex; flex-direction:column; background:rgba(0,0,0,0.9); backdrop-filter:blur(8px);">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; color:#fff;">
@@ -152,8 +230,8 @@ window.PageModules.event = {
         <div class="panel-head">
           <div><span class="eyebrow">Informações Gerais</span><h3>Detalhes e Networking</h3></div>
           <div style="display:flex; gap:8px;">
-            <button class="btn btn-secondary btn-small" onclick="UI.openDialog('eventLinkDialog')">${UI.icon("plus", 14)} Link</button>
-            <button class="btn btn-secondary btn-small" onclick="UI.openDialog('eventContactDialog')">${UI.icon("plus", 14)} Contato</button>
+            <button type="button" class="icon-btn action-circle" onclick="UI.openDialog('eventLinkDialog')" title="Adicionar Link">${UI.icon("link", 18)}</button>
+            <button type="button" class="icon-btn action-circle" onclick="UI.openDialog('eventContactDialog')" title="Adicionar Contato">${UI.icon("user-plus", 18)}</button>
           </div>
         </div>
 
@@ -169,7 +247,10 @@ window.PageModules.event = {
                     <span style="color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">${ctc.role} ${ctc.phone ? `· ${ctc.phone}` : ''}</span>
                   </div>
                 </div>
-                <button type="button" class="icon-btn" style="color:var(--mais-red); padding:4px;" onclick="window.deleteContact(${i})" title="Excluir">${UI.icon("trash", 14)}</button>
+                <div style="display:flex; gap:4px; flex-shrink:0;">
+                  <button type="button" class="icon-btn" style="color:var(--muted); padding:6px; background:#f7f9f8; border-radius:6px;" onclick="window.editContact(${i})" title="Editar">${UI.icon("edit", 14)}</button>
+                  <button type="button" class="icon-btn" style="color:var(--mais-red); padding:6px; background:#f7f9f8; border-radius:6px;" onclick="window.deleteContact(${i})" title="Excluir">${UI.icon("trash", 14)}</button>
+                </div>
               </div>
             `).join("") : '<span style="color:var(--muted); font-size:13px;">Nenhum contato adicionado.</span>'}
           </div>
@@ -185,13 +266,19 @@ window.PageModules.event = {
                     <a href="${lnk.url}" target="_blank" rel="noopener" style="color:var(--mais-blue); font-size:12px; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">${lnk.url}</a>
                   </div>
                 </div>
-                <button type="button" class="icon-btn" style="color:var(--mais-red); padding:4px;" onclick="window.deleteLink(${i})" title="Excluir">${UI.icon("trash", 14)}</button>
+                <div style="display:flex; gap:4px; flex-shrink:0;">
+                  <button type="button" class="icon-btn" style="color:var(--muted); padding:6px; background:#f7f9f8; border-radius:6px;" onclick="window.editLink(${i})" title="Editar">${UI.icon("edit", 14)}</button>
+                  <button type="button" class="icon-btn" style="color:var(--mais-red); padding:6px; background:#f7f9f8; border-radius:6px;" onclick="window.deleteLink(${i})" title="Excluir">${UI.icon("trash", 14)}</button>
+                </div>
               </div>
             `).join("") : '<span style="color:var(--muted); font-size:13px;">Nenhum link adicionado.</span>'}
           </div>
 
           <div>
-            <small style="margin-bottom: 12px; display: block; border-bottom: 1px solid var(--line); padding-bottom: 8px;">Equipe CRM</small>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+              <small style="margin:0;">Equipe CRM</small>
+              <button type="button" class="icon-btn action-circle" style="width:28px; height:28px;" onclick="window.editParticipants()" title="Gerenciar Equipe">${UI.icon("users", 14)}</button>
+            </div>
             ${participants.length ? participants.map(u => `
               <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
                 <span class="avatar mini" style="min-width:32px; width:32px; height:32px; font-size:11px;">${u.initials}</span>
@@ -244,26 +331,28 @@ window.PageModules.event = {
 
     const renderCosts = (expenses) => `
       <div class="panel">
-        <div class="panel-head"><div><span class="eyebrow">Financeiro</span><h3>Custos Lançados neste Evento</h3></div><button class="btn btn-secondary btn-small" onclick="UI.openDialog('eventExpenseDialog')">${UI.icon("plus", 16)} Lançar Custo</button></div>
+        <div class="panel-head"><div><span class="eyebrow">Financeiro</span><h3>Custos Lançados neste Evento</h3></div><button type="button" class="icon-btn action-circle" onclick="UI.openDialog('eventExpenseDialog')" title="Lançar Custo">${UI.icon("dollar-sign", 18)}</button></div>
         <div class="expense-list">
           ${expenses.length ? expenses.map(e => {
             const user = Store.getState().users.find(u=>u.id===e.userId);
             return `
-              <div class="expense-row">
-                <span class="expense-icon">${UI.icon("receipt")}</span>
-                <div style="flex:1;">
-                  <div class="row-inline">
-                    <strong>${e.category}</strong>
-                    ${e.costCenter ? `<span class="tag subtle" style="background:#eef2f6; color:#475569; margin-left:6px;">${e.costCenter}</span>` : ""}
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--line); gap:12px;">
+                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                  <span class="expense-icon" style="flex-shrink:0;">${UI.icon("receipt")}</span>
+                  <div style="min-width:0; flex:1;">
+                    <div class="row-inline" style="flex-wrap:nowrap; overflow:hidden;">
+                      <strong style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.category}</strong>
+                      ${e.costCenter ? `<span class="tag subtle" style="background:#eef2f6; color:#475569; margin-left:6px; flex-shrink:0;">${e.costCenter}</span>` : ""}
+                    </div>
+                    <p style="margin:4px 0; color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.place}${e.notes ? ` · ${e.notes}` : ""}</p>
+                    <small style="color:#8a9790; font-size:9px;">${UI.date(e.date)} · ${user?.name || "Usuário"}</small>
                   </div>
-                  <p>${e.place}${e.notes ? ` · ${e.notes}` : ""}</p>
-                  <small>${UI.date(e.date)} · ${user?.name || "Usuário"}</small>
                 </div>
-                <div style="display:flex; align-items:center; gap:16px;">
-                  <b>${UI.money(e.amount)}</b>
-                  <div style="display:flex; flex-direction:column; gap:4px;">
-                    <button type="button" class="icon-btn" style="color:var(--muted); padding:4px;" onclick="window.editExpense('${e.id}')" title="Editar">${UI.icon("edit", 14)}</button>
-                    <button type="button" class="icon-btn" style="color:var(--mais-red); padding:4px;" onclick="window.deleteExpense('${e.id}')" title="Excluir">${UI.icon("trash", 14)}</button>
+                <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+                  <b style="font-size:13px;">${UI.money(e.amount)}</b>
+                  <div style="display:flex; gap:4px;">
+                    <button type="button" class="icon-btn" style="color:var(--muted); padding:6px; background:#f7f9f8; border-radius:6px;" onclick="window.editExpense('${e.id}')" title="Editar">${UI.icon("edit", 14)}</button>
+                    <button type="button" class="icon-btn" style="color:var(--mais-red); padding:6px; background:#f7f9f8; border-radius:6px;" onclick="window.deleteExpense('${e.id}')" title="Excluir">${UI.icon("trash", 14)}</button>
                   </div>
                 </div>
               </div>
@@ -299,7 +388,7 @@ window.PageModules.event = {
         const newAttachments = [...(ev.attachments || [])];
         newAttachments.splice(currentGalleryIndex, 1);
         Store.updateEvent(eventId, { attachments: newAttachments });
-        window.UI?.updateRemoteEventMedia?.(eventId, ev.links || [], newAttachments);
+        
         UI.toast("Arquivo excluído.");
         UI.closeDialog('galleryDialog');
         render();
@@ -383,11 +472,34 @@ window.PageModules.event = {
         const ev = state.events.find(ev => ev.id === eventId);
         if (ev) {
           const links = ev.links || [];
-          links.push({ title: fd.get("title"), url: fd.get("url") });
+          const editIndex = fd.get("editIndex");
+          if (editIndex && editIndex !== "-1") {
+            links[parseInt(editIndex, 10)] = { title: fd.get("title"), url: fd.get("url") };
+            UI.toast("Link atualizado.");
+          } else {
+            links.push({ title: fd.get("title"), url: fd.get("url") });
+            UI.toast("Link adicionado.");
+          }
           Store.updateEvent(eventId, { links });
-          UI.toast("Link adicionado.");
           UI.closeDialog("eventLinkDialog");
           e.target.reset();
+          let hiddenInput = e.target.querySelector('input[name="editIndex"]');
+          if (hiddenInput) hiddenInput.value = "-1";
+          render();
+        }
+      }
+
+      
+      if (e.target.id === "eventParticipantsForm") {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const state = Store.getState();
+        const ev = state.events.find(ev => ev.id === eventId);
+        if (ev) {
+          const participantIds = fd.getAll("participants");
+          Store.updateEvent(eventId, { participantIds });
+          UI.toast("Equipe do evento atualizada.");
+          UI.closeDialog("eventParticipantsDialog");
           render();
         }
       }
@@ -399,11 +511,19 @@ window.PageModules.event = {
         const ev = state.events.find(ev => ev.id === eventId);
         if (ev) {
           const contacts = ev.contacts || [];
-          contacts.push({ name: fd.get("name"), role: fd.get("role"), phone: fd.get("phone") });
+          const editIndex = fd.get("editIndex");
+          if (editIndex && editIndex !== "-1") {
+            contacts[parseInt(editIndex, 10)] = { name: fd.get("name"), role: fd.get("role"), phone: fd.get("phone") };
+            UI.toast("Contato atualizado.");
+          } else {
+            contacts.push({ name: fd.get("name"), role: fd.get("role"), phone: fd.get("phone") });
+            UI.toast("Contato adicionado.");
+          }
           Store.updateEvent(eventId, { contacts });
-          UI.toast("Contato adicionado.");
           UI.closeDialog("eventContactDialog");
           e.target.reset();
+          let hiddenInput = e.target.querySelector('input[name="editIndex"]');
+          if (hiddenInput) hiddenInput.value = "-1";
           render();
         }
       }
@@ -444,6 +564,9 @@ window.PageModules.event = {
       }
     });
 
+    window.addEventListener("store:changed", render);
+
     render();
   }
 };
+
