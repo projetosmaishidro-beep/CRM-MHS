@@ -196,7 +196,7 @@ window.PageModules.event = {
               <label class="field span-2"><span>Valor e Local</span><div style="display:grid; grid-template-columns:1fr 2fr; gap:10px;"><input name="amount" type="text" required inputmode="decimal" placeholder="R$ 0,00"><input name="place" required placeholder="Estabelecimento ou Fornecedor"></div></label>
               <label class="field span-2"><span>ObservaÃ§Ãµes</span><textarea name="notes" rows="2"></textarea></label>
             </div>
-            <div class="dialog-actions"><button class="btn btn-secondary" type="button" onclick="UI.closeDialog('eventExpenseDialog')">Cancelar</button><button class="btn btn-primary" type="submit" onclick="alert('O HTML puro clicou no botao!')">Salvar custo</button></div>
+            <div class="dialog-actions"><button class="btn btn-secondary" type="button" onclick="UI.closeDialog('eventExpenseDialog')">Cancelar</button><button class="btn btn-primary" type="button" onclick="window.saveExpense()" id="btnSaveExpense">Salvar custo</button></div>
           </form>
         </dialog>
         </dialog>
@@ -541,15 +541,15 @@ window.PageModules.event = {
           }).catch(err => { console.error(err); UI.toast("Erro ao salvar contatos.", "error"); alert("Erro ao salvar contatos.\n" + err.message); });
         }
       }
+    });
 
-      if (e.target.id === "eventExpenseForm") {
-        e.preventDefault();
-        alert("O botÃ£o foi clicado e o evento disparou!");
-        const btn = e.target.querySelector("button[type=submit]");
+    window.saveExpense = () => {
+        const form = document.getElementById("eventExpenseForm");
+        const btn = document.getElementById("btnSaveExpense");
         const originalText = btn ? btn.textContent : "Salvar";
         if (btn) { btn.disabled = true; btn.textContent = "Salvando..."; }
         
-        const fd = new FormData(e.target);
+        const fd = new FormData(form);
         const expenseId = fd.get("id");
         
         const payload = {
@@ -569,8 +569,7 @@ window.PageModules.event = {
            UI.toast("Custo registrado no evento.");
            setTimeout(() => location.reload(), 350);
         }).catch(err => { console.error(err); UI.toast("Erro ao salvar custo.", "error"); alert("Erro ao salvar custo.\n" + err.message); if (btn) { btn.disabled = false; btn.textContent = originalText; } });
-      }
-    });
+    };
 
     window.addEventListener("store:changed", render);
 
