@@ -367,12 +367,7 @@
 
   async function init() {
     cacheDom();
-    // O mapa atual é somente leitura. Os controles de manutenção do banco
-    // legado permanecem fora da operação até existir uma API de escrita no
-    // banco unificado.
-    dom.maintenanceAccess?.classList.add("is-hidden");
-    dom.fieldMarkerLegend?.classList.add("is-hidden");
-    dom.newClientPin?.classList.add("is-hidden");
+    // Ferramentas de manutenção restauradas a pedido do usuário
 
     let isAdmin = false;
     try {
