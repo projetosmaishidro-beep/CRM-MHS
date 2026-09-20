@@ -133,7 +133,7 @@ window.PageModules.event = {
       const state = Store.getState();
       const event = state.events?.find(e => e.id === eventId);
       if (!event) {
-        UI.$("#pageContent").innerHTML = UI.empty("Evento nÃ£o encontrado", "O evento que vocÃª procura nÃ£o existe ou foi excluÃ­do.");
+        UI.$("#pageContent").innerHTML = UI.empty("Evento não encontrado", "O evento que você procura não existe ou foi excluído.");
         return;
       }
 
@@ -150,7 +150,7 @@ window.PageModules.event = {
             <div class="title-inline"><h2>${event.name}</h2>${UI.statusBadge(event.status)}</div>
             <div class="trip-meta-line" style="margin-top:6px;">
               <span>${UI.icon("map", 14)} ${event.location}</span>
-              <span>${UI.icon("calendar", 14)} ${UI.shortDate(event.startDate)} â†’ ${UI.shortDate(event.endDate)}</span>
+              <span>${UI.icon("calendar", 14)} ${UI.shortDate(event.startDate)} → ${UI.shortDate(event.endDate)}</span>
               <span>${event.role === 'Expositor' ? UI.icon("star", 14) : UI.icon("briefcase", 14)} ${event.role || 'Participante'}</span>
               <span>${UI.icon("users", 14)} ${leadsCount} leads captados</span>
             </div>
@@ -168,7 +168,7 @@ window.PageModules.event = {
           <form method="dialog" id="eventLinkForm">
             <div class="dialog-head"><div><span class="eyebrow">Acessos</span><h2>Novo Link</h2></div><button class="icon-btn" type="button" onclick="UI.closeDialog('eventLinkDialog')">${UI.icon("x")}</button></div>
             <div class="form-grid">
-              <label class="field"><span>TÃ­tulo</span><input name="title" required placeholder="Ex.: Site Oficial da Feira"></label>
+              <label class="field"><span>Título</span><input name="title" required placeholder="Ex.: Site Oficial da Feira"></label>
               <label class="field"><span>URL (Link)</span><input name="url" type="url" required placeholder="https://..."></label>
             </div>
             <div class="dialog-actions"><button class="btn btn-secondary" type="button" onclick="UI.closeDialog('eventLinkDialog')">Cancelar</button><button class="btn btn-primary" type="submit">Salvar Link</button></div>
@@ -179,8 +179,8 @@ window.PageModules.event = {
           <form method="dialog" id="eventContactForm">
             <div class="dialog-head"><div><span class="eyebrow">Networking</span><h2>Novo Contato</h2></div><button class="icon-btn" type="button" onclick="UI.closeDialog('eventContactDialog')">${UI.icon("x")}</button></div>
             <div class="form-grid">
-              <label class="field"><span>Nome</span><input name="name" required placeholder="Ex.: Maria (OrganizaÃ§Ã£o)"></label>
-              <label class="field"><span>Cargo / FunÃ§Ã£o</span><input name="role" required placeholder="Ex.: Produtora"></label>
+              <label class="field"><span>Nome</span><input name="name" required placeholder="Ex.: Maria (Organização)"></label>
+              <label class="field"><span>Cargo / Função</span><input name="role" required placeholder="Ex.: Produtora"></label>
               <label class="field span-2"><span>Telefone ou E-mail</span><input name="phone" placeholder="Ex.: (11) 99999-9999"></label>
             </div>
             <div class="dialog-actions"><button class="btn btn-secondary" type="button" onclick="UI.closeDialog('eventContactDialog')">Cancelar</button><button class="btn btn-primary" type="submit">Salvar Contato</button></div>
@@ -191,10 +191,10 @@ window.PageModules.event = {
             <input type="hidden" name="id" value="">
             <div class="dialog-head"><div><span class="eyebrow">Financeiro</span><h2>Custo</h2></div><button class="icon-btn" type="button" onclick="UI.closeDialog('eventExpenseDialog')">${UI.icon("x")}</button></div>
             <div class="form-grid">
-              <label class="field"><span>Categoria</span><select name="category"><option>AlimentaÃ§Ã£o</option><option>Hospedagem</option><option>Transporte / Voo</option><option>Material de Estande</option><option>Ingressos / InscriÃ§Ã£o</option><option>Outros</option></select></label>
-              <label class="field"><span>Centro de Custo</span><select name="costCenter" required><option value="">Selecione...</option><option>ProspecÃ§Ã£o (Novos Clientes)</option><option>CaptaÃ§Ã£o / RetenÃ§Ã£o</option><option>Marketing / Eventos</option><option>Outros</option></select></label>
+              <label class="field"><span>Categoria</span><select name="category"><option>Alimentação</option><option>Hospedagem</option><option>Transporte / Voo</option><option>Material de Estande</option><option>Ingressos / Inscrição</option><option>Outros</option></select></label>
+              <label class="field"><span>Centro de Custo</span><select name="costCenter" required><option value="">Selecione...</option><option>Prospecção (Novos Clientes)</option><option>Captação / Retenção</option><option>Marketing / Eventos</option><option>Outros</option></select></label>
               <label class="field span-2"><span>Valor e Local</span><div style="display:grid; grid-template-columns:1fr 2fr; gap:10px;"><input name="amount" type="text" required inputmode="decimal" placeholder="R$ 0,00"><input name="place" required placeholder="Estabelecimento ou Fornecedor"></div></label>
-              <label class="field span-2"><span>ObservaÃ§Ãµes</span><textarea name="notes" rows="2"></textarea></label>
+              <label class="field span-2"><span>Observações</span><textarea name="notes" rows="2"></textarea></label>
             </div>
             <div class="dialog-actions"><button class="btn btn-secondary" type="button" onclick="UI.closeDialog('eventExpenseDialog')">Cancelar</button><button class="btn btn-primary" type="button" onclick="window.saveExpense()" id="btnSaveExpense">Salvar custo</button></div>
           </form>
@@ -243,7 +243,7 @@ window.PageModules.event = {
       return `
       <div class="panel" style="margin-bottom: 24px;">
         <div class="panel-head">
-          <div><span class="eyebrow">InformaÃ§Ãµes Gerais</span><h3>Detalhes e Networking</h3></div>
+          <div><span class="eyebrow">Informações Gerais</span><h3>Detalhes e Networking</h3></div>
           <div style="display:flex; gap:8px;">
             <button type="button" class="icon-btn action-circle" onclick="UI.openDialog('eventLinkDialog')" title="Adicionar Link">${UI.icon("link", 18)}</button>
             <button type="button" class="icon-btn action-circle" onclick="UI.openDialog('eventContactDialog')" title="Adicionar Contato">${UI.icon("user-plus", 18)}</button>
@@ -259,7 +259,7 @@ window.PageModules.event = {
                   <span class="avatar mini" style="min-width:32px; width:32px; height:32px; font-size:11px;">${UI.initials(ctc.name)}</span>
                   <div style="overflow:hidden;">
                     <strong style="display:block; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ctc.name}</strong>
-                    <span style="color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">${ctc.role} ${ctc.phone ? `Â· ${ctc.phone}` : ''}</span>
+                    <span style="color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">${ctc.role} ${ctc.phone ? `· ${ctc.phone}` : ''}</span>
                   </div>
                 </div>
                 <div style="display:flex; gap:4px; flex-shrink:0;">
@@ -307,8 +307,8 @@ window.PageModules.event = {
         </div>
 
         <div class="note-box" style="margin-top: 0; border-top: 1px solid var(--line); border-radius: 0 0 12px 12px;">
-          <small>Foco e AnotaÃ§Ãµes EstratÃ©gicas</small>
-          <p style="white-space:pre-wrap; line-height:1.6;">${event.notes || "Nenhuma anotaÃ§Ã£o estratÃ©gica informada para este evento."}</p>
+          <small>Foco e Anotações Estratégicas</small>
+          <p style="white-space:pre-wrap; line-height:1.6;">${event.notes || "Nenhuma anotação estratégica informada para este evento."}</p>
         </div>
       </div>
       `;
@@ -339,14 +339,14 @@ window.PageModules.event = {
                 </button>`;
               }).join("")}
             </div>
-          ` : UI.empty("Nenhum arquivo", "Adicione fotos do estande, panfletos ou comprovantes de inscriÃ§Ã£o.")}
+          ` : UI.empty("Nenhum arquivo", "Adicione fotos do estande, panfletos ou comprovantes de inscrição.")}
         </div>
       </div>
     `;
 
     const renderCosts = (expenses) => `
       <div class="panel">
-        <div class="panel-head"><div><span class="eyebrow">Financeiro</span><h3>Custos LanÃ§ados neste Evento</h3></div><button type="button" class="icon-btn action-circle" onclick="UI.openDialog('eventExpenseDialog')" title="LanÃ§ar Custo">${UI.icon("dollar-sign", 18)}</button></div>
+        <div class="panel-head"><div><span class="eyebrow">Financeiro</span><h3>Custos Lançados neste Evento</h3></div><button type="button" class="icon-btn action-circle" onclick="UI.openDialog('eventExpenseDialog')" title="Lançar Custo">${UI.icon("dollar-sign", 18)}</button></div>
         <div class="expense-list">
           ${expenses.length ? expenses.map(e => {
             const user = Store.getState().users.find(u=>u.id===e.userId);
@@ -359,8 +359,8 @@ window.PageModules.event = {
                       <strong style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.category}</strong>
                       ${e.costCenter ? `<span class="tag subtle" style="background:#eef2f6; color:#475569; margin-left:6px; flex-shrink:0;">${e.costCenter}</span>` : ""}
                     </div>
-                    <p style="margin:4px 0; color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.place}${e.notes ? ` Â· ${e.notes}` : ""}</p>
-                    <small style="color:#8a9790; font-size:9px;">${UI.date(e.date)} Â· ${user?.name || "UsuÃ¡rio"}</small>
+                    <p style="margin:4px 0; color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.place}${e.notes ? ` · ${e.notes}` : ""}</p>
+                    <small style="color:#8a9790; font-size:9px;">${UI.date(e.date)} · ${user?.name || "Usuário"}</small>
                   </div>
                 </div>
                 <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
@@ -432,7 +432,7 @@ window.PageModules.event = {
           `;
         }
         
-        UI.$("#galleryCount").textContent = `MÃ­dia ${currentGalleryIndex + 1} de ${total}`;
+        UI.$("#galleryCount").textContent = `Mídia ${currentGalleryIndex + 1} de ${total}`;
       };
 
       updateGallery();
