@@ -617,197 +617,147 @@
       aria-hidden="true"
       aria-label="Detalhes do cliente"
     >
-      <button
-        id="sheet-handle"
-        class="sheet-handle"
-        type="button"
-        aria-label="Expandir ou recolher ficha"
-      >
-        <span></span>
-      </button>
-
-      <div class="panel-top">
-        <div class="panel-heading">
-          <span id="client-status" class="status-badge"></span>
-          <h1 id="client-title">Cliente</h1>
-          <p id="client-subtitle"></p>
-        </div>
-
-        <button
-          id="close-panel"
-          class="icon-button panel-close"
-          type="button"
-          aria-label="Fechar ficha do cliente"
-          title="Fechar"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 7l10 10M17 7 7 17"/>
-          </svg>
-        </button>
-      </div>
+      <button id="sheet-handle" class="sheet-handle" type="button" aria-label="Expandir ou recolher ficha"><span></span></button>
 
       <div class="panel-body">
-        <section id="client-preview" class="client-preview" aria-label="Previa do cliente selecionado">
-          <span id="client-avatar" class="client-avatar" aria-hidden="true">--</span>
-          <div class="client-preview-copy">
-            <span id="preview-label" class="preview-label">Ficha do cliente</span>
-            <strong id="preview-title">Cliente</strong>
-            <small id="preview-meta"></small>
-          </div>
-        </section>
-
-        <section id="client-quick-actions" class="client-quick-actions" aria-label="Acoes rapidas da ficha">
-          <a id="open-crm-client" class="quick-action" href="#" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"></path>
-              <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-              <path d="M3 15h6"></path>
-              <path d="M3 18h6"></path>
-            </svg>
-            Ficha CRM
-          </a>
-          <a id="route-client" class="quick-action is-hidden" href="#" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 17 13 4l7 16-7-3-4 3 1-5-6 2Z"></path>
-            </svg>
-            Rota
-          </a>
-          <button id="copy-address-client" class="quick-action" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"></path>
-              <circle cx="12" cy="10" r="2.5"></circle>
-            </svg>
-            Endereco
-          </button>
-          <button id="copy-maps-client" class="quick-action" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M10 13a5 5 0 0 0 7.07 0l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"></path>
-              <path d="M14 11a5 5 0 0 0-7.07 0l-2 2A5 5 0 0 0 12 20.07l1.15-1.15"></path>
-            </svg>
-            Link Maps
-          </button>
-          <button id="share-client-link" class="quick-action quick-action-share" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="18" cy="5" r="3"></circle>
-              <circle cx="6" cy="12" r="3"></circle>
-              <circle cx="18" cy="19" r="3"></circle>
-              <path d="m8.6 10.5 6.8-4"></path>
-              <path d="m8.6 13.5 6.8 4"></path>
-            </svg>
-            Compartilhar
-          </button>
-        </section>
-
-        <section id="client-share-menu" class="client-share-menu is-hidden" aria-label="Enviar link do cliente">
-          <div class="client-share-copy">
-            <strong>Link exclusivo pronto</strong>
-            <small>Envie pelo WhatsApp ou copie para outro canal.</small>
-          </div>
-          <input id="client-share-url" class="client-share-url" type="text" readonly aria-label="Link exclusivo do cliente">
-          <div class="client-share-actions">
-            <a id="share-client-whatsapp" class="secondary-action" href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M20 11.4a8.2 8.2 0 0 1-12.1 7.2L4 20l1.4-3.7A8.2 8.2 0 1 1 20 11.4Z"></path>
-                <path d="M8.7 7.7c.2-.4.4-.4.7-.4h.4c.1 0 .3 0 .4.4l.6 1.5c.1.3 0 .4-.1.6l-.4.5c-.1.1-.2.3 0 .5.3.5.8 1 1.4 1.3.2.1.4.1.5 0l.6-.7c.2-.2.4-.2.6-.1l1.4.7c.2.1.3.2.3.4 0 .3-.2.9-.5 1.1-.3.3-.7.4-1.2.3-.5-.1-1.7-.5-2.9-1.7-1-1-1.6-2.1-1.8-2.7-.2-.6-.1-1.1 0-1.4Z"></path>
+        <div class="client-panel-scroll-content">
+        
+          <section class="client-profile-hero panel" style="border-radius: 18px; border-bottom: 0;">
+            <button
+              id="close-panel"
+              class="icon-button panel-close"
+              type="button"
+              aria-label="Fechar ficha do cliente"
+              title="Fechar"
+              style="position: absolute; top: 12px; right: 12px; z-index: 10; background: rgba(255,255,255,0.7); border-radius: 50%;"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 7l10 10M17 7 7 17"/>
               </svg>
-              WhatsApp
-            </a>
-            <button id="copy-client-link" class="secondary-action" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="8" y="8" width="10" height="10" rx="2"></rect>
-                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
-              </svg>
-              Copiar link
             </button>
+
+            <div class="client-profile-heading" style="padding-right: 32px;">
+              <span id="client-status" class="status-badge"></span>
+              <h2 id="client-title">Cliente</h2>
+              <p id="client-subtitle" class="client-company"></p>
+            </div>
+            
+            <div class="profile-actions">
+              <a id="open-crm-client" class="btn btn-primary" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M3 15h6"></path><path d="M3 18h6"></path></svg>
+                Ficha CRM
+              </a>
+              <button id="copy-address-client" class="btn btn-secondary" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+                Endereço
+              </button>
+              <button id="share-client-link" class="btn btn-secondary" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 10.5 6.8-4"></path><path d="m8.6 13.5 6.8 4"></path></svg>
+                Compartilhar
+              </button>
+              <button id="copy-maps-client" class="btn btn-ghost" type="button" style="padding: 0 10px;">Link Maps</button>
+              <a id="route-client" class="btn btn-ghost is-hidden" href="#" target="_blank" rel="noopener" style="padding: 0 10px;">Rota</a>
+            </div>
+          </section>
+
+          <section
+            id="coordinate-preview"
+            class="coordinate-preview is-hidden panel"
+            aria-label="Pré-visualizações de clientes neste ponto"
+          >
+            <div class="panel-head" style="margin-bottom:12px;">
+              <div>
+                <span id="coordinate-preview-title" class="eyebrow">Múltiplos Clientes</span>
+                <h3 id="coordinate-preview-count">Selecione</h3>
+              </div>
+            </div>
+            <div id="coordinate-preview-list" class="preview-card-list"></div>
+          </section>
+
+          <section id="client-share-menu" class="client-share-menu is-hidden panel" aria-label="Enviar link do cliente">
+            <div class="client-share-copy">
+              <strong>Link exclusivo pronto</strong>
+              <small>Envie pelo WhatsApp ou copie para outro canal.</small>
+            </div>
+            <input id="client-share-url" class="client-share-url" type="text" readonly aria-label="Link exclusivo do cliente">
+            <div class="client-share-actions">
+              <a id="share-client-whatsapp" class="btn btn-primary" href="#" target="_blank" rel="noopener">WhatsApp</a>
+              <button id="copy-client-link" class="btn btn-secondary" type="button">Copiar link</button>
+            </div>
+          </section>
+          
+          <section class="panel panel-contact">
+            <div class="panel-head">
+              <div><span class="eyebrow">Dados principais</span><h3>Contato e relacionamento</h3></div>
+              <span class="panel-symbol">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </span>
+            </div>
+            <div class="info-grid compact-info">
+              <div><small>CNPJ</small><strong id="detail-cnpj"></strong></div>
+              <div><small>Endereço</small><strong id="detail-address"></strong></div>
+              <div><small>Telefone</small><strong id="detail-phone"></strong></div>
+              <div><small>Atividade (CNAE)</small><strong id="detail-cnae"></strong></div>
+            </div>
+          </section>
+
+          <div id="precision-card" class="precision-card panel" style="margin-bottom: 16px;">
+            <span class="precision-dot" aria-hidden="true"></span>
+            <div>
+              <strong id="precision-title">Localização aproximada</strong>
+              <p id="precision-text"></p>
+            </div>
           </div>
-        </section>
 
-        <section id="client-maintenance-actions" class="client-maintenance-actions is-hidden" aria-label="Manutencao do cliente">
-          <button id="edit-client" type="button">Editar contato</button>
-          <button id="relocate-client" type="button">Ajustar ponto</button>
-        </section>
+          <section id="client-maintenance-actions" class="client-maintenance-actions is-hidden panel" aria-label="Manutencao do cliente">
+            <div class="panel-head"><div><span class="eyebrow">Manutenção</span><h3>Ações de operador</h3></div></div>
+            <div style="display:flex;gap:8px;">
+              <button id="edit-client" class="btn btn-secondary" type="button">Editar contato</button>
+              <button id="relocate-client" class="btn btn-secondary" type="button">Ajustar ponto</button>
+            </div>
+          </section>
 
-        <section
-          id="coordinate-preview"
-          class="coordinate-preview is-hidden"
-          aria-label="Pre-visualizacoes de clientes neste ponto"
-        >
-          <div class="panel-section-title">
-            <span id="coordinate-preview-title">Pre-visualizacoes</span>
-            <strong id="coordinate-preview-count"></strong>
-          </div>
-          <div id="coordinate-preview-list" class="preview-card-list"></div>
-        </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><span class="eyebrow">Histórico</span><h3>Últimas visitas</h3></div>
+              <span class="panel-symbol">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </span>
+            </div>
+            <div class="media-empty">
+              <div class="media-empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <div>
+                <strong>Nenhuma visita recente</strong>
+                <p>Os registros de visitas da Central ainda não foram sincronizados com o mapa interativo.</p>
+              </div>
+            </div>
+          </section>
 
-        <div class="panel-section-title location-section-title">
-          <span>Localizacao</span>
-        </div>
+          <section class="panel">
+            <div class="panel-head">
+              <div><span class="eyebrow">Registro visual</span><h3>Galeria do cliente</h3></div>
+              <span class="panel-symbol">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              </span>
+            </div>
+            <div class="media-empty">
+              <div class="media-empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              </div>
+              <div>
+                <strong>Sem fotos cadastradas</strong>
+                <p>A sincronização de mídias do Supabase será ativada nas próximas atualizações.</p>
+              </div>
+            </div>
+          </section>
 
-        <div id="precision-card" class="precision-card">
-          <span class="precision-dot" aria-hidden="true"></span>
-          <div>
-            <strong id="precision-title">Localização aproximada</strong>
-            <p id="precision-text"></p>
-          </div>
-        </div>
-
-        <div class="panel-section-title detail-section-title">
-          <span>Dados principais</span>
-        </div>
-
-        <dl class="detail-list">
-          <div class="detail-row" data-field="cnpj">
-            <dt>CNPJ</dt>
-            <dd id="detail-cnpj"></dd>
-          </div>
-
-          <div class="detail-row" data-field="address">
-            <dt>Endereço</dt>
-            <dd id="detail-address"></dd>
-          </div>
-
-          <div class="detail-row" data-field="phone">
-            <dt>Telefone</dt>
-            <dd id="detail-phone"></dd>
-          </div>
-
-          <div class="detail-row" data-field="cnae">
-            <dt>Atividade</dt>
-            <dd id="detail-cnae"></dd>
+          <div style="display:none;">
+            <section id="client-preview"><span id="client-avatar"></span><span id="preview-label"></span><strong id="preview-title"></strong><small id="preview-meta"></small></section>
+            <a id="route-client-bottom"></a><a id="call-client"></a><a id="open-maps-client"></a><button id="copy-client"></button>
           </div>
 
-        </dl>
-
-        <div class="panel-actions" aria-label="Acoes do cliente">
-          <a id="route-client-bottom" class="secondary-action is-hidden" href="#" target="_blank" rel="noopener" title="Abrir rota">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 17 13 4l7 16-7-3-4 3 1-5-6 2Z"></path>
-            </svg>
-            Rota
-          </a>
-
-          <a id="call-client" class="secondary-action is-hidden" href="#" rel="nofollow">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M22 16.92v2a2 2 0 0 1-2.18 2 19.76 19.76 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.76 19.76 0 0 1 2.12 3.2 2 2 0 0 1 4.11 1h2a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.8a2 2 0 0 1-.45 2.11L7.46 8.5a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.9.31 1.84.53 2.8.66A2 2 0 0 1 22 16.92Z"></path>
-            </svg>
-            Ligar
-          </a>
-
-          <a id="open-maps-client" class="secondary-action is-hidden" href="#" target="_blank" rel="noopener" title="Abrir ponto no Maps">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"></path>
-              <circle cx="12" cy="10" r="2.5"></circle>
-            </svg>
-            Abrir Maps
-          </a>
-
-          <button id="copy-client" class="primary-action" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="8" y="8" width="10" height="10" rx="2"></rect>
-              <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
-            </svg>
-            Copiar dados
-          </button>
         </div>
       </div>
     </aside>
