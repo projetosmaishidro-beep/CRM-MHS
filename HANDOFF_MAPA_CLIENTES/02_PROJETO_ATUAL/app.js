@@ -373,6 +373,25 @@
     dom.maintenanceAccess?.classList.add("is-hidden");
     dom.fieldMarkerLegend?.classList.add("is-hidden");
     dom.newClientPin?.classList.add("is-hidden");
+
+    let isAdmin = false;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.includes("-auth-token")) {
+          const data = JSON.parse(localStorage.getItem(key));
+          if (data?.user?.email === "comercial3@maisintegradora.com") {
+            isAdmin = true;
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+
+    if (!isAdmin) {
+      dom.connectionAccess?.classList.add("is-hidden");
+    }
+
     restoreUiState();
     initMap();
     bindEvents();
