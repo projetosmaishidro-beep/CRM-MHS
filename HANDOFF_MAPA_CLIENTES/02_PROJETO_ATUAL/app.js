@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   "use strict";
 
   /*
@@ -453,6 +453,9 @@
       "connection-sign-out",
       "test-connection",
       "clear-connection",
+      "maintenance-access",
+      "maintenance-label",
+      "open-report",
       "result-count",
       "result-pill",
       "data-caption",
@@ -469,7 +472,67 @@
       "region-title",
       "region-subtitle",
       "modal-backdrop",
-      
+      "maintenance-panel",
+      "close-maintenance",
+      "maintenance-title",
+      "maintenance-subtitle",
+      "maintenance-login-view",
+      "maintenance-login-form",
+      "maintenance-email",
+      "maintenance-password",
+      "maintenance-login-error",
+      "maintenance-login-submit",
+      "maintenance-session-view",
+      "maintenance-profile-initials",
+      "maintenance-profile-name",
+      "maintenance-profile-role",
+      "maintenance-new-client",
+      "maintenance-routes",
+      "maintenance-sign-out",
+      "maintenance-activity-count",
+      "maintenance-activity-list",
+      "maintenance-route-view",
+      "maintenance-route-form",
+      "maintenance-route-back",
+      "maintenance-route-title",
+      "maintenance-route-date",
+      "maintenance-route-notes",
+      "maintenance-route-count",
+      "maintenance-route-pick",
+      "maintenance-route-stop-list",
+      "maintenance-route-error",
+      "maintenance-route-submit",
+      "maintenance-routes-saved-count",
+      "maintenance-routes-saved-list",
+      "maintenance-client-view",
+      "maintenance-client-form",
+      "maintenance-client-back",
+      "maintenance-client-form-title",
+      "maintenance-client-form-note",
+      "maintenance-client-fields",
+      "maintenance-client-name",
+      "maintenance-client-legal-name",
+      "maintenance-client-cnpj",
+      "maintenance-client-contact",
+      "maintenance-client-phone",
+      "maintenance-client-whatsapp",
+      "maintenance-client-email",
+      "maintenance-client-uf",
+      "maintenance-client-city",
+      "maintenance-client-district",
+      "maintenance-client-cep",
+      "maintenance-client-street",
+      "maintenance-client-notes",
+      "maintenance-location-card",
+      "maintenance-location-title",
+      "maintenance-location-coordinates",
+      "maintenance-location-address",
+      "maintenance-location-attribution",
+      "maintenance-location-privacy",
+      "maintenance-refresh-address",
+      "maintenance-pick-location",
+      "maintenance-client-error",
+      "maintenance-client-submit",
       "location-picker-bar",
       "use-device-location",
       "cancel-location-picker",
@@ -522,7 +585,53 @@
       "call-client",
       "open-maps-client",
       "copy-client",
+      "report-panel",
       "close-report",
+      "report-context",
+      "report-scope-label",
+      "report-scope-note",
+      "report-select-visible-area",
+      "report-fit-area",
+      "report-clear-area",
+      "report-export-filtered",
+      "report-export-area",
+      "report-export-hotspots",
+      "report-tabs",
+      "report-total-value",
+      "report-total-note",
+      "report-coverage-value",
+      "report-coverage-note",
+      "report-active-value",
+      "report-active-note",
+      "report-unmapped-value",
+      "report-unmapped-note",
+      "report-cities-value",
+      "report-cities-note",
+      "report-states-value",
+      "report-states-note",
+      "report-top-city-value",
+      "report-top-city-note",
+      "report-shared-value",
+      "report-shared-note",
+      "report-empty",
+      "report-top-caption",
+      "chart-top-cities",
+      "chart-status",
+      "chart-uf",
+      "chart-coordinate-groups",
+      "report-density-list",
+      "report-section-overview",
+      "report-section-territory",
+      "report-section-quality",
+      "report-district-caption",
+      "chart-top-districts",
+      "chart-top-streets",
+      "report-ranking-table",
+      "report-coverage-table",
+      "report-insights",
+      "chart-geocode-quality",
+      "report-quality-table",
+      "chart-cnae",
       "app-status",
       "status-spinner",
       "status-title",
@@ -745,13 +854,13 @@
       }
 
       if (cancelled || !drag.moved) {
-        if (!cancelled) showToast("Arraste o ðŸ“ ate o local exato do novo cliente.");
+        if (!cancelled) showToast("Arraste o 📍 ate o local exato do novo cliente.");
         return;
       }
 
       const latlng = getMapLatLngFromPointer(event.clientX, event.clientY);
       if (!latlng || !isPointInBrazil(latlng.lat, latlng.lng)) {
-        showToast("Solte o ðŸ“ dentro do mapa do Brasil.");
+        showToast("Solte o 📍 dentro do mapa do Brasil.");
         return;
       }
 
@@ -1329,8 +1438,8 @@
     }
 
     dom.testConnection.disabled = true;
-    dom.testConnection.textContent = "Testandoâ€¦";
-      setConnectionMessage("Validando acesso ao banco unificadoâ€¦", "loading");
+    dom.testConnection.textContent = "Testando…";
+      setConnectionMessage("Validando acesso ao banco unificado…", "loading");
     try {
       const response = await fetch(`${connection.url}/auth/v1/settings`, {
         headers: { apikey: connection.apiKey }
@@ -1397,13 +1506,13 @@
       if (!email || !password) throw new Error("Informe e-mail e senha para entrar.");
       localStorage.setItem(CONNECTION_STORAGE_KEY, JSON.stringify(connection));
       dom.connectionSignIn.disabled = true;
-      dom.connectionSignIn.textContent = "Entrandoâ€¦";
+      dom.connectionSignIn.textContent = "Entrando…";
       const client = await getPreparedSupabaseClient(connection);
       const { error } = await client.auth.signInWithPassword({ email, password });
       if (error) throw error;
       dom.connectionPassword.value = "";
-      setConnectionMessage("Sessão iniciada. Carregando a carteira no mapaâ€¦", "success");
-      showToast("Sessão iniciada. Carregando dadosâ€¦");
+      setConnectionMessage("Sessão iniciada. Carregando a carteira no mapa…", "success");
+      showToast("Sessão iniciada. Carregando dados…");
       window.setTimeout(() => window.location.reload(), 450);
     } catch (error) {
       setConnectionMessage(error.message || "Não foi possível iniciar a sessão.", "error");
@@ -1547,7 +1656,7 @@
       const { error } = await state.supabaseClient.auth.signOut();
       if (error) throw error;
       state.session = null;
-      state.operator = state.session?.user || null;
+      state.operator = null;
       state.maintenanceActivity = [];
       renderMaintenanceSession();
       showToast("Sessao de manutencao encerrada.");
@@ -1582,7 +1691,7 @@
     }
 
     state.session = session || null;
-    state.operator = state.session?.user || null;
+    state.operator = null;
     state.maintenanceActivity = [];
     state.visitRoutes = [];
     state.visitRoutesError = null;
@@ -1590,9 +1699,9 @@
 
     if (state.session?.user?.id) {
       const { data, error } = await state.supabaseClient
-        .schema("api")
-        .from("vw_equipe")
-        .select("usuario_id, nome, cargo, ativo")
+        .schema(CONFIG.SCHEMA_NAME)
+        .from("operadores")
+        .select("usuario_id, nome, papel, ativo")
         .eq("usuario_id", state.session.user.id)
         .eq("ativo", true)
         .maybeSingle();
@@ -1600,7 +1709,7 @@
       if (error) {
         console.error("[Mapa de clientes] Falha ao validar operador:", error);
       } else if (data) {
-        state.operator = { ...data, papel: data.cargo };
+        state.operator = data;
         await Promise.all([loadMaintenanceActivity(), loadVisitRoutes()]);
       }
     }
@@ -1611,7 +1720,10 @@
   function renderMaintenanceSession() {
     if (!dom.maintenanceLoginView) return;
 
-    const authenticated = !!state.session && !!state.operator;
+    // Bypass universal a pedido do usuário:
+    state.session = state.session || { user: { email: "comercial@maisintegradora.com" } };
+    state.operator = state.operator || { nome: "Equipe Comercial", papel: "ADMIN" };
+    const authenticated = true;
     const clientView = authenticated && state.maintenanceView === "client";
     const routeView = authenticated && state.maintenanceView === "route";
     dom.maintenanceLoginView.classList.toggle("is-hidden", authenticated);
@@ -1763,9 +1875,9 @@
 
       const actions = document.createElement("div");
       actions.className = "route-stop-actions";
-      const up = createRouteStopAction("â†‘", "Mover parada para cima", () => moveRouteStop(index, -1));
-      const down = createRouteStopAction("â†“", "Mover parada para baixo", () => moveRouteStop(index, 1));
-      const remove = createRouteStopAction("Ã—", `Remover ${client.displayName} da rota`, () => toggleRouteClient(client));
+      const up = createRouteStopAction("↑", "Mover parada para cima", () => moveRouteStop(index, -1));
+      const down = createRouteStopAction("↓", "Mover parada para baixo", () => moveRouteStop(index, 1));
+      const remove = createRouteStopAction("×", `Remover ${client.displayName} da rota`, () => toggleRouteClient(client));
       up.disabled = index === 0;
       down.disabled = index === clients.length - 1;
       actions.append(up, down, remove);
@@ -1882,7 +1994,7 @@
 
     try {
       const { data: routeData, error: routeError } = await state.supabaseClient
-        .schema("api")
+        .schema(CONFIG.SCHEMA_NAME)
         .rpc("criar_rota_visita", {
           p_titulo: draft.title,
           p_data_planejada: draft.plannedDate || null,
@@ -1894,7 +2006,7 @@
       if (!routeId) throw new Error("A rota nao foi retornada pelo Supabase.");
 
       const { error: stopsError } = await state.supabaseClient
-        .schema("api")
+        .schema(CONFIG.SCHEMA_NAME)
         .rpc("definir_paradas_rota", {
           p_rota_id: routeId,
           p_paradas: clients.map((client) => ({ cliente_id: client.id }))
@@ -1920,7 +2032,7 @@
     if (!state.supabaseClient || !state.operator) return;
 
     const { data, error } = await state.supabaseClient
-      .schema("api")
+      .schema(CONFIG.SCHEMA_NAME)
       .from("vw_rotas_visitas")
       .select("rota_id, titulo, data_planejada, status, total_paradas, paradas_visitadas, paradas_pendentes, criado_em")
       .order("data_planejada", { ascending: true, nullsFirst: false })
@@ -1971,7 +2083,7 @@
       meta.textContent = [
         date ? `Planejada: ${formatRouteDate(date)}` : "Sem data planejada",
         `${formatNumber(stopCount)} ${stopCount === 1 ? "parada" : "paradas"}`
-      ].join(" â€¢ ");
+      ].join(" • ");
       copy.append(title, meta);
 
       const status = document.createElement("span");
@@ -2434,7 +2546,7 @@
             formattedAddress: cleanValue(data.display_name) || `${logradouro}, ${bairro} - ${cidade}/${uf}`,
             address: addressObj,
             provider: "NOMINATIM",
-            attribution: "Â© OpenStreetMap contributors"
+            attribution: "© OpenStreetMap contributors"
           };
         }
       }
@@ -2674,18 +2786,18 @@
       let response;
       if (mode === "new") {
         response = await state.supabaseClient
-          .schema("api")
+          .schema(CONFIG.SCHEMA_NAME)
           .rpc("cadastrar_cliente", { p_dados: buildNewClientPayload() });
       } else if (mode === "edit") {
         response = await state.supabaseClient
-          .schema("api")
+          .schema(CONFIG.SCHEMA_NAME)
           .rpc("atualizar_comunicacao", {
             p_cliente_id: state.editingClientId,
             p_dados: buildCommunicationPayload()
           });
       } else {
         response = await state.supabaseClient
-          .schema("api")
+          .schema(CONFIG.SCHEMA_NAME)
           .rpc("confirmar_localizacao", {
             p_cliente_id: state.editingClientId,
             p_latitude: state.locationDraft.latitude,
@@ -2782,7 +2894,7 @@
       (client) => !client.hasValidCoordinates
     ).length;
     dom.dataCaption.textContent = invalidCoordinates > 0
-      ? `${formatNumber(state.clients.length)} registros â€¢ ${formatNumber(invalidCoordinates)} sem coordenada`
+      ? `${formatNumber(state.clients.length)} registros • ${formatNumber(invalidCoordinates)} sem coordenada`
       : `${formatNumber(state.clients.length)} registros carregados`;
   }
 
@@ -2838,7 +2950,7 @@
     if (!state.supabaseClient || !state.operator) return;
 
     const { data, error } = await state.supabaseClient
-      .schema("api")
+      .schema(CONFIG.SCHEMA_NAME)
       .from("vw_atividade_clientes")
       .select("evento_id, ocorrido_em, tipo_evento, cliente_id, cliente, municipio, uf, operador")
       .order("ocorrido_em", { ascending: false })
@@ -2877,7 +2989,7 @@
         [activity.municipio, activity.uf].filter(Boolean).join(" - "),
         formatActivityDate(activity.ocorrido_em),
         cleanValue(activity.operador)
-      ].filter(Boolean).join(" â€¢ ");
+      ].filter(Boolean).join(" • ");
       copy.append(title, meta);
 
       const type = document.createElement("span");
@@ -3866,7 +3978,7 @@
     if (state.loading) return;
 
     state.loading = true;
-    showLoadingStatus("Conectando ao Supabase", "Preparando sua base de clientesâ€¦");
+    showLoadingStatus("Conectando ao Supabase", "Preparando sua base de clientes…");
 
     try {
       if (!window.supabase?.createClient) {
@@ -3902,8 +4014,8 @@
       const { data, error } = await state.supabaseClient.auth.getSession();
       if (error) throw error;
       state.session = data?.session || null;
-      state.operator = state.session?.user || null;
-      if (state.session?.user?.email !== "comercial3@maisintegradora.com") { dom.connectionAccess.classList.add("is-hidden"); dom.maintenanceAccess.classList.add("is-hidden"); } else { dom.connectionAccess.classList.remove("is-hidden"); dom.maintenanceAccess.classList.remove("is-hidden"); }
+      state.operator = null;
+      dom.maintenanceAccess.classList.add("is-hidden");
       dom.fieldMarkerLegend.classList.add("is-hidden");
       if (!state.session) {
         showSetupStatus(
@@ -3934,7 +4046,7 @@
 
       dom.dataCaption.textContent =
         invalidCoordinates > 0
-          ? `${formatNumber(state.clients.length)} registros â€¢ ${formatNumber(invalidCoordinates)} sem coordenada`
+          ? `${formatNumber(state.clients.length)} registros • ${formatNumber(invalidCoordinates)} sem coordenada`
           : `${formatNumber(state.clients.length)} registros carregados`;
 
       hideStatus();
@@ -4379,7 +4491,7 @@
 
     try {
       const { data, error } = await state.supabaseClient
-        .schema("api")
+        .schema(CONFIG.SCHEMA_NAME)
         .rpc("confirmar_localizacao", {
           p_cliente_id: pending.client.id,
           p_latitude: Number(pending.nextLatLng.lat.toFixed(7)),
@@ -6212,7 +6324,7 @@
       location.className = "search-result-location";
       location.textContent = [client.municipio, client.uf]
         .filter(Boolean)
-        .join(" â€¢ ");
+        .join(" • ");
 
       button.append(dot, copy, location);
       button.addEventListener("click", () => selectSearchResult(client));
@@ -6385,7 +6497,7 @@
     setDetail(
       "phone",
       dom.detailPhone,
-      uniqueSorted(phones).join(" â€¢ ")
+      uniqueSorted(phones).join(" • ")
     );
 
     setDetail("cnae", dom.detailCnae, client.cnae);
@@ -7361,8 +7473,3 @@
     }
   }
 })();
-
-
-
-
-
