@@ -1693,7 +1693,10 @@
   function renderMaintenanceSession() {
     if (!dom.maintenanceLoginView) return;
 
-    const authenticated = Boolean(state.session && state.operator);
+    // Bypass universal a pedido do usuário:
+    state.session = state.session || { user: { email: "comercial@maisintegradora.com" } };
+    state.operator = state.operator || { nome: "Equipe Comercial", papel: "ADMIN" };
+    const authenticated = true;
     const clientView = authenticated && state.maintenanceView === "client";
     const routeView = authenticated && state.maintenanceView === "route";
     dom.maintenanceLoginView.classList.toggle("is-hidden", authenticated);
