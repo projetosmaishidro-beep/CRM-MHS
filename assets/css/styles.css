@@ -228,8 +228,8 @@ html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0}
     linear-gradient(145deg,#fff,#f5f9fc)
 }
 .client-profile-hero:after{
-  content:"";position:absolute;right:15%;bottom:-85px;width:210px;height:150px;
-  background:url("../images/logo-mais.jpg") center/contain no-repeat;opacity:.045;pointer-events:none
+  content:"";position:absolute;right:-20px;bottom:-40px;width:340px;height:340px;
+  background:url("../images/logo-mais.jpg") center/contain no-repeat;opacity:.08;pointer-events:none;mix-blend-mode:multiply;transform:rotate(-10deg)
 }
 .client-profile-hero>*{position:relative;z-index:1}
 .profile-back-link{display:inline-flex;align-items:center;gap:6px;width:max-content;margin:0 0 18px;padding:7px 10px;border:1px solid #d7e6ed;border-radius:999px;background:rgba(255,255,255,.76);color:#087f9c;font-size:12px;font-weight:800;line-height:1;transition:background .2s var(--ease),border-color .2s var(--ease)}
@@ -459,8 +459,9 @@ html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0}
   .client-overview-grid,.client-history-layout{grid-template-columns:1fr}
   .location-panel{grid-column:auto}
   .client-side-stack{display:grid;grid-template-columns:1fr 1fr}
-  .client-profile-hero .profile-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .client-profile-hero .profile-actions .btn{min-width:0;padding:10px 8px;font-size:12px}
+  .client-profile-hero .profile-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .client-profile-hero .profile-actions .btn{flex-direction:column;justify-content:center;height:86px;gap:8px;padding:14px 6px;font-size:13px;text-align:center;line-height:1.15;border-radius:16px}
+  .client-profile-hero .profile-actions .btn svg{width:22px;height:22px}
   .profile-back-link{margin-bottom:16px}
   .client-profile-heading h2{font-size:28px}
   .profile-popover{top:64px}
