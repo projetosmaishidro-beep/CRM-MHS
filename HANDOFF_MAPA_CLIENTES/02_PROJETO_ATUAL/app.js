@@ -2454,33 +2454,80 @@
         const edgeSuggestion = await reverseGeocodeWithEdgeFunction(draft);
         if (edgeSuggestion) return edgeSuggestion;
       } catch (edgeError) {
-        if (!CONFIG.GOOGLE_MAPS_BROWSER_KEY) throw edgeError;
         console.warn(
-          "[Mapa de clientes] Edge Function indisponivel; tentando browser key:",
-          edgeError
+          "[Mapa de clientes] Edge Function indisponível para geocodificação; alternando para provedor direto:",
+          edgeError?.message || edgeError
         );
       }
     }
 
-    const geocoder = await getGoogleGeocoder();
-    if (!geocoder) return null;
+    if (CONFIG.GOOGLE_MAPS_BROWSER_KEY) {
+      try {
+        const geocoder = await getGoogleGeocoder();
+        if (geocoder) {
+          const response = await geocoder.geocode({
+            location: {
+              lat: draft.latitude,
+              lng: draft.longitude
+            },
+            language: "pt-BR",
+            region: "BR"
+          });
+          const result = selectBrazilGeocodeResult(response?.results || []);
+          if (result) {
+            return {
+              formattedAddress: cleanValue(result.formatted_address),
+              address: extractAddressFromGeocodeResult(result),
+              provider: "GOOGLE_MAPS_BROWSER"
+            };
+          }
+        }
+      } catch (gErr) {
+        console.warn("[Mapa de clientes] Google Geocoder falhou:", gErr);
+      }
+    }
 
-    const response = await geocoder.geocode({
-      location: {
-        lat: draft.latitude,
-        lng: draft.longitude
-      },
-      language: "pt-BR",
-      region: "BR"
-    });
-    const result = selectBrazilGeocodeResult(response?.results || []);
-    if (!result) return null;
+    // Fallback gratuito e de alta precisão via OpenStreetMap (Nominatim)
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${draft.latitude}&lon=${draft.longitude}&addressdetails=1`,
+        {
+          headers: { "Accept-Language": "pt-BR,pt;q=0.9" }
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          const addr = data.address;
+          const logradouro = cleanValue(addr.road || addr.pedestrian || addr.street || addr.suburb || "");
+          const numero = cleanValue(addr.house_number || "");
+          const bairro = cleanValue(addr.suburb || addr.neighbourhood || addr.quarter || addr.city_district || "");
+          const cidade = cleanValue(addr.city || addr.town || addr.village || addr.municipality || "");
+          const uf = cleanValue((addr.state || "").substring(0, 2).toUpperCase());
+          const cep = cleanValue(addr.postcode ? addr.postcode.replace(/\D/g, "") : "");
 
-    return {
-      formattedAddress: cleanValue(result.formatted_address),
-      address: extractAddressFromGeocodeResult(result),
-      provider: "GOOGLE_MAPS_BROWSER"
-    };
+          const addressObj = {
+            logradouro: logradouro,
+            numero: numero,
+            bairro: bairro,
+            cidade: cidade,
+            uf: uf,
+            cep: cep
+          };
+
+          return {
+            formattedAddress: cleanValue(data.display_name) || `${logradouro}, ${bairro} - ${cidade}/${uf}`,
+            address: addressObj,
+            provider: "NOMINATIM",
+            attribution: "© OpenStreetMap contributors"
+          };
+        }
+      }
+    } catch (nomErr) {
+      console.warn("[Mapa de clientes] Fallback Nominatim indisponível:", nomErr);
+    }
+
+    return null;
   }
 
   async function reverseGeocodeWithEdgeFunction(draft) {
@@ -2499,7 +2546,7 @@
     }
 
     if (!data?.ok) {
-      throw new Error(cleanValue(data?.error) || "Consulta de endereco indisponivel.");
+      throw new Error(cleanValue(data?.error) || "Consulta de endereço indisponível.");
     }
 
     if (!data.address && !data.formattedAddress) return null;
