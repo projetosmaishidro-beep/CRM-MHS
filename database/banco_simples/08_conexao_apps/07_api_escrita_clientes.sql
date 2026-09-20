@@ -1,4 +1,4 @@
-begin;
+Ôªøbegin;
 
 -- ==============================================================================
 -- 1. CADASTRAR CLIENTE (NOVO PONTO MAPA)
@@ -7,7 +7,7 @@ create or replace function api.cadastrar_cliente(p_dados jsonb)
 returns uuid
 language plpgsql
 security invoker
-as $body
+as $$
 declare
     v_empresa_id uuid;
 begin
@@ -39,16 +39,16 @@ begin
 
     return v_empresa_id;
 end;
-$body;
+$$;
 
 -- ==============================================================================
--- 2. ATUALIZAR COMUNICACAO E CADASTRO (EDI«√O)
+-- 2. ATUALIZAR COMUNICACAO E CADASTRO (EDI√á√ÉO)
 -- ==============================================================================
 create or replace function api.atualizar_comunicacao(p_cliente_id uuid, p_dados jsonb)
 returns void
 language plpgsql
 security invoker
-as $body
+as $$
 begin
     update cadastro.empresas
     set
@@ -67,7 +67,7 @@ begin
         atualizado_em = now()
     where empresa_id = p_cliente_id;
 end;
-$body;
+$$;
 
 -- ==============================================================================
 -- 3. CONFIRMAR LOCALIZACAO (MAPA / CHECK-IN)
@@ -83,7 +83,7 @@ create or replace function api.confirmar_localizacao(
 returns void
 language plpgsql
 security invoker
-as $body
+as $$
 begin
     insert into mapa.pontos (
         empresa_id, latitude, longitude,
@@ -105,8 +105,7 @@ begin
         confirmado_em = now(),
         confirmado_por = auth.uid();
 end;
-$body;
-
+$$;
 
 -- ==============================================================================
 -- 4. ROTAS (MAPA)
@@ -119,7 +118,7 @@ create or replace function api.criar_rota_visita(
 returns uuid
 language plpgsql
 security invoker
-as $body
+as $$
 declare
     v_viagem_id uuid;
 begin
@@ -132,7 +131,7 @@ begin
     ) returning viagem_id into v_viagem_id;
     return v_viagem_id;
 end;
-$body;
+$$;
 
 create or replace function api.definir_paradas_rota(
     p_rota_id uuid,
@@ -141,7 +140,7 @@ create or replace function api.definir_paradas_rota(
 returns void
 language plpgsql
 security invoker
-as $body
+as $$
 declare
     item jsonb;
 begin
@@ -158,7 +157,6 @@ begin
         );
     end loop;
 end;
-$body;
+$$;
+
 commit;
-
-
