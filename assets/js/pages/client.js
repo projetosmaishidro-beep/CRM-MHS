@@ -62,7 +62,7 @@ window.PageModules.client = {
               <div><span class="eyebrow">Localização rural</span><h3>Ponto do cliente</h3></div>
               <span class="panel-symbol">${UI.icon("pin", 23)}</span>
             </div>
-            ${UI.miniMap(client.lat, client.lng, "Ponto do cliente", UI.pageLink("mapa/?cliente=" + client.id))}
+            ${UI.miniMap(client.lat, client.lng, "Ponto do cliente", UI.pageLink("HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html?cliente=" + client.id))}
             <div class="coord-row" style="margin-top: 16px; padding: 12px 14px; background: rgba(0,0,0,0.02); border-radius: 10px; border: 1px solid var(--line);">
               <div><span class="eyebrow">Coordenadas (Lat / Lng)</span><br><strong style="font-size: 13px; font-family: monospace;">${client.lat && client.lng ? `${Number(client.lat).toFixed(5)}, ${Number(client.lng).toFixed(5)}` : "Não definidas"}</strong></div>
               <div><span class="eyebrow">Município base</span><br><strong style="font-size: 13px;">${client.municipio || "Não informado"} - ${client.uf || "--"}</strong></div>

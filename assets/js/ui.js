@@ -50,7 +50,7 @@ window.UI = (() => {
     { id: "visits", label: "Visitas", href: "pages/visitas.html", icon: "pin" },
     { id: "trips", label: "Viagens", href: "pages/viagens.html", icon: "briefcase" },
     { id: "events", label: "Eventos", href: "pages/eventos.html", icon: "calendar" },
-    { id: "map", label: "Mapa", href: "mapa/", icon: "map", target: "_blank" },
+    { id: "map", label: "Mapa", href: "HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html", icon: "map", target: "_blank" },
     { id: "finance", label: "Financeiro", href: "pages/financeiro.html", icon: "wallet" },
     { id: "reports", label: "Relatórios", href: "pages/relatorios.html", icon: "chart" },
     { id: "users", label: "Usuários", href: "pages/usuarios.html", icon: "user" }
