@@ -1,4 +1,4 @@
-const CACHE = "central-comercial-v4";
+const CACHE = "central-comercial-v5";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,7 +29,18 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Se a rede retornar com sucesso, atualiza o cache silenciosamente com a versão mais fresca
+        const resClone = networkResponse.clone();
+        caches.open(CACHE).then((cache) => cache.put(event.request, resClone));
+        return networkResponse;
+      })
+      .catch(() => {
+        // Se a rede falhar (usuário offline), serve do cache
+        return caches.match(event.request);
+      })
   );
 });
