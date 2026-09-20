@@ -4729,6 +4729,8 @@ select:focus-visible {
   background: var(--primary);
   color: #fff;
   box-shadow: 0 8px 20px rgba(14, 148, 181, 0.25);
+  border: none !important;
+  outline: none !important;
 }
 
 .btn-primary:hover {

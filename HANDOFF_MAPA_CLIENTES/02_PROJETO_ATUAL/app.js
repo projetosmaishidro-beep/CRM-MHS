@@ -6572,7 +6572,7 @@
 
   function updateClientActions(client) {
     if (dom.openCrmClient) {
-      dom.openCrmClient.href = `../pages/cliente.html?id=${client.id}`;
+      dom.openCrmClient.href = `../../pages/cliente.html?id=${client.id}`;
     }
 
     const telHref = buildTelHref(client);
