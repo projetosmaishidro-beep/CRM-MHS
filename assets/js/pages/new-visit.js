@@ -49,10 +49,10 @@ window.PageModules["new-visit"] = {
             <div class="section-body">
               <h3>Contexto da visita</h3>
               <div class="form-grid">
-                <label class="field"><span>Tipo</span><select name="type"><option>Acompanhamento</option><option>ProspecÃ§Ã£o</option><option>Relacionamento</option><option>Suporte</option></select></label>
+                <label class="field"><span>Tipo</span><select name="type"><option>Acompanhamento</option><option>Prospecção</option><option>Relacionamento</option><option>Suporte</option></select></label>
                 <label class="field"><span>Viagem relacionada</span><select name="tripId"><option value="">Sem viagem</option>${state.trips.map(t => `<option value="${t.id}" ${t.id === preselectedTrip ? "selected" : ""}>${t.name}</option>`).join("")}</select></label>
-                <label class="field span-2"><span>O que aconteceu?</span><textarea name="notes" rows="4" required placeholder="Resumo curto da conversa, observaÃ§Ãµes e prÃ³ximos passos."></textarea></label>
-                <label class="field span-2"><span>Necessidades identificadas</span><input name="needs" placeholder="Separe por vÃ­rgulas: logÃ­stica, proposta, acompanhamento..."></label>
+                <label class="field span-2"><span>O que aconteceu?</span><textarea name="notes" rows="4" required placeholder="Resumo curto da conversa, observações e próximos passos."></textarea></label>
+                <label class="field span-2"><span>Necessidades identificadas</span><input name="needs" placeholder="Separe por vírgulas: logística, proposta, acompanhamento..."></label>
               </div>
             </div>
           </section>
@@ -60,23 +60,23 @@ window.PageModules["new-visit"] = {
           <section class="form-section">
             <div class="section-number">3</div>
             <div class="section-body">
-              <h3>EvidÃªncias e localizaÃ§Ã£o</h3>
-              <p>Use a cÃ¢mera do celular ou selecione arquivos jÃ¡ existentes.</p>
+              <h3>Evidências e localização</h3>
+              <p>Use a câmera do celular ou selecione arquivos já existentes.</p>
               <div class="upload-grid">
-                <label class="upload-card">${UI.icon("camera", 26)}<span><strong>Tirar foto</strong><small>Abre a cÃ¢mera quando suportado</small></span><input type="file" id="cameraInput" accept="image/*" capture="environment" hidden></label>
-                <label class="upload-card">${UI.icon("paperclip", 26)}<span><strong>Anexar arquivos</strong><small>Fotos, vÃ­deos e documentos</small></span><input type="file" id="fileInput" accept="image/*,video/*,.pdf" multiple hidden></label>
+                <label class="upload-card">${UI.icon("camera", 26)}<span><strong>Tirar foto</strong><small>Abre a câmera quando suportado</small></span><input type="file" id="cameraInput" accept="image/*" capture="environment" hidden></label>
+                <label class="upload-card">${UI.icon("paperclip", 26)}<span><strong>Anexar arquivos</strong><small>Fotos, vídeos e documentos</small></span><input type="file" id="fileInput" accept="image/*,video/*,.pdf" multiple hidden></label>
               </div>
               <div id="attachmentPreview" class="attachment-preview"></div>
 
               <div class="geo-row">
-                <button class="btn btn-secondary" type="button" id="geoBtn">${UI.icon("pin")} Usar localizaÃ§Ã£o atual</button>
-                <span id="geoStatus" class="muted">Opcional. Requer permissÃ£o do dispositivo.</span>
+                <button class="btn btn-secondary" type="button" id="geoBtn">${UI.icon("pin")} Usar localização atual</button>
+                <span id="geoStatus" class="muted">Opcional. Requer permissão do dispositivo.</span>
               </div>
             </div>
           </section>
 
           <div class="sticky-submit">
-            <span><strong>Pronto para salvar?</strong><small>O registro serÃ¡ incluÃ­do no histÃ³rico do cliente e da viagem.</small></span>
+            <span><strong>Pronto para salvar?</strong><small>O registro será incluído no histórico do cliente e da viagem.</small></span>
             <button class="btn btn-primary btn-large" type="submit">${UI.icon("check")} Salvar visita</button>
           </div>
         </form>
@@ -92,7 +92,7 @@ window.PageModules["new-visit"] = {
     UI.$$("[data-mode]").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
     setMode("existing");
 
-    // LÃ³gica do Autocomplete de Cliente
+    // Lógica do Autocomplete de Cliente
     const searchInput = UI.$("#clientSearchInput");
     const hiddenInput = UI.$("#clientSelect");
     const autocompleteList = UI.$("#clientAutocompleteList");
@@ -110,12 +110,12 @@ window.PageModules["new-visit"] = {
       if (lower) {
         matches = allClients.filter(c => c.name.toLowerCase().includes(lower) || (c.city && c.city.toLowerCase().includes(lower)));
       }
-      matches = matches.slice(0, 50); // limita a 50 para nÃ£o travar o celular
+      matches = matches.slice(0, 50); // limita a 50 para não travar o celular
       
       if (matches.length === 0) {
         autocompleteList.innerHTML = `<div style="padding:12px 14px; color:var(--muted); font-size:12px;">Nenhum cliente encontrado.</div>`;
       } else {
-        autocompleteList.innerHTML = matches.map(c => `<button type="button" class="autocomplete-item" data-id="${c.id}" style="display:block; width:100%; text-align:left; padding:12px 14px; border:none; background:transparent; border-bottom:1px solid var(--line); font-size:13px; cursor:pointer;"><strong>${c.name}</strong><br><small style="color:var(--muted);">${c.city || "Cidade nÃ£o informada"}</small></button>`).join("");
+        autocompleteList.innerHTML = matches.map(c => `<button type="button" class="autocomplete-item" data-id="${c.id}" style="display:block; width:100%; text-align:left; padding:12px 14px; border:none; background:transparent; border-bottom:1px solid var(--line); font-size:13px; cursor:pointer;"><strong>${c.name}</strong><br><small style="color:var(--muted);">${c.city || "Cidade não informada"}</small></button>`).join("");
       }
       autocompleteList.style.display = "block";
     }
@@ -160,17 +160,17 @@ window.PageModules["new-visit"] = {
     UI.$("#geoBtn").addEventListener("click", () => {
       const status = UI.$("#geoStatus");
       if (!navigator.geolocation) {
-        status.textContent = "GeolocalizaÃ§Ã£o nÃ£o disponÃ­vel neste navegador.";
+        status.textContent = "Geolocalização não disponível neste navegador.";
         return;
       }
-      status.textContent = "Obtendo localizaÃ§Ã£o...";
+      status.textContent = "Obtendo localização...";
       navigator.geolocation.getCurrentPosition(
         pos => {
           geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          status.textContent = `LocalizaÃ§Ã£o capturada: ${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)}`;
-          UI.toast("LocalizaÃ§Ã£o capturada.");
+          status.textContent = `Localização capturada: ${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)}`;
+          UI.toast("Localização capturada.");
         },
-        () => { status.textContent = "NÃ£o foi possÃ­vel acessar a localizaÃ§Ã£o. VocÃª pode salvar sem ela."; },
+        () => { status.textContent = "Não foi possível acessar a localização. Você pode salvar sem ela."; },
         { enableHighAccuracy: true, timeout: 7000 }
       );
     });

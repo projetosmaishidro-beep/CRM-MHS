@@ -46,15 +46,15 @@
   };
 
   const nav = [
-    { id: "dashboard", label: "InÃ­cio", href: "index.html", icon: "home" },
+    { id: "dashboard", label: "Início", href: "index.html", icon: "home" },
     { id: "clients", label: "Clientes", href: "pages/clientes.html", icon: "users" },
     { id: "visits", label: "Visitas", href: "pages/visitas.html", icon: "pin" },
     { id: "trips", label: "Viagens", href: "pages/viagens.html", icon: "briefcase" },
     { id: "events", label: "Eventos", href: "pages/eventos.html", icon: "calendar" },
     { id: "map", label: "Mapa", href: "HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html", icon: "map", target: "_blank" },
     { id: "finance", label: "Financeiro", href: "pages/financeiro.html", icon: "wallet" },
-    { id: "reports", label: "RelatÃ³rios", href: "pages/relatorios.html", icon: "chart" },
-    { id: "users", label: "UsuÃ¡rios", href: "pages/usuarios.html", icon: "user" }
+    { id: "reports", label: "Relatórios", href: "pages/relatorios.html", icon: "chart" },
+    { id: "users", label: "Usuários", href: "pages/usuarios.html", icon: "user" }
   ];
 
   function mountShell() {
@@ -80,8 +80,8 @@
                 ? `<a class="icon-btn mobile-menu" href="${pageLink(parentNav.href)}" aria-label="Voltar">${icon("arrow_left")}</a>`
                 : `<button class="icon-btn mobile-menu" id="mobileMenuBtn" aria-label="Abrir menu">${icon("menu")}</button>`
               }
-              <a class="topbar-logo" href="${pageLink("index.html")}" aria-label="Mais Hidro SoluÃ§Ãµes - inÃ­cio">
-                <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro SoluÃ§Ãµes" loading="eager">
+              <a class="topbar-logo" href="${pageLink("index.html")}" aria-label="Mais Hidro Soluções - início">
+                <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro Soluções" loading="eager">
               </a>
               <div class="topbar-title">
                 <span class="eyebrow">Central comercial</span>
@@ -89,7 +89,7 @@
               </div>
             </div>
 
-            <nav class="desktop-nav" aria-label="NavegaÃ§Ã£o principal">
+            <nav class="desktop-nav" aria-label="Navegação principal">
               ${nav.map(item => `
                 <a class="${activePage === item.id ? "active" : ""}" href="${pageLink(item.href)}" title="${item.label}" ${item.target ? `target="${item.target}" rel="noopener"` : ""}>
                   ${icon(item.icon, 17)}<span>${item.label}</span>
@@ -98,15 +98,15 @@
 
             <div class="topbar-actions">
               <button class="icon-btn" id="globalSearchBtn" aria-label="Buscar">${icon("search")}</button>
-              <button class="icon-btn hide-mobile" aria-label="NotificaÃ§Ãµes">${icon("bell")}</button>
-              <button class="avatar-btn" id="profileMenuBtn" aria-label="Menu do usuÃ¡rio" style="padding: 0; overflow: hidden; border: none; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></button>
+              <button class="icon-btn hide-mobile" aria-label="Notificações">${icon("bell")}</button>
+              <button class="avatar-btn" id="profileMenuBtn" aria-label="Menu do usuário" style="padding: 0; overflow: hidden; border: none; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></button>
             </div>
           </header>
 
           <main class="page-content" id="pageContent"></main>
         </div>
 
-        <nav class="bottom-nav" aria-label="NavegaÃ§Ã£o mÃ³vel">
+        <nav class="bottom-nav" aria-label="Navegação móvel">
           ${nav.slice(0, 5).map(item => `
             <a class="${activePage === item.id ? "active" : ""}" href="${pageLink(item.href)}" ${item.target ? `target="${item.target}" rel="noopener"` : ""}>
               ${icon(item.icon, 19)}<span>${item.label}</span>
@@ -117,7 +117,7 @@
           <div class="drawer-backdrop" data-close-drawer></div>
           <aside class="drawer-panel">
             <div class="drawer-brand">
-              <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro SoluÃ§Ãµes">
+              <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro Soluções">
             </div>
             <div class="drawer-head"><strong>Menu</strong><button class="icon-btn" data-close-drawer>${icon("x")}</button></div>
             <nav class="drawer-nav">
@@ -134,14 +134,14 @@
             <div><span class="eyebrow">Busca global</span><h2>Encontre rapidamente</h2></div>
             <button class="icon-btn" data-close-dialog>${icon("x")}</button>
           </div>
-          <label class="search-field">${icon("search")}<input id="globalSearchInput" placeholder="Cliente, viagem, usuÃ¡rio..." autocomplete="off"></label>
+          <label class="search-field">${icon("search")}<input id="globalSearchInput" placeholder="Cliente, viagem, usuário..." autocomplete="off"></label>
           <div id="globalSearchResults" class="search-results"></div>
         </dialog>
 
         <div class="profile-popover" id="profilePopover">
           <div class="profile-chip large"><span class="avatar" style="padding: 0; overflow: hidden; border: 1px solid #e2e8f0; background: #fff;"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></span><span><strong>${profileName}</strong><small>${profileRole}</small></span></div>
           <a href="${pageLink("pages/usuarios.html")}">${icon("user")} Meu perfil</a>
-          ${authUser.isAdmin ? `<button id="connectionBtn">${icon("database")} ConfiguraÃ§Ãµes do banco</button>` : ""}
+          ${authUser.isAdmin ? `<button id="connectionBtn">${icon("database")} Configurações do banco</button>` : ""}
           <button id="resetDemoBtn">${icon("rotate")} Restaurar demo</button>
           <button id="logoutBtn" style="color:var(--mais-red)">${icon("arrow")} Sair</button>
         </div>
@@ -150,13 +150,13 @@
           <form id="connectionForm" novalidate>
             <div class="dialog-head">
               <div>
-                <span class="eyebrow">IntegraÃ§Ã£o</span>
+                <span class="eyebrow">Integração</span>
                 <h2 id="connectionTitle">Banco de dados</h2>
               </div>
               <button class="icon-btn" type="button" data-close-dialog aria-label="Fechar">${icon("x")}</button>
             </div>
 
-            <p class="connection-intro">Informe a URL e a chave pÃºblica do projeto Supabase. Esta etapa sÃ³ valida e guarda a conexÃ£o neste navegador; os dados locais continuam intactos.</p>
+            <p class="connection-intro">Informe a URL e a chave pública do projeto Supabase. Esta etapa só valida e guarda a conexão neste navegador; os dados locais continuam intactos.</p>
 
             <div class="connection-schema-list" aria-label="Estrutura preparada">
               <span>${icon("database", 16)} cadastro</span>
@@ -170,7 +170,7 @@
                 <input id="connectionUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://seu-projeto.supabase.co" required>
               </label>
               <label class="field">
-                <span>Chave pÃºblica (publishable ou anon)</span>
+                <span>Chave pública (publishable ou anon)</span>
                 <div class="connection-key-field">
                   <input id="connectionKey" type="password" autocomplete="off" spellcheck="false" placeholder="sb_publishable_..." required>
                   <button id="toggleConnectionKey" class="connection-key-toggle" type="button" aria-label="Mostrar chave">${icon("eye", 17)}</button>
@@ -179,12 +179,12 @@
             </div>
 
             <p class="connection-security-note">Nunca use aqui a chave <strong>secret</strong> ou <strong>service_role</strong>.</p>
-            <p id="connectionStatus" class="connection-status" role="status">Nenhuma conexÃ£o salva neste navegador.</p>
+            <p id="connectionStatus" class="connection-status" role="status">Nenhuma conexão salva neste navegador.</p>
 
             <section class="connection-auth" aria-labelledby="connectionAuthTitle">
               <div class="connection-auth-head">
                 <div><span class="eyebrow">Acesso da equipe</span><strong id="connectionAuthTitle">Entrar para consultar a carteira</strong></div>
-                <small id="connectionAuthStatus">Sem sessÃ£o iniciada.</small>
+                <small id="connectionAuthStatus">Sem sessão iniciada.</small>
               </div>
               <div class="connection-auth-fields">
                 <label class="field"><span>E-mail</span><input id="connectionEmail" type="email" autocomplete="username" placeholder="voce@empresa.com"></label>
@@ -198,8 +198,8 @@
 
             <div class="dialog-actions connection-actions">
               <button id="clearConnectionBtn" class="btn btn-secondary" type="button">Limpar</button>
-              <button id="testConnectionBtn" class="btn btn-secondary" type="button">Testar conexÃ£o</button>
-              <button class="btn btn-primary" type="submit">Salvar conexÃ£o</button>
+              <button id="testConnectionBtn" class="btn btn-secondary" type="button">Testar conexão</button>
+              <button class="btn btn-primary" type="submit">Salvar conexão</button>
             </div>
           </form>
         </dialog>
@@ -227,7 +227,7 @@
     $("#connectionSignOutBtn")?.addEventListener("click", signOutFromSupabase);
     $("#resetDemoBtn")?.addEventListener("click", () => {
       Store.reset();
-      toast("Dados da demonstraÃ§Ã£o restaurados.");
+      toast("Dados da demonstração restaurados.");
       setTimeout(() => location.reload(), 350);
     });
 
@@ -270,16 +270,16 @@
     try {
       url = new URL(rawUrl);
     } catch {
-      throw new Error("Informe uma URL vÃ¡lida do projeto Supabase.");
+      throw new Error("Informe uma URL válida do projeto Supabase.");
     }
     if (!/^https?:$/.test(url.protocol)) {
-      throw new Error("A URL precisa comeÃ§ar com https:// ou http://.");
+      throw new Error("A URL precisa começar com https:// ou http://.");
     }
     if (!apiKey || apiKey.length < 12) {
-      throw new Error("Informe a chave pÃºblica do projeto.");
+      throw new Error("Informe a chave pública do projeto.");
     }
     if (isRestrictedSupabaseKey(apiKey)) {
-      throw new Error("Use somente uma chave pÃºblica publishable ou anon.");
+      throw new Error("Use somente uma chave pública publishable ou anon.");
     }
     return { url: url.href.replace(/\/$/, ""), apiKey };
   }
@@ -311,8 +311,8 @@
     $("#connectionKey").value = saved.apiKey || "";
     setConnectionStatus(
       saved.url && saved.apiKey
-        ? "ConexÃ£o salva neste navegador. Teste-a antes de seguir para a integraÃ§Ã£o dos dados."
-        : "Nenhuma conexÃ£o salva neste navegador.",
+        ? "Conexão salva neste navegador. Teste-a antes de seguir para a integração dos dados."
+        : "Nenhuma conexão salva neste navegador.",
       saved.url && saved.apiKey ? "ready" : "neutral"
     );
     $("#profilePopover")?.classList.remove("open");
@@ -326,11 +326,11 @@
     try {
       const connection = normalizeConnection();
       localStorage.setItem(CONNECTION_STORAGE_KEY, JSON.stringify(connection));
-      setConnectionStatus("ConexÃ£o salva neste navegador. Nenhum dado foi migrado ou exposto.", "success");
+      setConnectionStatus("Conexão salva neste navegador. Nenhum dado foi migrado ou exposto.", "success");
       renderConnectionAuthState();
-      toast("ConexÃ£o preparada.");
+      toast("Conexão preparada.");
     } catch (error) {
-      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel salvar a conexÃ£o.", "error");
+      setConnectionStatus(error.message || "Não foi possível salvar a conexão.", "error");
     }
   }
 
@@ -339,28 +339,28 @@
     let connection;
     try {
       if (location.protocol === "file:") {
-        throw new Error("Abra o aplicativo por um servidor local (http://localhost), nÃ£o diretamente pelo arquivo HTML.");
+        throw new Error("Abra o aplicativo por um servidor local (http://localhost), não diretamente pelo arquivo HTML.");
       }
       connection = normalizeConnection();
     } catch (error) {
-      setConnectionStatus(error.message || "Revise a conexÃ£o.", "error");
+      setConnectionStatus(error.message || "Revise a conexão.", "error");
       return;
     }
 
     button.disabled = true;
     button.textContent = "Testandoâ€¦";
-    setConnectionStatus("Validando URL e chave pÃºblica sem consultar dados comerciaisâ€¦", "loading");
+    setConnectionStatus("Validando URL e chave pública sem consultar dados comerciaisâ€¦", "loading");
     try {
       const response = await fetch(`${connection.url}/auth/v1/settings`, {
         headers: { apikey: connection.apiKey }
       });
-      if (!response.ok) throw new Error(`A API respondeu com cÃ³digo ${response.status}.`);
-      setConnectionStatus("Projeto acessÃ­vel. A leitura de clientes serÃ¡ liberada na prÃ³xima etapa, com autenticaÃ§Ã£o e RLS.", "success");
+      if (!response.ok) throw new Error(`A API respondeu com código ${response.status}.`);
+      setConnectionStatus("Projeto acessível. A leitura de clientes será liberada na próxima etapa, com autenticação e RLS.", "success");
     } catch (error) {
-      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel alcanÃ§ar o projeto. Confira a URL, a chave e sua internet.", "error");
+      setConnectionStatus(error.message || "Não foi possível alcançar o projeto. Confira a URL, a chave e sua internet.", "error");
     } finally {
       button.disabled = false;
-      button.textContent = "Testar conexÃ£o";
+      button.textContent = "Testar conexão";
     }
   }
 
@@ -368,7 +368,7 @@
     localStorage.removeItem(CONNECTION_STORAGE_KEY);
     $("#connectionUrl").value = "";
     $("#connectionKey").value = "";
-    setConnectionStatus("ConexÃ£o removida deste navegador.", "neutral");
+    setConnectionStatus("Conexão removida deste navegador.", "neutral");
     renderConnectionAuthState();
   }
 
@@ -390,8 +390,8 @@
         script.async = true;
         script.onload = () => window.supabase?.createClient
           ? resolve(window.supabase)
-          : reject(new Error("A biblioteca do Supabase nÃ£o foi carregada."));
-        script.onerror = () => reject(new Error("NÃ£o foi possÃ­vel carregar a biblioteca do Supabase."));
+          : reject(new Error("A biblioteca do Supabase não foi carregada."));
+        script.onerror = () => reject(new Error("Não foi possível carregar a biblioteca do Supabase."));
         document.head.appendChild(script);
       });
     }
@@ -424,7 +424,7 @@
     if (!status || !signIn || !signOut) return;
     const connection = readConnection();
     if (!connection.url || !connection.apiKey) {
-      status.textContent = "Salve a conexÃ£o para entrar.";
+      status.textContent = "Salve a conexão para entrar.";
       signIn.hidden = false;
       signOut.hidden = true;
       return;
@@ -434,11 +434,11 @@
       const { data, error } = await client.auth.getSession();
       if (error) throw error;
       const email = data.session?.user?.email;
-      status.textContent = email ? `SessÃ£o ativa: ${email}` : "Sem sessÃ£o iniciada.";
+      status.textContent = email ? `Sessão ativa: ${email}` : "Sem sessão iniciada.";
       signIn.hidden = Boolean(email);
       signOut.hidden = !email;
     } catch {
-      status.textContent = "NÃ£o foi possÃ­vel consultar a sessÃ£o.";
+      status.textContent = "Não foi possível consultar a sessão.";
       signIn.hidden = false;
       signOut.hidden = true;
     }
@@ -459,11 +459,11 @@
       if (error) throw error;
       $("#connectionPassword").value = "";
       await renderConnectionAuthState();
-      setConnectionStatus("SessÃ£o iniciada. Atualizando a carteira comercialâ€¦", "success");
-      toast("SessÃ£o iniciada. Carregando dadosâ€¦");
+      setConnectionStatus("Sessão iniciada. Atualizando a carteira comercialâ€¦", "success");
+      toast("Sessão iniciada. Carregando dadosâ€¦");
       setTimeout(() => location.reload(), 450);
     } catch (error) {
-      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel iniciar a sessÃ£o.", "error");
+      setConnectionStatus(error.message || "Não foi possível iniciar a sessão.", "error");
     } finally {
       if (button) {
         button.disabled = false;
@@ -477,18 +477,18 @@
       const client = await getSupabaseClient();
       if (client) await client.auth.signOut();
       Store.reset();
-      toast("SessÃ£o encerrada.");
+      toast("Sessão encerrada.");
       setTimeout(() => location.reload(), 300);
     } catch (error) {
-      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel encerrar a sessÃ£o.", "error");
+      setConnectionStatus(error.message || "Não foi possível encerrar a sessão.", "error");
     }
   }
 
   const categoryLabels = {
     CARCINICULTOR: "Carcinicultor",
-    IRRIGACAO: "IrrigaÃ§Ã£o",
-    CONSTRUCAO_CIVIL: "ConstruÃ§Ã£o civil",
-    MINERACAO: "MineraÃ§Ã£o",
+    IRRIGACAO: "Irrigação",
+    CONSTRUCAO_CIVIL: "Construção civil",
+    MINERACAO: "Mineração",
     CONDOMINIAL: "Condominial",
     OUTRO: "Outro",
     PENDENTE_CLASSIFICACAO: "Outro"
@@ -503,7 +503,7 @@
       contact: row.contato_nome || "",
       phone: row.whatsapp || row.telefone || "",
       email: row.email || "",
-      city: row.municipio || "NÃ£o informado",
+      city: row.municipio || "Não informado",
       state: row.uf || "",
       segment: category,
       category,
@@ -525,14 +525,14 @@
     const statusMap = {
       PLANEJADA: "Planejada",
       EM_ANDAMENTO: "Em andamento",
-      CONCLUIDA: "ConcluÃ­da",
+      CONCLUIDA: "Concluída",
       CANCELADA: "Cancelada"
     };
     const snapshotId = (item) => typeof item === "string" ? item : item?.id;
 
     return {
       id: row.viagem_id,
-      name: row.titulo || "Viagem sem tÃ­tulo",
+      name: row.titulo || "Viagem sem título",
       status: statusMap[row.status] || row.status || "Planejada",
       startDate: row.inicio_em ? String(row.inicio_em).slice(0, 10) : "",
       endDate: row.fim_em ? String(row.fim_em).slice(0, 10) : "",
@@ -591,7 +591,7 @@
         .order("criado_em", { ascending: false });
       if (tripsResult.error) {
         tripError = tripsResult.error;
-        console.warn("[Central Comercial] A view de viagens ainda nÃ£o estÃ¡ disponÃ­vel:", tripError);
+        console.warn("[Central Comercial] A view de viagens ainda não está disponível:", tripError);
       } else {
         remoteTrips = (tripsResult.data || []).map(mapRemoteTrip);
       }
@@ -603,8 +603,8 @@
         .order("nome", { ascending: true });
       if (teamResult.error) {
         // A carteira continua funcionando se o cadastro opcional da equipe
-        // ainda nÃ£o tiver sido executado no Supabase.
-        console.warn("[Central Comercial] O cadastro da equipe ainda nÃ£o estÃ¡ disponÃ­vel:", teamResult.error);
+        // ainda não tiver sido executado no Supabase.
+        console.warn("[Central Comercial] O cadastro da equipe ainda não está disponível:", teamResult.error);
       } else {
         remoteUsers = (teamResult.data || []).map(mapRemoteUser);
       }
@@ -617,14 +617,14 @@
       };
     } catch (error) {
       console.error("[Central Comercial] Falha ao carregar a carteira remota:", error);
-      return { error: "A sessÃ£o estÃ¡ ativa, mas a leitura ainda nÃ£o foi liberada. Execute o SQL 01 de conexÃ£o e exponha somente o schema api." };
+      return { error: "A sessão está ativa, mas a leitura ainda não foi liberada. Execute o SQL 01 de conexão e exponha somente o schema api." };
     }
   }
 
   async function createRemoteTrip(payload) {
     const connection = readConnection();
     if (!connection.url || !connection.apiKey) {
-      throw new Error("Configure a conexÃ£o do Supabase antes de salvar a viagem.");
+      throw new Error("Configure a conexão do Supabase antes de salvar a viagem.");
     }
     const client = await getSupabaseClient(connection);
     const { data: sessionData, error: sessionError } = await client.auth.getSession();
@@ -641,12 +641,12 @@
     });
     if (error) {
       if (/criar_viagem|schema cache|PGRST202|function .* does not exist/i.test(error.message || "")) {
-        throw new Error("A escrita de viagens ainda nÃ£o foi ativada. Execute 04_api_escrita_viagens.sql no Supabase.");
+        throw new Error("A escrita de viagens ainda não foi ativada. Execute 04_api_escrita_viagens.sql no Supabase.");
       }
-      throw new Error(error.message || "NÃ£o foi possÃ­vel salvar a viagem no Supabase.");
+      throw new Error(error.message || "Não foi possível salvar a viagem no Supabase.");
     }
     const row = Array.isArray(data) ? data[0] : data;
-    if (!row?.viagem_id) throw new Error("O Supabase nÃ£o retornou a viagem criada.");
+    if (!row?.viagem_id) throw new Error("O Supabase não retornou a viagem criada.");
     return mapRemoteTrip(row);
   }
 
@@ -723,7 +723,7 @@
         .schema("api")
         .rpc("criar_evento", {
           p_nome: payload.name,
-          p_local: payload.location || "NÃ£o informado",
+          p_local: payload.location || "Não informado",
           p_data_inicio: payload.startDate || new Date().toISOString().slice(0, 10),
           p_data_fim: payload.endDate || payload.startDate || new Date().toISOString().slice(0, 10),
           p_tipo_participacao: payload.role === "Expositor" ? "EXPOSITOR" : "PARTICIPANTE",
@@ -734,8 +734,8 @@
       console.log("[Central] Evento salvo no Supabase:", result);
       return result?.evento_id || null;
     } catch (err) {
-      console.warn("[Central] Evento nÃ£o salvo no Supabase:", err);
-      toast("O evento foi criado localmente mas nÃ£o foi salvo no banco. Verifique o console.", "error");
+      console.warn("[Central] Evento não salvo no Supabase:", err);
+      toast("O evento foi criado localmente mas não foi salvo no banco. Verifique o console.", "error");
       return null;
     }
   }
@@ -760,7 +760,7 @@
       console.log("[Central] Despesa salva no Supabase:", result);
       return result?.despesa_id || null;
     } catch (err) {
-      console.warn("[Central] Despesa nÃ£o salva no Supabase:", err);
+      console.warn("[Central] Despesa não salva no Supabase:", err);
       alert("ERRO SUPABASE (Criar Despesa): " + (err.message || JSON.stringify(err)));
       return null;
     }
@@ -799,10 +799,10 @@
           p_anexos: attachments || null
         });
       if (error) throw error;
-      console.log("[Central] Evento atualizado com mÃ­dia:", data);
+      console.log("[Central] Evento atualizado com mídia:", data);
       return true;
     } catch (err) {
-      console.error("[Central] Erro ao atualizar mÃ­dia do evento:", err);
+      console.error("[Central] Erro ao atualizar mídia do evento:", err);
       return false;
     }
   }
@@ -841,7 +841,7 @@
     const items = [
       ...state.clients.map(c => ({ type: "Cliente", label: c.name, meta: `${c.city}, ${c.state}`, href: pageLink(`pages/cliente.html?id=${c.id}`) })),
       ...state.trips.map(t => ({ type: "Viagem", label: t.name, meta: t.status, href: pageLink(`pages/viagem.html?id=${t.id}`) })),
-      ...state.users.map(u => ({ type: "UsuÃ¡rio", label: u.name, meta: u.role, href: pageLink("pages/usuarios.html") }))
+      ...state.users.map(u => ({ type: "Usuário", label: u.name, meta: u.role, href: pageLink("pages/usuarios.html") }))
     ].filter(item => !q || `${item.label} ${item.meta}`.toLowerCase().includes(q)).slice(0, 8);
 
     $("#globalSearchResults").innerHTML = items.length ? items.map(item => `
@@ -960,8 +960,8 @@
   function initRevealObserver() {
     observeRevealItems();
 
-    // Re-renderizaÃ§Ãµes de filtros e modos de visualizaÃ§Ã£o tambÃ©m recebem
-    // animaÃ§Ã£o sem ficarem presos em opacity: 0.
+    // Re-renderizações de filtros e modos de visualização também recebem
+    // animação sem ficarem presos em opacity: 0.
     const pageContent = $("#pageContent");
     if (pageContent && !revealMutationObserver && "MutationObserver" in window) {
       revealMutationObserver = new MutationObserver(() => observeRevealItems(pageContent));
@@ -1092,7 +1092,7 @@
     }).catch(console.error);
   }
 
-  function miniMap(lat, lng, label = "LocalizaÃ§Ã£o registrada", linkUrl = null) {
+  function miniMap(lat, lng, label = "Localização registrada", linkUrl = null) {
     const inner = `
       <div class="mini-map leaflet-mini-map" data-lat="${lat}" data-lng="${lng}" aria-label="${label}" style="z-index:1; isolation:isolate; height: clamp(140px, 30vh, 220px);">
         ${!lat || !lng ? `<div class="map-caption" style="position:absolute;bottom:10px;left:10px;z-index:900;background:rgba(255,255,255,0.9);padding:5px 8px;border-radius:6px;box-shadow:var(--shadow-sm);">${icon("pin", 16)}<span>Sem coordenadas</span></div>` : ""}
@@ -1200,10 +1200,10 @@
 
   async function operationalClient() {
     const client = window.AuthClient || await getSupabaseClient(readConnection());
-    if (!client) throw new Error("ConexÃ£o do Supabase nÃ£o configurada.");
+    if (!client) throw new Error("Conexão do Supabase não configurada.");
     const { data, error } = await client.auth.getSession();
     if (error) throw error;
-    if (!data.session) throw new Error("Sua sessÃ£o expirou. Entre novamente.");
+    if (!data.session) throw new Error("Sua sessão expirou. Entre novamente.");
     return client;
   }
 
@@ -1260,7 +1260,7 @@
       return { count: remoteClients.length };
     } catch (error) {
       console.error("[Central] Falha no retrato remoto:", error);
-      return { error: error.message || "NÃ£o foi possÃ­vel carregar o Supabase." };
+      return { error: error.message || "Não foi possível carregar o Supabase." };
     }
   }
 
@@ -1281,7 +1281,7 @@
 
   async function uploadPrivateFile(path, file) {
     const client = await operationalClient();
-    if (!file || file.size > 20 * 1024 * 1024) throw new Error("O anexo deve ter no mÃ¡ximo 20 MB.");
+    if (!file || file.size > 20 * 1024 * 1024) throw new Error("O anexo deve ter no máximo 20 MB.");
     const { data, error } = await client.storage.from("crm-anexos").upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
     if (error) throw new Error(error.message || "Falha ao enviar o anexo.");
     const { data: signed, error: signedError } = await client.storage.from("crm-anexos").createSignedUrl(data.path, 3600);

@@ -5,10 +5,10 @@ window.PageModules.clients = {
     let category = "Todos";
     let viewMode = "cards";
     let filtersOpen = false;
-    const categories = ["Todos", "Carcinicultor", "IrrigaÃ§Ã£o", "ConstruÃ§Ã£o civil", "MineraÃ§Ã£o", "Condominial", "Outro"];
+    const categories = ["Todos", "Carcinicultor", "Irrigação", "Construção civil", "Mineração", "Condominial", "Outro"];
     const clientCategory = (client) => {
       if (categories.includes(client.category)) return client.category;
-      if (["AgropecuÃ¡ria", "ProduÃ§Ã£o rural"].includes(client.segment)) return "IrrigaÃ§Ã£o";
+      if (["Agropecuária", "Produção rural"].includes(client.segment)) return "Irrigação";
       return "Outro";
     };
 
@@ -71,11 +71,11 @@ window.PageModules.clients = {
           </div>
 
           <div class="client-browser-actions">
-            <div class="view-mode-toggle" aria-label="Modo de visualizaÃ§Ã£o">
+            <div class="view-mode-toggle" aria-label="Modo de visualização">
               <button class="icon-btn ${viewMode === "cards" ? "active" : ""}" data-view="cards" type="button" aria-label="Exibir em cards" title="Cards">${UI.icon("grid", 17)}</button>
               <button class="icon-btn ${viewMode === "list" ? "active" : ""}" data-view="list" type="button" aria-label="Exibir em lista" title="Lista">${UI.icon("list", 18)}</button>
             </div>
-            <button class="compact-create-btn" id="newClientBtn" type="button" title="${remoteReadOnly ? "Cadastro serÃ¡ conectado na prÃ³xima etapa" : "Novo cliente"}" ${remoteReadOnly ? "disabled" : ""}>${UI.icon("plus", 18)}<span>${remoteReadOnly ? "Modo leitura" : "Novo cliente"}</span></button>
+            <button class="compact-create-btn" id="newClientBtn" type="button" title="${remoteReadOnly ? "Cadastro será conectado na próxima etapa" : "Novo cliente"}" ${remoteReadOnly ? "disabled" : ""}>${UI.icon("plus", 18)}<span>${remoteReadOnly ? "Modo leitura" : "Novo cliente"}</span></button>
           </div>
         </section>
 
@@ -89,29 +89,29 @@ window.PageModules.clients = {
                 <div class="client-card-title"><h3>${c.name}</h3><span class="client-category-tag">${clientCategory(c)}</span></div>
                 <p>${c.company}</p>
                 <div class="client-meta"><span>${UI.icon("pin", 15)} ${c.city}, ${c.state}</span><span>${visits.length} visita(s)</span></div>
-                <div class="client-card-foot"><span>${last ? `Ãšltima visita ${UI.date(last.date)}` : "Sem visitas"}</span>${UI.icon("chevron")}</div>
+                <div class="client-card-foot"><span>${last ? `Última visita ${UI.date(last.date)}` : "Sem visitas"}</span>${UI.icon("chevron")}</div>
               </a>`;
           }).join("") : UI.empty("Nenhum cliente encontrado", "Ajuste a busca ou cadastre um novo cliente.")}
         </section>
 
         <dialog id="clientDialog" class="form-dialog large">
           <form method="dialog" id="clientForm">
-            <div class="dialog-head"><div><span class="eyebrow">Cadastro rÃ¡pido</span><h2>Novo cliente</h2></div><button class="icon-btn" value="cancel">${UI.icon("x")}</button></div>
+            <div class="dialog-head"><div><span class="eyebrow">Cadastro rápido</span><h2>Novo cliente</h2></div><button class="icon-btn" value="cancel">${UI.icon("x")}</button></div>
             <div class="form-grid">
               <label class="field span-2"><span>Nome do cliente / propriedade</span><input name="name" required placeholder="Ex.: Fazenda Santa Clara"></label>
-              <label class="field span-2"><span>RazÃ£o ou nome empresarial</span><input name="company" placeholder="Opcional"></label>
+              <label class="field span-2"><span>Razão ou nome empresarial</span><input name="company" placeholder="Opcional"></label>
               <label class="field"><span>Contato principal</span><input name="contact"></label>
               <label class="field"><span>Telefone</span><input name="phone" inputmode="tel"></label>
               <label class="field"><span>Cidade</span><input name="city" required></label>
               <label class="field"><span>Estado</span><input name="state" value="CE" maxlength="2"></label>
               <label class="field"><span>Categoria</span><select name="category">${categories.slice(1).map(item => `<option>${item}</option>`).join("")}</select></label>
               <label class="field"><span>Status</span><select name="status"><option>Lead</option><option>Prospect</option><option>Cliente</option></select></label>
-              <label class="field"><span>Origem da CaptaÃ§Ã£o</span><select id="originSelect" name="origin"><option>ProspecÃ§Ã£o Ativa</option><option>IndicaÃ§Ã£o</option><option>Inbound Marketing</option><option>Feira / Evento</option><option>Mapa</option><option>Outros</option></select></label>
+              <label class="field"><span>Origem da Captação</span><select id="originSelect" name="origin"><option>Prospecção Ativa</option><option>Indicação</option><option>Inbound Marketing</option><option>Feira / Evento</option><option>Mapa</option><option>Outros</option></select></label>
               <label class="field" id="originEventField" style="display:none;"><span>Evento de Origem</span><select name="originEventId"><option value="">Selecione a feira...</option>${(state.events||[]).map(ev => `<option value="${ev.id}">${ev.name}</option>`).join("")}</select></label>
-              <label class="field span-2"><span>ObservaÃ§Ã£o inicial</span><textarea name="notes" rows="3"></textarea></label>
+              <label class="field span-2"><span>Observação inicial</span><textarea name="notes" rows="3"></textarea></label>
             </div>
             <div class="location-card">
-              <div><span class="eyebrow">LocalizaÃ§Ã£o rural</span><h3>Marque manualmente no mapa</h3><p>Clique na Ã¡rea aproximada para registrar coordenadas simuladas nesta demonstraÃ§Ã£o.</p></div>
+              <div><span class="eyebrow">Localização rural</span><h3>Marque manualmente no mapa</h3><p>Clique na área aproximada para registrar coordenadas simuladas nesta demonstração.</p></div>
               <div class="manual-map" id="manualMap"><div class="map-grid"></div><span class="manual-pin">${UI.icon("pin", 20)}</span></div>
               <div class="coord-row"><label class="field"><span>Latitude</span><input id="latInput" name="lat" readonly></label><label class="field"><span>Longitude</span><input id="lngInput" name="lng" readonly></label></div>
             </div>
