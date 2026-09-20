@@ -1,4 +1,4 @@
-window.PageModules = window.PageModules || {};
+﻿window.PageModules = window.PageModules || {};
 window.PageModules.trip = {
   init() {
     const id = new URLSearchParams(location.search).get("id");
@@ -26,13 +26,13 @@ window.PageModules.trip = {
           <div class="trip-central-heading">
             <div class="title-inline"><h2>${trip.name}</h2>${UI.statusBadge(trip.status)}</div>
             <p>${trip.objective || "Sem objetivo informado."}</p>
-            <div class="trip-meta-line"><span>${UI.icon("clock",16)} ${UI.shortDate(trip.startDate)} → ${UI.shortDate(trip.endDate)}</span><span>${UI.icon("users",16)} ${participants.length} participantes</span><span>${UI.icon("route",16)} ${km} km</span></div>
+            <div class="trip-meta-line"><span>${UI.icon("clock",16)} ${UI.shortDate(trip.startDate)} â†’ ${UI.shortDate(trip.endDate)}</span><span>${UI.icon("users",16)} ${participants.length} participantes</span><span>${UI.icon("route",16)} ${km} km</span></div>
           </div>
           <div class="trip-primary-actions">
             ${trip.status === "Planejada" ? `<button class="btn btn-secondary" id="statusTripBtn">${UI.icon("check",17)} Iniciar viagem</button>` : ""}
             ${trip.status === "Em andamento" ? `<button class="btn btn-secondary" id="statusTripBtn">${UI.icon("check",17)} Concluir viagem</button>` : ""}
             <a class="btn btn-primary" href="${UI.pageLink(`pages/nova-visita.html?trip=${trip.id}`)}">${UI.icon("pin",17)} Nova visita</a>
-            <button class="icon-btn trip-report-btn" id="reportBtn" type="button" aria-label="Gerar relatório" title="Gerar relatório">${UI.icon("file",19)}</button>
+            <button class="icon-btn trip-report-btn" id="reportBtn" type="button" aria-label="Gerar relatÃ³rio" title="Gerar relatÃ³rio">${UI.icon("file",19)}</button>
           </div>
         </section>
 
@@ -42,7 +42,7 @@ window.PageModules.trip = {
           <article><span>Gastos</span><strong>${UI.money(totalExpenses)}</strong><small>${expenses.length} registros</small></article>
         </section>
 
-        <section class="trip-actions-grid reveal" aria-label="Gestão da viagem">
+        <section class="trip-actions-grid reveal" aria-label="GestÃ£o da viagem">
           ${action("routeDialog", "route", "Roteiro", `${stops.length} parada(s)`)}
           ${action("participantsDialog", "users", "Participantes", `${participants.length} na equipe`)}
           ${action("clientsDialog", "user", "Clientes", `${planned.length} planejados`)}
@@ -57,7 +57,7 @@ window.PageModules.trip = {
           <div class="dialog-head"><div><span class="eyebrow">Roteiro</span><h2>Paradas e percurso</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
           <div class="route-list modal-list">${stops.length ? stops.map((stop, index) => `<label class="route-stop ${stop.done ? "done" : ""}"><input type="checkbox" data-stop="${stop.id}" ${stop.done ? "checked" : ""}><span class="route-index">${stop.done ? UI.icon("check",15) : index + 1}</span><span><strong>${stop.label}</strong><small>${stop.place}</small></span></label>`).join("") : UI.empty("Roteiro vazio", "Adicione a primeira parada da viagem.")}</div>
           <div class="progress-row"><span>Progresso do roteiro</span><strong>${progress}%</strong></div><div class="progress"><span style="width:${progress}%"></span></div>
-          <div class="trip-modal-divider"></div><div class="form-grid"><label class="field"><span>Nova parada</span><input name="label" required placeholder="Ex.: Visita Cliente X"></label><label class="field"><span>Local</span><input name="place" required placeholder="Cidade ou referência"></label></div><div class="dialog-actions"><button class="btn btn-primary" value="default">${UI.icon("plus",17)} Adicionar parada</button></div>
+          <div class="trip-modal-divider"></div><div class="form-grid"><label class="field"><span>Nova parada</span><input name="label" required placeholder="Ex.: Visita Cliente X"></label><label class="field"><span>Local</span><input name="place" required placeholder="Cidade ou referÃªncia"></label></div><div class="dialog-actions"><button class="btn btn-primary" value="default">${UI.icon("plus",17)} Adicionar parada</button></div>
         </form></dialog>
 
         <dialog id="participantsDialog" class="form-dialog trip-modal"><form method="dialog">
@@ -72,31 +72,31 @@ window.PageModules.trip = {
 
         <dialog id="visitsDialog" class="form-dialog large trip-modal"><form method="dialog">
           <div class="dialog-head"><div><span class="eyebrow">Campo</span><h2>Visitas da viagem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
-          <div class="mini-list modal-list">${visits.length ? visits.map(visit => { const client = state.clients.find(item => item.id === visit.clientId); return `<a href="${UI.pageLink(`pages/cliente.html?id=${client?.id || ""}`)}"><span class="mini-icon">${UI.icon("pin",15)}</span><span><strong>${client?.name || "Cliente"}</strong><small>${UI.date(visit.date)} · ${visit.type}</small></span></a>`; }).join("") : UI.empty("Nenhuma visita", "Registre a primeira visita desta viagem.")}</div>
+          <div class="mini-list modal-list">${visits.length ? visits.map(visit => { const client = state.clients.find(item => item.id === visit.clientId); return `<a href="${UI.pageLink(`pages/cliente.html?id=${client?.id || ""}`)}"><span class="mini-icon">${UI.icon("pin",15)}</span><span><strong>${client?.name || "Cliente"}</strong><small>${UI.date(visit.date)} Â· ${visit.type}</small></span></a>`; }).join("") : UI.empty("Nenhuma visita", "Registre a primeira visita desta viagem.")}</div>
           <div class="dialog-actions"><a class="btn btn-primary" href="${UI.pageLink(`pages/nova-visita.html?trip=${trip.id}`)}">${UI.icon("plus",17)} Nova visita</a></div>
         </form></dialog>
 
         <dialog id="financeDialog" class="form-dialog large trip-modal"><form method="dialog">
           <div class="dialog-head"><div><span class="eyebrow">Financeiro</span><h2>Despesas da viagem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
-          <div class="mini-list modal-list">${expenses.length ? expenses.map(expense => `<div><span class="mini-icon">${UI.icon("receipt",15)}</span><span><strong>${expense.category}</strong><small>${expense.place} · ${UI.date(expense.date)}</small></span><b>${UI.money(expense.amount)}</b></div>`).join("") : UI.empty("Sem despesas", "Os lançamentos financeiros aparecerão aqui.")}</div>
+          <div class="mini-list modal-list">${expenses.length ? expenses.map(expense => `<div><span class="mini-icon">${UI.icon("receipt",15)}</span><span><strong>${expense.category}</strong><small>${expense.place} Â· ${UI.date(expense.date)}</small></span><b>${UI.money(expense.amount)}</b></div>`).join("") : UI.empty("Sem despesas", "Os lanÃ§amentos financeiros aparecerÃ£o aqui.")}</div>
           <div class="dialog-actions"><a class="btn btn-secondary" href="${UI.pageLink(`pages/financeiro.html?trip=${trip.id}`)}">Abrir financeiro</a></div>
         </form></dialog>
 
         <dialog id="kmDialog" class="form-dialog trip-modal"><form method="dialog" id="kmForm">
-          <div class="dialog-head"><div><span class="eyebrow">Odômetro</span><h2>Quilometragem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
-          <div class="km-quick-read"><span>Distância rodada calculada</span><strong>${km} km</strong></div>
-          <div class="form-grid" style="align-items: end; grid-template-columns: 1fr auto; margin-bottom: 20px;"><label class="field"><span>Novo registro do odômetro (km)</span><input name="kmValue" type="number" step="0.1" required placeholder="Ex.: 125400"></label><button class="btn btn-primary" value="default">${UI.icon("plus", 17)} Inserir</button></div>
-          ${records.length ? `<div class="mini-list modal-list">${records.map((r, i) => `<div><span class="mini-icon">${UI.icon("route", 15)}</span><span><strong>${r.km} km</strong><small>${UI.shortDate(r.date)} às ${new Date(r.date).toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"})}</small></span>${i === 0 ? `<b>Último</b>` : ""}</div>`).join("")}</div>` : UI.empty("Nenhum registro", "Insira o km atual do painel do carro para começar.")}
+          <div class="dialog-head"><div><span class="eyebrow">OdÃ´metro</span><h2>Quilometragem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
+          <div class="km-quick-read"><span>DistÃ¢ncia rodada calculada</span><strong>${km} km</strong></div>
+          <div class="form-grid" style="align-items: end; grid-template-columns: 1fr auto; margin-bottom: 20px;"><label class="field"><span>Novo registro do odÃ´metro (km)</span><input name="kmValue" type="number" step="0.1" required placeholder="Ex.: 125400"></label><button class="btn btn-primary" value="default">${UI.icon("plus", 17)} Inserir</button></div>
+          ${records.length ? `<div class="mini-list modal-list">${records.map((r, i) => `<div><span class="mini-icon">${UI.icon("route", 15)}</span><span><strong>${r.km} km</strong><small>${UI.shortDate(r.date)} Ã s ${new Date(r.date).toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"})}</small></span>${i === 0 ? `<b>Ãšltimo</b>` : ""}</div>`).join("")}</div>` : UI.empty("Nenhum registro", "Insira o km atual do painel do carro para comeÃ§ar.")}
         </form></dialog>
 
         <dialog id="notesDialog" class="form-dialog trip-modal"><form method="dialog" id="notesForm">
           <div class="dialog-head"><div><span class="eyebrow">Registro interno</span><h2>Notas da viagem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
-          <label class="field"><span>Observações</span><textarea name="notes" rows="6" placeholder="Registre decisões, observações e próximos passos.">${trip.notes || ""}</textarea></label><div class="dialog-actions"><button class="btn btn-primary" value="default">Salvar nota</button></div>
+          <label class="field"><span>ObservaÃ§Ãµes</span><textarea name="notes" rows="6" placeholder="Registre decisÃµes, observaÃ§Ãµes e prÃ³ximos passos.">${trip.notes || ""}</textarea></label><div class="dialog-actions"><button class="btn btn-primary" value="default">Salvar nota</button></div>
         </form></dialog>
 
         <dialog id="attachmentsDialog" class="form-dialog trip-modal"><form method="dialog">
-          <div class="dialog-head"><div><span class="eyebrow">Documentação</span><h2>Anexos da viagem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
-          <label class="upload-card full">${UI.icon("paperclip",26)}<span><strong>Adicionar arquivos</strong><small>Fotos, vídeos ou documentos</small></span><input type="file" id="tripFiles" accept="image/*,video/*,.pdf" multiple hidden></label>
+          <div class="dialog-head"><div><span class="eyebrow">DocumentaÃ§Ã£o</span><h2>Anexos da viagem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
+          <label class="upload-card full">${UI.icon("paperclip",26)}<span><strong>Adicionar arquivos</strong><small>Fotos, vÃ­deos ou documentos</small></span><input type="file" id="tripFiles" accept="image/*,video/*,.pdf" multiple hidden></label>
           <div class="attachment-preview modal-list">${attachments.length ? attachments.map(file => `<div class="file-chip">${UI.icon(file.type?.startsWith("image/") ? "camera" : "file",16)}<span>${file.name}</span><small>${Math.round((file.size || 0) / 1024)} KB</small></div>`).join("") : `<span class="muted">Nenhum anexo geral nesta viagem.</span>`}</div>
         </form></dialog>
       `;
@@ -119,7 +119,7 @@ window.PageModules.trip = {
         const kmValue = Number(data.get("kmValue"));
         if (kmValue > 0) {
           Store.addOdometerRecord(trip.id, kmValue);
-          UI.toast("Registro salvo no histórico do odômetro.");
+          UI.toast("Registro salvo no histÃ³rico do odÃ´metro.");
         }
         render();
         requestAnimationFrame(() => {
@@ -127,32 +127,42 @@ window.PageModules.trip = {
           UI.$("#kmForm input[name=kmValue]")?.focus();
         });
       });
-      UI.$("#notesForm")?.addEventListener("submit", event => {
-        if (event.submitter?.value === "cancel") return;
-        event.preventDefault();
-        Store.updateTrip(trip.id, { notes: String(new FormData(event.currentTarget).get("notes") || "").trim() });
-        UI.toast("Nota da viagem atualizada.");
-        render();
-      });
+              UI.$("#notesForm")?.addEventListener("submit", async event => {
+          if (event.submitter?.value === "cancel") return;
+          event.preventDefault();
+          try {
+            await UI.updateSupabaseTrip(trip.id, { notes: String(new FormData(event.currentTarget).get("notes") || "").trim() });
+            UI.toast("Nota da viagem atualizada.");
+            setTimeout(() => location.reload(), 350);
+          } catch(err) {
+            console.error(err);
+            UI.toast("Erro ao atualizar notas.", "error");
+          }
+        });
       UI.$("#statusTripBtn")?.addEventListener("click", () => {
-        const nextStatus = trip.status === "Planejada" ? "Em andamento" : "Concluída";
+        const nextStatus = trip.status === "Planejada" ? "Em andamento" : "ConcluÃ­da";
         const patch = { status: nextStatus };
-        if (nextStatus === "Concluída" && trip.currentKm && !trip.endKm) patch.endKm = trip.currentKm;
+        if (nextStatus === "ConcluÃ­da" && trip.currentKm && !trip.endKm) patch.endKm = trip.currentKm;
         Store.updateTrip(trip.id, patch);
-        UI.toast(nextStatus === "Em andamento" ? "Viagem iniciada." : "Viagem concluída.");
+        UI.toast(nextStatus === "Em andamento" ? "Viagem iniciada." : "Viagem concluÃ­da.");
         render();
       });
-      UI.$("#tripFiles")?.addEventListener("change", async event => {
-        const added = await UI.filesToAttachments(event.target.files);
-        Store.updateTrip(trip.id, { attachments: [...attachments, ...added] });
-        UI.toast(`${added.length} anexo(s) adicionado(s) à viagem.`);
-        render();
-      });
+              UI.$("#tripFiles")?.addEventListener("change", async event => {
+          const added = await UI.filesToAttachments(event.target.files);
+          try {
+             await UI.updateSupabaseTrip(trip.id, { attachments: [...(trip.attachments || []), ...added] });
+             UI.toast(` anexo(s) adicionado(s) à viagem.);
+             setTimeout(() => location.reload(), 350);
+          } catch(err) {
+             console.error(err);
+             UI.toast("Erro ao anexar arquivo.", "error");
+          }
+        });
       UI.$("#reportBtn")?.addEventListener("click", () => generateReport(trip, state, visits, expenses, participants));
     };
 
     function generateReport(trip, state, visits, expenses, participants) {
-      const lines = [`RELATÓRIO DE VIAGEM — ${trip.name}`, `Período: ${UI.shortDate(trip.startDate)} a ${UI.shortDate(trip.endDate)}`, `Status: ${trip.status}`, "", "Objetivo", trip.objective, "", "Participantes", ...participants.map(user => `- ${user.name} — ${user.role}`), "", "Roteiro", ...(trip.stops || []).map((stop, index) => `${index + 1}. ${stop.label} — ${stop.place} [${stop.done ? "concluída" : "pendente"}]`), "", "Visitas", ...visits.map(visit => { const client = state.clients.find(item => item.id === visit.clientId); return `- ${UI.date(visit.date)} — ${client?.name || "Cliente"} — ${visit.type}: ${visit.notes}`; }), "", "Financeiro", ...expenses.map(expense => `- ${expense.category} — ${expense.place} — ${UI.money(expense.amount)}`), `Total: ${UI.money(expenses.reduce((sum, expense) => sum + Number(expense.amount), 0))}`];
+      const lines = [`RELATÃ“RIO DE VIAGEM â€” ${trip.name}`, `PerÃ­odo: ${UI.shortDate(trip.startDate)} a ${UI.shortDate(trip.endDate)}`, `Status: ${trip.status}`, "", "Objetivo", trip.objective, "", "Participantes", ...participants.map(user => `- ${user.name} â€” ${user.role}`), "", "Roteiro", ...(trip.stops || []).map((stop, index) => `${index + 1}. ${stop.label} â€” ${stop.place} [${stop.done ? "concluÃ­da" : "pendente"}]`), "", "Visitas", ...visits.map(visit => { const client = state.clients.find(item => item.id === visit.clientId); return `- ${UI.date(visit.date)} â€” ${client?.name || "Cliente"} â€” ${visit.type}: ${visit.notes}`; }), "", "Financeiro", ...expenses.map(expense => `- ${expense.category} â€” ${expense.place} â€” ${UI.money(expense.amount)}`), `Total: ${UI.money(expenses.reduce((sum, expense) => sum + Number(expense.amount), 0))}`];
       const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -160,7 +170,7 @@ window.PageModules.trip = {
       link.download = `relatorio-${trip.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.txt`;
       link.click();
       URL.revokeObjectURL(url);
-      UI.toast("Relatório gerado.");
+      UI.toast("RelatÃ³rio gerado.");
     }
 
     render();

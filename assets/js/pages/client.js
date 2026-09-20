@@ -182,17 +182,33 @@ window.PageModules.client = {
       `;
 
       UI.$("#openNeedBtn")?.addEventListener("click", () => UI.openDialog("needDialog"));
-      UI.$("#needForm")?.addEventListener("submit", (e) => {
+            UI.$("#needForm")?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
-        Store.addClientNeed(client.id, {
-          category: fd.get("category"),
-          description: String(fd.get("description") || "").trim(),
-          priority: fd.get("priority")
-        }, "u1");
-        UI.toast("Necessidade registrada no perfil do cliente.");
-        UI.closeDialog("needDialog");
-        render();
+        const desc = String(fd.get("description") || "").trim();
+        if (!desc) {
+          UI.toast("Informe a descrição da necessidade.", "error");
+          return;
+        }
+        
+        const btn = e.currentTarget.querySelector("button[type='submit']");
+        if (btn) btn.disabled = true;
+
+        try {
+          const payload = {
+            clientId: client.id,
+            category: fd.get("category"),
+            description: desc,
+            priority: fd.get("priority")
+          };
+          await UI.createSupabaseNeed(payload);
+          UI.toast("Necessidade registrada com sucesso.");
+          setTimeout(() => location.reload(), 350);
+        } catch (err) {
+          console.error(err);
+          UI.toast("Erro ao registrar necessidade.", "error");
+          if (btn) btn.disabled = false;
+        }
       });
 
 

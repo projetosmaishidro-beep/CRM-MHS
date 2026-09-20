@@ -1,4 +1,4 @@
-window.PageModules = window.PageModules || {};
+﻿window.PageModules = window.PageModules || {};
 window.PageModules.events = {
   init() {
     const render = () => {
@@ -7,8 +7,8 @@ window.PageModules.events = {
       const expenses = state.expenses || [];
       
       const totalInvested = expenses.filter(e => e.eventId).reduce((sum, e) => sum + Number(e.amount), 0);
-      const concludedEvents = events.filter(e => e.status === 'Concluído');
-      const upcomingEvents = events.filter(e => e.status !== 'Concluído');
+      const concludedEvents = events.filter(e => e.status === 'ConcluÃ­do');
+      const upcomingEvents = events.filter(e => e.status !== 'ConcluÃ­do');
       
       const getBaseName = (name) => name.replace(/\b(20\d{2}|\d{2})\b/g, '').trim().toUpperCase();
       const editionsCount = {};
@@ -20,15 +20,15 @@ window.PageModules.events = {
       });
 
       const sortedEvents = [
-        ...eventsWithEditions.filter(e => e.status !== 'Concluído').sort((a,b) => new Date(a.startDate) - new Date(b.startDate)),
-        ...eventsWithEditions.filter(e => e.status === 'Concluído').sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
+        ...eventsWithEditions.filter(e => e.status !== 'ConcluÃ­do').sort((a,b) => new Date(a.startDate) - new Date(b.startDate)),
+        ...eventsWithEditions.filter(e => e.status === 'ConcluÃ­do').sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
       ];
 
       UI.$("#pageContent").innerHTML = `
         <section class="trip-quick-metrics reveal" style="margin-bottom: 24px;">
           <article><span>Investimento Global</span><strong style="color:var(--primary);">${UI.money(totalInvested)}</strong><small>Total alocado em eventos</small></article>
-          <article><span>Histórico</span><strong>${concludedEvents.length}</strong><small>Eventos realizados</small></article>
-          <article><span>Radar</span><strong>${upcomingEvents.length}</strong><small>Próximos eventos</small></article>
+          <article><span>HistÃ³rico</span><strong>${concludedEvents.length}</strong><small>Eventos realizados</small></article>
+          <article><span>Radar</span><strong>${upcomingEvents.length}</strong><small>PrÃ³ximos eventos</small></article>
         </section>
 
         <section class="trip-board reveal">
@@ -37,22 +37,22 @@ window.PageModules.events = {
             <div style="grid-column:1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:48px 16px; color:var(--muted); text-align:center;">
               ${UI.icon("calendar", 40)}
               <p style="font-size:15px; font-weight:600;">Nenhum evento registrado ainda</p>
-              <small>Clique em "Novo Evento" para começar, ou aguarde a sincronização com o banco de dados.</small>
+              <small>Clique em "Novo Evento" para comeÃ§ar, ou aguarde a sincronizaÃ§Ã£o com o banco de dados.</small>
             </div>` : sortedEvents.map(ev => {
             const evExpenses = expenses.filter(e => e.eventId === ev.id);
             const totalEvCost = evExpenses.reduce((s,e) => s + Number(e.amount), 0);
             const participants = (ev.participantIds || []).map(id => state.users.find(u => u.id === id)).filter(Boolean);
-            const editionBadge = ev._edition > 1 ? `<span class="tag tag-accent" style="font-size:10px; padding:2px 6px;">${ev._edition}ª Edição</span>` : "";
+            const editionBadge = ev._edition > 1 ? `<span class="tag tag-accent" style="font-size:10px; padding:2px 6px;">${ev._edition}Âª EdiÃ§Ã£o</span>` : "";
             
             return `
-              <a class="trip-card ${ev.status === 'Concluído' ? 'opacity-80' : ''}" href="${UI.pageLink(`pages/evento.html?id=${ev.id}`)}">
+              <a class="trip-card ${ev.status === 'ConcluÃ­do' ? 'opacity-80' : ''}" href="${UI.pageLink(`pages/evento.html?id=${ev.id}`)}">
                 <div class="trip-card-top">
                   <div style="display:flex; gap:6px; align-items:center;">
                     ${UI.statusBadge(ev.status)}
                     ${editionBadge}
                   </div>
                   <div style="display:flex; gap:6px; align-items:center;">
-                    <span class="date-chip">${UI.shortDate(ev.startDate)} → ${UI.shortDate(ev.endDate)}</span>
+                    <span class="date-chip">${UI.shortDate(ev.startDate)} â†’ ${UI.shortDate(ev.endDate)}</span>
                   </div>
                 </div>
                 
@@ -71,7 +71,7 @@ window.PageModules.events = {
                 </div>
                 
                 <div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px;">
-                  <div class="avatar-stack" style="margin-top: 10px;">${participants.length ? participants.map(u => `<span class="avatar mini" title="${u.name}">${u.initials}</span>`).join("") : `<span style="font-size:12px; color:var(--muted);">Equipe não definida</span>`}</div>
+                  <div class="avatar-stack" style="margin-top: 10px;">${participants.length ? participants.map(u => `<span class="avatar mini" title="${u.name}">${u.initials}</span>`).join("") : `<span style="font-size:12px; color:var(--muted);">Equipe nÃ£o definida</span>`}</div>
                 </div>
               </a>`;
           }).join("")}
@@ -83,15 +83,15 @@ window.PageModules.events = {
             <div class="trip-form-scroll">
             <div class="form-grid trip-form-grid">
               <label class="field span-2"><span>Nome do Evento</span><input name="name" required placeholder="Ex.: Agrishow 2026"></label>
-              <label class="field"><span>Data de início</span><input name="startDate" type="date" required></label>
+              <label class="field"><span>Data de inÃ­cio</span><input name="startDate" type="date" required></label>
               <label class="field"><span>Data final</span><input name="endDate" type="date" required></label>
-              <label class="field"><span>Tipo de Participação</span><select name="role"><option>Participante</option><option>Expositor</option></select></label>
-              <label class="field"><span>Local (Cidade/Estado)</span><input name="location" required placeholder="Ex.: Ribeirão Preto, SP"></label>
-              <label class="field span-2"><span>Descrição Estratégica</span><textarea name="notes" rows="3" required placeholder="Qual o foco desta participação?"></textarea></label>
-              <fieldset class="field span-2 checklist trip-checklist"><legend>Equipe Participante</legend><p class="checklist-hint">Selecione quem irá ao evento.</p>${(Store.getState().users || []).map(u => `<label><input type="checkbox" name="participant" value="${u.id}"><span class="avatar mini">${u.initials}</span><span class="checklist-name">${u.name}</span></label>`).join("")}</fieldset>
+              <label class="field"><span>Tipo de ParticipaÃ§Ã£o</span><select name="role"><option>Participante</option><option>Expositor</option></select></label>
+              <label class="field"><span>Local (Cidade/Estado)</span><input name="location" required placeholder="Ex.: RibeirÃ£o Preto, SP"></label>
+              <label class="field span-2"><span>DescriÃ§Ã£o EstratÃ©gica</span><textarea name="notes" rows="3" required placeholder="Qual o foco desta participaÃ§Ã£o?"></textarea></label>
+              <fieldset class="field span-2 checklist trip-checklist"><legend>Equipe Participante</legend><p class="checklist-hint">Selecione quem irÃ¡ ao evento.</p>${(Store.getState().users || []).map(u => `<label><input type="checkbox" name="participant" value="${u.id}"><span class="avatar mini">${u.initials}</span><span class="checklist-name">${u.name}</span></label>`).join("")}</fieldset>
             </div>
             </div>
-            <div class="dialog-actions trip-dialog-actions"><span class="trip-form-status" id="eventFormStatus">O evento será salvo no banco de dados.</span><div><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Criar Evento</button></div></div>
+            <div class="dialog-actions trip-dialog-actions"><span class="trip-form-status" id="eventFormStatus">O evento serÃ¡ salvo no banco de dados.</span><div><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Criar Evento</button></div></div>
           </form>
         </dialog>
       `;
@@ -112,7 +112,7 @@ window.PageModules.events = {
         const startDate = String(fd.get("startDate") || "");
         const endDate = String(fd.get("endDate") || "");
         if (startDate && endDate && endDate < startDate) {
-          UI.toast("A data final precisa ser posterior à data inicial.", "error");
+          UI.toast("A data final precisa ser posterior Ã  data inicial.", "error");
           return;
         }
         const payload = {
@@ -128,7 +128,7 @@ window.PageModules.events = {
         const originalLabel = submitButton?.textContent || "Salvar";
         if (submitButton) {
           submitButton.disabled = true;
-          submitButton.textContent = "Salvando…";
+          submitButton.textContent = "Salvandoâ€¦";
         }
         
         Store.addEvent(payload);
@@ -143,14 +143,14 @@ window.PageModules.events = {
       });
     };
 
-    // Renderiza imediatamente com o que há no cache
+    // Renderiza imediatamente com o que hÃ¡ no cache
     render();
 
-    // Re-renderiza quando a hidratação remota concluir (evento store:changed)
+    // Re-renderiza quando a hidrataÃ§Ã£o remota concluir (evento store:changed)
     const onStoreChange = () => render();
     window.addEventListener("store:changed", onStoreChange, { once: true });
 
-    // Se não há eventos no cache, força hidratação agora (usuário acessou a página diretamente)
+    // Se nÃ£o hÃ¡ eventos no cache, forÃ§a hidrataÃ§Ã£o agora (usuÃ¡rio acessou a pÃ¡gina diretamente)
     if (!Store.getState().events?.length && window.AuthClient) {
       UI.hydrateRemoteEvents?.().then(() => render());
     }
