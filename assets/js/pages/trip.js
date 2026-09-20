@@ -22,7 +22,7 @@ window.PageModules.trip = {
 
       UI.$("#pageContent").innerHTML = `
         <section class="trip-central-hero reveal">
-          <a class="profile-back-link" href="${UI.pageLink("pages/viagens.html")}"><span class="back-arrow">${UI.icon("arrow",15)}</span>Viagens</a>
+
           <div class="trip-central-heading">
             <div class="title-inline"><h2>${trip.name}</h2>${UI.statusBadge(trip.status)}</div>
             <p>${trip.objective || "Sem objetivo informado."}</p>

@@ -130,7 +130,7 @@ window.PageModules.event = {
 
       UI.$("#pageContent").innerHTML = `
         <section class="trip-central-hero reveal">
-          <a class="profile-back-link" href="#" onclick="history.back(); return false;"><span class="back-arrow">${UI.icon("arrow",15)}</span>Voltar</a>
+
           <div class="trip-central-heading">
             <div class="title-inline"><h2>${event.name}</h2>${UI.statusBadge(event.status)}</div>
             <div class="trip-meta-line" style="margin-top:6px;">

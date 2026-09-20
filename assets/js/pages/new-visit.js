@@ -11,7 +11,7 @@ window.PageModules["new-visit"] = {
     UI.$("#pageContent").innerHTML = `
       <section class="form-page reveal">
         <div class="form-page-head">
-          <div><a class="back-link" href="${UI.pageLink("pages/visitas.html")}">← Voltar para visitas</a><h2>Nova visita</h2></div>
+          <div><h2>Nova visita</h2></div>
         </div>
 
         <form id="visitForm" class="smart-form">

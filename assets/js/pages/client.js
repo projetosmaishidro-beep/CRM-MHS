@@ -27,7 +27,7 @@ window.PageModules.client = {
       UI.$("#pageContent").innerHTML = `
         <section class="profile-hero client-profile-hero reveal">
           <div class="profile-main">
-            <a class="profile-back-link" href="${UI.pageLink("pages/clientes.html")}"><span class="back-arrow">${UI.icon("arrow", 15)}</span>Clientes</a>
+
             <div class="client-profile-heading">
               <div class="title-inline"><h2>${client.name}</h2>${UI.statusBadge(client.status)}</div>
               <p class="client-company">${client.company}</p>

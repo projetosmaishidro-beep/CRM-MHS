@@ -12,7 +12,7 @@ window.PageModules.user = {
     UI.$("#pageContent").innerHTML = `
       <section class="profile-hero reveal">
         <div class="profile-main">
-          <a class="back-link" href="${UI.pageLink("pages/usuarios.html")}">← Voltar para usuários</a>
+
           <div class="profile-title-row">
             <span class="avatar xl">${user.initials}</span>
             <div><div class="title-inline"><h2>${user.name}</h2><span class="badge badge-cliente">Ativo</span></div><p>${user.role}</p><span class="muted">${user.email} · ${user.phone}</span></div>
