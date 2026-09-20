@@ -161,7 +161,7 @@ create or replace function api.criar_despesa(p_dados jsonb)
 returns jsonb
 language plpgsql
 security invoker
-as $
+as $$
 declare
     v_despesa_id uuid;
 begin
@@ -178,14 +178,14 @@ begin
     ) returning despesa_id into v_despesa_id;
     return jsonb_build_object('despesa_id', v_despesa_id);
 end;
-$;
+$$;
 
 drop function if exists api.atualizar_despesa cascade;
 create or replace function api.atualizar_despesa(p_despesa_id uuid, p_dados jsonb)
 returns void
 language plpgsql
 security invoker
-as $
+as $$
 begin
     update crm.despesas
     set
@@ -195,17 +195,17 @@ begin
         ocorrido_em = coalesce((p_dados->>'date')::date, ocorrido_em)
     where despesa_id = p_despesa_id;
 end;
-$;
+$$;
 
 drop function if exists api.excluir_despesa cascade;
 create or replace function api.excluir_despesa(p_despesa_id uuid)
 returns void
 language plpgsql
 security invoker
-as $
+as $$
 begin
     delete from crm.despesas where despesa_id = p_despesa_id;
 end;
-$;
+$$;
 
 commit;
