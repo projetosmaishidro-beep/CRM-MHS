@@ -5171,3 +5171,22 @@ select:focus-visible {
     padding: 10px 12px;
   }
 }
+.visit-timeline { padding-left: 12px; border-left: 2px solid var(--border-light); margin-top: 12px; }
+.visit-item { position: relative; padding-bottom: 16px; padding-left: 16px; }
+.visit-item:last-child { padding-bottom: 0; }
+.visit-dot { position: absolute; left: -21px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--color-primary); border: 2px solid #fff; }
+.visit-content strong { display: block; font-size: 0.9rem; color: var(--text-dark); margin-bottom: 2px; }
+.visit-content small { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+.visit-content p { font-size: 0.8rem; color: var(--text-medium); line-height: 1.4; margin: 0; }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 12px; }
+.gallery-item { border-radius: 8px; overflow: hidden; aspect-ratio: 1; background: var(--surface-variant); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.gallery-item:hover img { transform: scale(1.05); }
+/* Fix leaflet phantom lines */
+.leaflet-tile-container img {
+    box-shadow: 0 0 1px rgba(0,0,0,0.01);
+}
+.leaflet-tile {
+    outline: 1px solid transparent;
+}

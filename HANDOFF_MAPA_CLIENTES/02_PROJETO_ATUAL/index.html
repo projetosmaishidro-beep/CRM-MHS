@@ -256,25 +256,7 @@
             <span id="maintenance-label">Manutencao</span>
           </button>
 
-          <button
-            id="open-report"
-            class="report-tab-button"
-            style="display:none !important;"
-            type="button"
-            aria-controls="report-panel"
-            aria-expanded="false"
-            aria-haspopup="dialog"
-            title="Abrir relatorio"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 19V5"></path>
-              <path d="M4 19h16"></path>
-              <path d="M8 16v-5"></path>
-              <path d="M13 16V8"></path>
-              <path d="M18 16v-9"></path>
-            </svg>
-            <span>Relatorio</span>
-          </button>
+          
 
           <div class="result-pill" id="result-pill" aria-live="polite">
             <strong id="result-count">0</strong>
@@ -399,21 +381,6 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
           </button>
         </header>
-
-        <div id="maintenance-login-view" class="maintenance-body">
-          <form id="maintenance-login-form" class="maintenance-form">
-            <label class="maintenance-field">
-              <span>E-mail</span>
-              <input id="maintenance-email" type="email" autocomplete="username" required>
-            </label>
-            <label class="maintenance-field">
-              <span>Senha</span>
-              <input id="maintenance-password" type="password" autocomplete="current-password" required minlength="6">
-            </label>
-            <p id="maintenance-login-error" class="maintenance-message is-hidden" role="alert"></p>
-            <button id="maintenance-login-submit" class="primary-action" type="submit">Entrar</button>
-          </form>
-        </div>
 
         <div id="maintenance-session-view" class="maintenance-body is-hidden">
           <section class="maintenance-profile">
@@ -665,7 +632,7 @@
               </button>
               <a id="route-client" class="btn btn-ghost icon-only is-hidden" href="#" target="_blank" rel="noopener" aria-label="Rota" title="Rota">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
-              </a>
+              </a> <button id="edit-client" class="btn btn-secondary icon-only" type="button" aria-label="Editar" title="Editar Contato"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button><button id="relocate-client" class="btn btn-secondary icon-only" type="button" aria-label="Ajustar Ponto" title="Ajustar Ponto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></button>
             </div>
           </section>
 
@@ -676,15 +643,7 @@
                 <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               </span>
             </div>
-            <div class="media-empty">
-              <div class="media-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-              </div>
-              <div>
-                <strong>Nenhuma visita recente</strong>
-                <p>Os registros de visitas da Central ainda não foram sincronizados com o mapa interativo.</p>
-              </div>
-            </div>
+            <div class="visit-timeline"><div class="visit-item"><span class="visit-dot"></span><div class="visit-content"><strong>Visita Comercial</strong><small>15/09/2026 - Representante</small><p>Apresenta��o comercial e alinhamento.</p></div></div></div>
           </section>
 
           <section class="panel">
@@ -694,15 +653,7 @@
                 <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
               </span>
             </div>
-            <div class="media-empty">
-              <div class="media-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-              </div>
-              <div>
-                <strong>Sem fotos cadastradas</strong>
-                <p>A sincronização de mídias do Supabase será ativada nas próximas atualizações.</p>
-              </div>
-            </div>
+            <div class="gallery-grid"><div class="gallery-item"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=200&q=80" alt="Fachada" /></div><div class="gallery-item"><img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=200&q=80" alt="Interior" /></div></div>
           </section>
 
           <section
@@ -754,13 +705,7 @@
             </div>
           </div>
 
-          <section id="client-maintenance-actions" class="client-maintenance-actions is-hidden panel" aria-label="Manutencao do cliente">
-            <div class="panel-head"><div><span class="eyebrow">Manutenção</span><h3>Ações de operador</h3></div></div>
-            <div style="display:flex;gap:8px;">
-              <button id="edit-client" class="btn btn-secondary" type="button">Editar contato</button>
-              <button id="relocate-client" class="btn btn-secondary" type="button">Ajustar ponto</button>
-            </div>
-          </section>
+          
 
 
 
@@ -774,276 +719,7 @@
       </div>
     </aside>
 
-    <section
-      id="report-panel"
-      class="report-panel"
-      style="display:none !important;"
-      aria-hidden="true"
-      aria-label="Relatorio de concentracao de clientes"
-    >
-      <div class="report-shell" role="dialog" aria-modal="false" aria-labelledby="report-title">
-        <header class="report-header">
-          <div class="report-title-block">
-            <span class="report-eyebrow">Business Intelligence</span>
-            <h2 id="report-title">Relatorio de concentracao</h2>
-            <p id="report-context">Os indicadores acompanham os filtros atuais da base.</p>
-          </div>
-
-          <button
-            id="close-report"
-            class="icon-button report-close"
-            type="button"
-            aria-label="Fechar relatorio"
-            title="Fechar relatorio"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 7l10 10M17 7 7 17"></path>
-            </svg>
-          </button>
-        </header>
-
-        <div class="report-body">
-          <section class="report-command-strip" aria-label="Acoes e escopo do relatorio">
-            <div class="report-scope">
-              <span>Escopo atual</span>
-              <strong id="report-scope-label">Filtros atuais</strong>
-              <small id="report-scope-note">Use filtros, busca ou uma area do mapa para recalcular o BI.</small>
-            </div>
-
-            <div class="report-actions" aria-label="Acoes do relatorio">
-              <button id="report-select-visible-area" class="report-action-button is-primary" type="button">
-                Usar area visivel
-              </button>
-              <button id="report-fit-area" class="report-action-button" type="button" disabled>
-                Ver area
-              </button>
-              <button id="report-clear-area" class="report-action-button" type="button" disabled>
-                Limpar area
-              </button>
-              <button id="report-export-filtered" class="report-action-button" type="button">
-                CSV clientes
-              </button>
-              <button id="report-export-area" class="report-action-button" type="button" disabled>
-                CSV area
-              </button>
-              <button id="report-export-hotspots" class="report-action-button" type="button">
-                CSV hotspots
-              </button>
-            </div>
-          </section>
-
-          <nav id="report-tabs" class="report-tabs" aria-label="Secoes do relatorio">
-            <button class="report-tab is-active" type="button" data-report-tab="overview" aria-pressed="true">
-              Visao geral
-            </button>
-            <button class="report-tab" type="button" data-report-tab="territory" aria-pressed="false">
-              Territorios
-            </button>
-            <button class="report-tab" type="button" data-report-tab="quality" aria-pressed="false">
-              Qualidade
-            </button>
-          </nav>
-
-          <section id="report-empty" class="report-empty is-hidden">
-            Nenhum cliente encontrado para os filtros atuais.
-          </section>
-
-          <section id="report-section-overview" class="report-tab-panel is-active" data-report-panel="overview">
-            <section class="report-kpis" aria-label="Indicadores principais">
-              <article class="kpi-card">
-                <span>Clientes analisados</span>
-                <strong id="report-total-value">0</strong>
-                <small id="report-total-note">Base atual</small>
-              </article>
-
-              <article class="kpi-card">
-                <span>Com coordenada</span>
-                <strong id="report-coverage-value">0%</strong>
-                <small id="report-coverage-note">0 pontos no mapa</small>
-              </article>
-
-              <article class="kpi-card">
-                <span>Ativos</span>
-                <strong id="report-active-value">0%</strong>
-                <small id="report-active-note">0 clientes ativos</small>
-              </article>
-
-              <article class="kpi-card">
-                <span>Sem coordenada</span>
-                <strong id="report-unmapped-value">0</strong>
-                <small id="report-unmapped-note">Fora do mapa</small>
-              </article>
-
-              <article class="kpi-card">
-                <span>Municipios</span>
-                <strong id="report-cities-value">0</strong>
-                <small id="report-cities-note">Com clientes filtrados</small>
-              </article>
-
-              <article class="kpi-card">
-                <span>Estados</span>
-                <strong id="report-states-value">0</strong>
-                <small id="report-states-note">UFs representadas</small>
-              </article>
-
-              <article class="kpi-card kpi-card-wide">
-                <span>Maior concentracao</span>
-                <strong id="report-top-city-value">-</strong>
-                <small id="report-top-city-note">Sem dados suficientes</small>
-              </article>
-
-              <article class="kpi-card kpi-card-wide">
-                <span>Pontos compartilhados</span>
-                <strong id="report-shared-value">0</strong>
-                <small id="report-shared-note">Clientes no mesmo ponto</small>
-              </article>
-            </section>
-
-            <section class="report-grid" aria-label="Graficos de concentracao">
-              <article class="report-card report-card-large">
-                <div class="report-card-header">
-                  <div>
-                    <span>Ranking territorial</span>
-                    <h3>Municipios por concentracao</h3>
-                  </div>
-                  <strong id="report-top-caption">Top 8</strong>
-                </div>
-                <div id="chart-top-cities" class="bar-chart"></div>
-              </article>
-
-              <article class="report-card">
-                <div class="report-card-header">
-                  <div>
-                    <span>Carteira</span>
-                    <h3>Situacao cadastral</h3>
-                  </div>
-                </div>
-                <div id="chart-status" class="status-chart"></div>
-              </article>
-
-              <article class="report-card">
-                <div class="report-card-header">
-                  <div>
-                    <span>Distribuicao</span>
-                    <h3>Clientes por UF</h3>
-                  </div>
-                </div>
-                <div id="chart-uf" class="bar-chart compact"></div>
-              </article>
-
-              <article class="report-card">
-                <div class="report-card-header">
-                  <div>
-                    <span>Precisao visual</span>
-                    <h3>Clientes por ponto</h3>
-                  </div>
-                </div>
-                <div id="chart-coordinate-groups" class="column-chart"></div>
-              </article>
-
-              <article class="report-card report-card-large">
-                <div class="report-card-header">
-                  <div>
-                    <span>Indice de oportunidade</span>
-                    <h3>Hotspots de clientes</h3>
-                  </div>
-                </div>
-                <div id="report-density-list" class="density-list"></div>
-              </article>
-            </section>
-          </section>
-
-          <section id="report-section-territory" class="report-tab-panel" data-report-panel="territory">
-            <section class="report-grid" aria-label="Analise territorial detalhada">
-              <article class="report-card report-card-large">
-                <div class="report-card-header">
-                  <div>
-                    <span>Ranking refinado</span>
-                    <h3>Bairros com maior presenca</h3>
-                  </div>
-                  <strong id="report-district-caption">Top 10</strong>
-                </div>
-                <div id="chart-top-districts" class="bar-chart"></div>
-              </article>
-
-              <article class="report-card">
-                <div class="report-card-header">
-                  <div>
-                    <span>Ruas</span>
-                    <h3>Logradouros mais fortes</h3>
-                  </div>
-                </div>
-                <div id="chart-top-streets" class="bar-chart compact"></div>
-              </article>
-
-              <article class="report-card report-card-large">
-                <div class="report-card-header">
-                  <div>
-                    <span>Tabela executiva</span>
-                    <h3>Ranking de municipios</h3>
-                  </div>
-                </div>
-                <div id="report-ranking-table" class="report-table-wrap"></div>
-              </article>
-
-              <article class="report-card">
-                <div class="report-card-header">
-                  <div>
-                    <span>Cobertura</span>
-                    <h3>UFs por alcance</h3>
-                  </div>
-                </div>
-                <div id="report-coverage-table" class="report-table-wrap"></div>
-              </article>
-            </section>
-          </section>
-
-          <section id="report-section-quality" class="report-tab-panel" data-report-panel="quality">
-            <section class="report-grid" aria-label="Qualidade e leitura operacional">
-              <article class="report-card report-card-large">
-                <div class="report-card-header">
-                  <div>
-                    <span>Leitura executiva</span>
-                    <h3>Insights automaticos</h3>
-                  </div>
-                </div>
-                <div id="report-insights" class="insight-list"></div>
-              </article>
-
-              <article class="report-card">
-                <div class="report-card-header">
-                  <div>
-                    <span>Geocodificacao</span>
-                    <h3>Precisao da base</h3>
-                  </div>
-                </div>
-                <div id="chart-geocode-quality" class="bar-chart compact"></div>
-              </article>
-
-              <article class="report-card report-card-large">
-                <div class="report-card-header">
-                  <div>
-                    <span>Consistencia</span>
-                    <h3>Campos criticos</h3>
-                  </div>
-                </div>
-                <div id="report-quality-table" class="report-table-wrap"></div>
-              </article>
-
-              <article class="report-card">
-                <div class="report-card-header">
-                  <div>
-                    <span>Atividade</span>
-                    <h3>CNAEs mais frequentes</h3>
-                  </div>
-                </div>
-                <div id="chart-cnae" class="bar-chart compact"></div>
-              </article>
-            </section>
-          </section>
-        </div>
-      </div>
-    </section>
+    
 
     <section id="app-status" class="app-status" aria-live="polite">
       <div class="status-card">
@@ -1075,3 +751,7 @@
   <script src="./app.js?v=20260919-conexao"></script>
 </body>
 </html>
+
+
+
+

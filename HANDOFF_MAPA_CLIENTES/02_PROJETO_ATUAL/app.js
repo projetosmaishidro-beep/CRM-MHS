@@ -453,9 +453,6 @@
       "connection-sign-out",
       "test-connection",
       "clear-connection",
-      "maintenance-access",
-      "maintenance-label",
-      "open-report",
       "result-count",
       "result-pill",
       "data-caption",
@@ -472,67 +469,7 @@
       "region-title",
       "region-subtitle",
       "modal-backdrop",
-      "maintenance-panel",
-      "close-maintenance",
-      "maintenance-title",
-      "maintenance-subtitle",
-      "maintenance-login-view",
-      "maintenance-login-form",
-      "maintenance-email",
-      "maintenance-password",
-      "maintenance-login-error",
-      "maintenance-login-submit",
-      "maintenance-session-view",
-      "maintenance-profile-initials",
-      "maintenance-profile-name",
-      "maintenance-profile-role",
-      "maintenance-new-client",
-      "maintenance-routes",
-      "maintenance-sign-out",
-      "maintenance-activity-count",
-      "maintenance-activity-list",
-      "maintenance-route-view",
-      "maintenance-route-form",
-      "maintenance-route-back",
-      "maintenance-route-title",
-      "maintenance-route-date",
-      "maintenance-route-notes",
-      "maintenance-route-count",
-      "maintenance-route-pick",
-      "maintenance-route-stop-list",
-      "maintenance-route-error",
-      "maintenance-route-submit",
-      "maintenance-routes-saved-count",
-      "maintenance-routes-saved-list",
-      "maintenance-client-view",
-      "maintenance-client-form",
-      "maintenance-client-back",
-      "maintenance-client-form-title",
-      "maintenance-client-form-note",
-      "maintenance-client-fields",
-      "maintenance-client-name",
-      "maintenance-client-legal-name",
-      "maintenance-client-cnpj",
-      "maintenance-client-contact",
-      "maintenance-client-phone",
-      "maintenance-client-whatsapp",
-      "maintenance-client-email",
-      "maintenance-client-uf",
-      "maintenance-client-city",
-      "maintenance-client-district",
-      "maintenance-client-cep",
-      "maintenance-client-street",
-      "maintenance-client-notes",
-      "maintenance-location-card",
-      "maintenance-location-title",
-      "maintenance-location-coordinates",
-      "maintenance-location-address",
-      "maintenance-location-attribution",
-      "maintenance-location-privacy",
-      "maintenance-refresh-address",
-      "maintenance-pick-location",
-      "maintenance-client-error",
-      "maintenance-client-submit",
+      
       "location-picker-bar",
       "use-device-location",
       "cancel-location-picker",
@@ -585,53 +522,7 @@
       "call-client",
       "open-maps-client",
       "copy-client",
-      "report-panel",
       "close-report",
-      "report-context",
-      "report-scope-label",
-      "report-scope-note",
-      "report-select-visible-area",
-      "report-fit-area",
-      "report-clear-area",
-      "report-export-filtered",
-      "report-export-area",
-      "report-export-hotspots",
-      "report-tabs",
-      "report-total-value",
-      "report-total-note",
-      "report-coverage-value",
-      "report-coverage-note",
-      "report-active-value",
-      "report-active-note",
-      "report-unmapped-value",
-      "report-unmapped-note",
-      "report-cities-value",
-      "report-cities-note",
-      "report-states-value",
-      "report-states-note",
-      "report-top-city-value",
-      "report-top-city-note",
-      "report-shared-value",
-      "report-shared-note",
-      "report-empty",
-      "report-top-caption",
-      "chart-top-cities",
-      "chart-status",
-      "chart-uf",
-      "chart-coordinate-groups",
-      "report-density-list",
-      "report-section-overview",
-      "report-section-territory",
-      "report-section-quality",
-      "report-district-caption",
-      "chart-top-districts",
-      "chart-top-streets",
-      "report-ranking-table",
-      "report-coverage-table",
-      "report-insights",
-      "chart-geocode-quality",
-      "report-quality-table",
-      "chart-cnae",
       "app-status",
       "status-spinner",
       "status-title",
@@ -1656,7 +1547,7 @@
       const { error } = await state.supabaseClient.auth.signOut();
       if (error) throw error;
       state.session = null;
-      state.operator = null;
+      state.operator = state.session?.user || null;
       state.maintenanceActivity = [];
       renderMaintenanceSession();
       showToast("Sessao de manutencao encerrada.");
@@ -1691,7 +1582,7 @@
     }
 
     state.session = session || null;
-    state.operator = null;
+    state.operator = state.session?.user || null;
     state.maintenanceActivity = [];
     state.visitRoutes = [];
     state.visitRoutesError = null;
@@ -1700,8 +1591,8 @@
     if (state.session?.user?.id) {
       const { data, error } = await state.supabaseClient
         .schema(CONFIG.SCHEMA_NAME)
-        .from("operadores")
-        .select("usuario_id, nome, papel, ativo")
+        .from("vw_equipe")
+        .select("usuario_id, nome, cargo, ativo")
         .eq("usuario_id", state.session.user.id)
         .eq("ativo", true)
         .maybeSingle();
@@ -1709,7 +1600,7 @@
       if (error) {
         console.error("[Mapa de clientes] Falha ao validar operador:", error);
       } else if (data) {
-        state.operator = data;
+        state.operator = { ...data, papel: data.cargo };
         await Promise.all([loadMaintenanceActivity(), loadVisitRoutes()]);
       }
     }
@@ -4014,8 +3905,8 @@
       const { data, error } = await state.supabaseClient.auth.getSession();
       if (error) throw error;
       state.session = data?.session || null;
-      state.operator = null;
-      dom.maintenanceAccess.classList.add("is-hidden");
+      state.operator = state.session?.user || null;
+      if (state.session?.user?.email !== "comercial3@maisintegradora.com") { dom.connectionAccess.classList.add("is-hidden"); dom.maintenanceAccess.classList.add("is-hidden"); } else { dom.connectionAccess.classList.remove("is-hidden"); dom.maintenanceAccess.classList.remove("is-hidden"); }
       dom.fieldMarkerLegend.classList.add("is-hidden");
       if (!state.session) {
         showSetupStatus(
@@ -7473,3 +7364,8 @@
     }
   }
 })();
+
+
+
+
+
