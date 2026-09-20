@@ -1119,7 +1119,7 @@ window.UI = (() => {
     const client = window.AuthClient;
     if (!client) return false;
     try {
-      const { error } = await client.schema("api").from("vw_despesas_eventos").delete().eq("despesa_id", id);
+      const { error } = await client.schema("api").rpc("deletar_despesa_evento", { p_despesa_id: id });
       if (error) throw error;
       return true;
     } catch (err) {
@@ -1141,7 +1141,7 @@ window.UI = (() => {
       
       if (Object.keys(updateData).length === 0) return true;
 
-      const { error } = await client.schema("api").from("vw_despesas_eventos").update(updateData).eq("despesa_id", id);
+      const { error } = await client.schema("api").rpc("atualizar_despesa_evento", { p_despesa_id: id, p_categoria: updateData.categoria || null, p_valor: updateData.valor || null, p_estabelecimento: updateData.estabelecimento || null, p_descricao: updateData.descricao || null, p_data_despesa: updateData.data_despesa || null, p_centro_custo: updateData.centro_custo || null });
       if (error) throw error;
       return true;
     } catch (err) {
@@ -1188,4 +1188,5 @@ window.UI = (() => {
     uploadToStorage, updateRemoteEventMedia
   };
 })();
+
 
