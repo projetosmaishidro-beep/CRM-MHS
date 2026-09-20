@@ -1,7 +1,7 @@
-begin;
+Ôªøbegin;
 
 -- ==============================================================================
--- 1. PERMISS’ES DA TABELA DE EVENTOS
+-- 1. PERMISS√ïES DA TABELA DE EVENTOS
 -- ==============================================================================
 grant select, insert, update, delete on table crm.eventos to authenticated, service_role;
 grant usage on schema crm to authenticated, service_role;
@@ -19,7 +19,7 @@ create policy eventos_atualiza on crm.eventos for update to authenticated using 
 drop policy if exists eventos_deleta on crm.eventos;
 create policy eventos_deleta on crm.eventos for delete to authenticated using (auth.uid() is not null);
 
--- Permissıes para despesas
+-- Permiss√µes para despesas
 grant select, insert, update, delete on table crm.despesas to authenticated, service_role;
 alter table crm.despesas enable row level security;
 drop policy if exists despesas_le_todos on crm.despesas;
@@ -31,7 +31,7 @@ create policy despesas_atualiza on crm.despesas for update to authenticated usin
 drop policy if exists despesas_deleta on crm.despesas;
 create policy despesas_deleta on crm.despesas for delete to authenticated using (auth.uid() is not null);
 
--- E n„o esquecer de garantir acesso ‡s views
+-- E n√£o esquecer de garantir acesso √†s views
 grant select, insert, update, delete on api.vw_eventos to authenticated, service_role;
 grant select, insert, update, delete on api.vw_despesas_eventos to authenticated, service_role;
 
@@ -131,7 +131,7 @@ create or replace function api.atualizar_despesa_evento(
 returns void
 language plpgsql
 security invoker
-as $
+as $$
 begin
     update crm.despesas
     set
@@ -141,17 +141,17 @@ begin
         ocorrido_em = coalesce(p_data_despesa, ocorrido_em)
     where despesa_id = p_despesa_id;
 end;
-$;
+$$;
 
 create or replace function api.deletar_despesa_evento(p_despesa_id uuid)
 returns void
 language plpgsql
 security invoker
-as $
+as $$
 begin
     delete from crm.despesas where despesa_id = p_despesa_id;
 end;
-$;
+$$;
 
 commit;
 
