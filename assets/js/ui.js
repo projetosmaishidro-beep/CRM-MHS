@@ -1265,18 +1265,18 @@
   }
 
   const createSupabaseClientRecord = async (payload) => mapRemoteClient(await operationalRpc("cadastrar_cliente", { p_dados: payload }));
-  const updateSupabaseClientRecord = async (id, payload) => mapRemoteClient(await operationalRpc("atualizar_comunicacao", { p_cliente_id: id, p_dados: payload }));
+  const updateSupabaseClientRecord = async (id, payload) => await operationalRpc("atualizar_comunicacao", { p_cliente_id: id, p_dados: payload });
   const archiveSupabaseClientRecord = async (id) => operationalRpc("arquivar_cliente", { p_cliente_id: id });
   const createSupabaseVisit = async (payload) => visitFromApi(await operationalRpc("criar_visita", { p_dados: payload }));
   const createSupabaseNeed = async (payload) => operationalRpc("criar_necessidade", { p_dados: payload });
   const createSupabaseTrip = async (payload) => tripFromApi(await operationalRpc("criar_viagem", { p_titulo: payload.name, p_inicio: payload.startDate, p_fim: payload.endDate, p_observacao: payload.objective, p_participantes: payload.participants || [], p_clientes: payload.clients || [] }));
-  const updateSupabaseTrip = async (id, payload) => tripFromApi(await operationalRpc("atualizar_viagem", { p_viagem_id: id, p_dados: payload }));
+  const updateSupabaseTrip = async (id, payload) => await operationalRpc("atualizar_viagem", { p_viagem_id: id, p_dados: payload });
   const deleteSupabaseTrip = async (id) => operationalRpc("excluir_viagem", { p_viagem_id: id });
   const createSupabaseExpense = async (payload) => expenseFromApi(await operationalRpc("criar_despesa", { p_dados: payload }));
-  const updateSupabaseExpense = async (id, payload) => expenseFromApi(await operationalRpc("atualizar_despesa", { p_despesa_id: id, p_dados: payload }));
+  const updateSupabaseExpense = async (id, payload) => await operationalRpc("atualizar_despesa", { p_despesa_id: id, p_dados: payload });
   const deleteSupabaseExpense = async (id) => operationalRpc("excluir_despesa", { p_despesa_id: id });
   const createSupabaseEvent = async (payload) => eventFromApi(await operationalRpc("criar_evento", { p_nome: payload.name, p_local: payload.location || null, p_data_inicio: payload.startDate, p_data_fim: payload.endDate || payload.startDate, p_tipo_participacao: payload.role === "Expositor" ? "EXPOSITOR" : "PARTICIPANTE", p_notas: payload.notes || null }));
-  const updateSupabaseEvent = async (id, payload) => eventFromApi(await operationalRpc("atualizar_evento", { p_evento_id: id, p_dados: payload }));
+  const updateSupabaseEvent = async (id, payload) => await operationalRpc("atualizar_evento", { p_evento_id: id, p_dados: payload });
   const deleteSupabaseEvent = async (id) => operationalRpc("excluir_evento", { p_evento_id: id });
 
   async function uploadPrivateFile(path, file) {
