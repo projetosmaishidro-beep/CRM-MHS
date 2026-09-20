@@ -31,6 +31,7 @@ window.UI = (() => {
       receipt: '<path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
       file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
       arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+      arrow_left: '<path d="M19 12H5M11 18l-6-6 6-6"/>',
       bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"/><path d="M10 19h4"/>',
       rotate: '<path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M18 9a7 7 0 0 0-12-3L4 8M6 15a7 7 0 0 0 12 3l2-2"/>',
       database: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12v7c0 1.66 3.58 3 8 3s8-1.34 8-3v-7"/>',
@@ -60,6 +61,9 @@ window.UI = (() => {
     const page = document.body.dataset.page || "";
     const title = document.body.dataset.title || "Central Comercial";
     const activePage = ({ client: "clients", "new-visit": "visits", trip: "trips", user: "users", event: "events" })[page] || page;
+    const isSubpage = page !== activePage;
+    const parentNav = nav.find(i => i.id === activePage) || nav[0];
+
     const app = document.querySelector("#app");
     const authUser = window.AuthUser || {};
     const profileInitials = authUser.initials || "MA";
@@ -72,7 +76,10 @@ window.UI = (() => {
         <div class="workspace">
           <header class="topbar">
             <div class="topbar-brand-area">
-              <button class="icon-btn mobile-menu" id="mobileMenuBtn" aria-label="Abrir menu">${icon("menu")}</button>
+              ${isSubpage
+                ? `<a class="icon-btn mobile-menu" href="${pageLink(parentNav.href)}" aria-label="Voltar">${icon("arrow_left")}</a>`
+                : `<button class="icon-btn mobile-menu" id="mobileMenuBtn" aria-label="Abrir menu">${icon("menu")}</button>`
+              }
               <a class="topbar-logo" href="${pageLink("index.html")}" aria-label="Mais Hidro Soluções - início">
                 <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro Soluções" loading="eager">
               </a>
