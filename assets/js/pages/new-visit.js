@@ -1,4 +1,4 @@
-﻿window.PageModules = window.PageModules || {};
+window.PageModules = window.PageModules || {};
 window.PageModules["new-visit"] = {
   init() {
     const state = Store.getState();
@@ -225,7 +225,7 @@ window.PageModules["new-visit"] = {
         if (!createdVisit) throw new Error("Falha ao registrar visita remota.");
 
         UI.toast("Visita salva com sucesso!");
-        setTimeout(() => location.href = UI.pageLink(pages/cliente.html?id= + clientId), 350);
+        setTimeout(() => location.href = UI.pageLink("pages/cliente.html?id=" + clientId), 350);
       } catch (err) {
         console.error(err);
         UI.toast("Erro ao salvar visita no servidor.", "error");

@@ -1,4 +1,4 @@
-﻿window.PageModules = window.PageModules || {};
+window.PageModules = window.PageModules || {};
 window.PageModules.trip = {
   init() {
     const id = new URLSearchParams(location.search).get("id");
@@ -151,7 +151,7 @@ window.PageModules.trip = {
           const added = await UI.filesToAttachments(event.target.files);
           try {
              await UI.updateSupabaseTrip(trip.id, { attachments: [...(trip.attachments || []), ...added] });
-             UI.toast(` anexo(s) adicionado(s) à viagem.);
+             UI.toast(`${added.length} anexo(s) adicionado(s) à viagem.`);
              setTimeout(() => location.reload(), 350);
           } catch(err) {
              console.error(err);

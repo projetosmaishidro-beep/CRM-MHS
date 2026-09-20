@@ -1,4 +1,4 @@
-﻿window.PageModules = window.PageModules || {};
+window.PageModules = window.PageModules || {};
 window.PageModules.finance = {
   init() {
     const params = new URLSearchParams(location.search);
@@ -137,11 +137,6 @@ window.PageModules.finance = {
           UI.toast("Erro ao salvar despesa.", "error");
           if (btn) btn.disabled = false;
         }
-      });
-        UI.toast("Despesa registrada.");
-        attachment = null;
-        UI.closeDialog("expenseDialog");
-        render();
       });
     };
 
