@@ -4708,6 +4708,7 @@ select:focus-visible {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   height: 42px;
   padding: 0 16px;
@@ -4719,6 +4720,18 @@ select:focus-visible {
   text-decoration: none;
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn.icon-only {
+  width: 42px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.btn.icon-only svg {
+  width: 20px;
+  height: 20px;
+  margin: 0;
 }
 
 .btn:active {
