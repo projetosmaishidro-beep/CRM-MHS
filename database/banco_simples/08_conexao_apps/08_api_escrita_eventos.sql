@@ -38,6 +38,7 @@ grant select, insert, update, delete on api.vw_despesas_eventos to authenticated
 -- ==============================================================================
 -- 2. CRIAR EVENTO
 -- ==============================================================================
+drop function if exists api.criar_evento cascade;
 create or replace function api.criar_evento(
     p_nome text,
     p_local text,
@@ -68,6 +69,7 @@ $$;
 -- ==============================================================================
 -- 3. CRIAR DESPESA DE EVENTO
 -- ==============================================================================
+drop function if exists api.criar_despesa_evento cascade;
 create or replace function api.criar_despesa_evento(
     p_evento_id uuid,
     p_categoria text,
@@ -96,6 +98,7 @@ $$;
 -- ==============================================================================
 -- 4. ATUALIZAR EVENTO MIDIA
 -- ==============================================================================
+drop function if exists api.atualizar_evento_midia cascade;
 create or replace function api.atualizar_evento_midia(
     p_evento_id uuid,
     p_links jsonb,
@@ -119,6 +122,7 @@ $$;
 -- ==============================================================================
 -- 5. ATUALIZAR E DELETAR DESPESAS
 -- ==============================================================================
+drop function if exists api.atualizar_despesa_evento cascade;
 create or replace function api.atualizar_despesa_evento(
     p_despesa_id uuid,
     p_categoria text,
@@ -143,6 +147,7 @@ begin
 end;
 $$;
 
+drop function if exists api.deletar_despesa_evento cascade;
 create or replace function api.deletar_despesa_evento(p_despesa_id uuid)
 returns void
 language plpgsql
