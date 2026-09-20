@@ -92,7 +92,7 @@ window.UI = (() => {
             <div class="topbar-actions">
               <button class="icon-btn" id="globalSearchBtn" aria-label="Buscar">${icon("search")}</button>
               <button class="icon-btn hide-mobile" aria-label="Notificações">${icon("bell")}</button>
-              <button class="avatar-btn" id="profileMenuBtn" aria-label="Menu do usuário">${profileInitials}</button>
+              <button class="avatar-btn" id="profileMenuBtn" aria-label="Menu do usuário" style="padding: 0; overflow: hidden; border: none; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></button>
             </div>
           </header>
 
@@ -132,7 +132,7 @@ window.UI = (() => {
         </dialog>
 
         <div class="profile-popover" id="profilePopover">
-          <div class="profile-chip large"><span class="avatar">${profileInitials}</span><span><strong>${profileName}</strong><small>${profileRole}</small></span></div>
+          <div class="profile-chip large"><span class="avatar" style="padding: 0; overflow: hidden; border: 1px solid #e2e8f0; background: #fff;"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></span><span><strong>${profileName}</strong><small>${profileRole}</small></span></div>
           <a href="${pageLink("pages/usuarios.html")}">${icon("user")} Meu perfil</a>
           ${authUser.isAdmin ? `<button id="connectionBtn">${icon("database")} Configurações do banco</button>` : ""}
           <button id="resetDemoBtn">${icon("rotate")} Restaurar demo</button>
