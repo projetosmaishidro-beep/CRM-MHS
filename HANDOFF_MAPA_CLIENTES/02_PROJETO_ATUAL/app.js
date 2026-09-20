@@ -393,9 +393,36 @@
     syncViewButtons();
     syncBaseButtons();
     startUpdateChecks();
+    initLegendAlternation();
 
     if (!state.map) return;
     await connectAndLoad();
+  }
+
+  function initLegendAlternation() {
+    const legend = dom.fieldMarkerLegend;
+    const pinBtn = dom.newClientPin;
+    if (!legend || !pinBtn) return;
+
+    // As instruções aparecem 1 vez brevemente (4.5s) para orientar o usuário e somem suavemente
+    legend.classList.remove("is-hidden", "is-faded");
+
+    let timer = setTimeout(() => {
+      legend.classList.add("is-faded");
+    }, 4500);
+
+    // Alternância inteligente: clicar no botão do pino re-exibe/oculta a legenda por 4s
+    pinBtn.addEventListener("click", () => {
+      clearTimeout(timer);
+      if (legend.classList.contains("is-faded")) {
+        legend.classList.remove("is-faded");
+        timer = setTimeout(() => {
+          legend.classList.add("is-faded");
+        }, 4000);
+      } else {
+        legend.classList.add("is-faded");
+      }
+    });
   }
 
   function cacheDom() {

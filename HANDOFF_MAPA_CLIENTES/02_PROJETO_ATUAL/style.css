@@ -43,14 +43,14 @@
    ========================================================================== */
 .new-client-pin {
   position: absolute;
-  bottom: calc(24px + var(--safe-bottom));
-  left: calc(24px + var(--safe-left));
+  bottom: calc(20px + var(--safe-bottom));
+  left: calc(20px + var(--safe-left));
   z-index: 800;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 58px;
-  height: 58px;
+  width: 54px;
+  height: 54px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -73,9 +73,9 @@
 
 .pin-cursor-body {
   position: relative;
-  width: 48px;
-  height: 56px;
-  filter: drop-shadow(0 8px 16px rgba(0, 114, 255, 0.3));
+  width: 44px;
+  height: 52px;
+  filter: drop-shadow(0 8px 16px rgba(0, 114, 255, 0.35));
   animation: pin-float 3.2s ease-in-out infinite;
   transition: transform 0.2s ease;
 }
@@ -114,25 +114,35 @@
   }
 }
 
+/* Legenda com alternância e auto-fade */
 .field-marker-legend {
   position: absolute;
-  bottom: calc(90px + var(--safe-bottom));
-  left: calc(24px + var(--safe-left));
-  z-index: 790;
-  max-width: 280px;
+  bottom: calc(84px + var(--safe-bottom));
+  left: calc(20px + var(--safe-left));
+  z-index: 850;
+  max-width: 270px;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  font-size: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  font-size: 11.5px;
   color: var(--text-dark, #1c1c1e);
   display: flex;
   flex-direction: column;
   gap: 6px;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: auto;
+}
+
+.field-marker-legend.is-faded {
+  opacity: 0 !important;
+  transform: translateY(10px) !important;
+  pointer-events: none !important;
 }
 
 .field-marker-legend strong {
@@ -165,6 +175,109 @@
   color: #8e8e93;
   line-height: 1.3;
   margin-top: 2px;
+}
+
+/* ==========================================================================
+   RODAPÉ HUD: LEITURA DA REGIÃO (CIDADE/ESTADO - ALINHAMENTO CENTRALIZADO)
+   ========================================================================== */
+.region-readout {
+  position: absolute;
+  bottom: calc(20px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 740;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.1);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  max-width: min(85vw, 420px);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.region-readout #region-level {
+  display: inline-grid;
+  place-items: center;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--accent);
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.region-readout #region-title {
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--text-dark);
+}
+
+.region-readout #region-subtitle {
+  font-size: 11px;
+  color: var(--text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   CONTROLES DO MAPA (ZOOM & FIT BRAZIL - CANTO INFERIOR DIREITO)
+   ========================================================================== */
+.map-controls {
+  position: absolute;
+  bottom: calc(20px + var(--safe-bottom));
+  right: calc(20px + var(--safe-right));
+  z-index: 750;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.map-control {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-dark);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.map-control:hover {
+  background: #ffffff;
+  transform: scale(1.05);
+}
+
+.map-control:active {
+  transform: scale(0.94);
+}
+
+.map-control svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.control-divider {
+  display: none;
 }
 
 html,
