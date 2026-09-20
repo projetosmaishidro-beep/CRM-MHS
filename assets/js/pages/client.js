@@ -37,7 +37,7 @@ window.PageModules.client = {
           <div class="profile-actions">
             <a class="btn btn-primary" href="${UI.pageLink(`pages/nova-visita.html?client=${client.id}`)}">${UI.icon("plus")} Registrar visita</a>
             <button class="btn btn-need" id="openNeedBtn">${UI.icon("plus", 18)} Necessidade</button>
-            <button class="btn btn-ghost" id="editLocationBtn">${UI.icon("pin")} Localização</button>
+            <a class="btn btn-ghost" href="${UI.pageLink('HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html')}" target="_blank" rel="noopener">${UI.icon("pin")} Abrir no mapa</a>
             <button class="btn btn-secondary" id="clientHistoryPdfBtn">${UI.icon("file")} PDF de visitas</button>
           </div>
         </section>
@@ -166,14 +166,7 @@ window.PageModules.client = {
           </div>
         </section>
 
-        <dialog id="locationDialog" class="form-dialog">
-          <form method="dialog" id="locationForm">
-            <div class="dialog-head"><div><span class="eyebrow">Localização</span><h2>Ajustar ponto manualmente</h2></div><button class="icon-btn" value="cancel">${UI.icon("x")}</button></div>
-            <div class="manual-map large-map has-pin" id="clientManualMap" style="--pin-x:50%;--pin-y:50%"><div class="map-grid"></div><span class="manual-pin">${UI.icon("pin", 20)}</span></div>
-            <div class="coord-row"><label class="field"><span>Latitude</span><input id="clientLat" name="lat" value="${client.lat || ""}" readonly></label><label class="field"><span>Longitude</span><input id="clientLng" name="lng" value="${client.lng || ""}" readonly></label></div>
-            <div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Salvar localização</button></div>
-          </form>
-        </dialog>
+
 
         <dialog id="needDialog" class="form-dialog">
           <form method="dialog" id="needForm" class="need-dialog-form">
@@ -202,20 +195,7 @@ window.PageModules.client = {
         render();
       });
 
-      UI.$("#editLocationBtn")?.addEventListener("click", () => {
-        UI.openDialog("locationDialog");
-        UI.setupManualMap(UI.$("#clientManualMap"), UI.$("#clientLat"), UI.$("#clientLng"));
-      });
 
-      UI.$("#locationForm")?.addEventListener("submit", (e) => {
-        if (e.submitter?.value === "cancel") return;
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        Store.updateClient(client.id, { lat: Number(fd.get("lat")), lng: Number(fd.get("lng")) });
-        UI.toast("Localização atualizada.");
-        UI.closeDialog("locationDialog");
-        render();
-      });
 
       const track = UI.$("#clientMediaCarousel .media-track");
       const scrollCarousel = (direction) => {
