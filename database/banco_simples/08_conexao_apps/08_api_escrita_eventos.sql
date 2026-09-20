@@ -160,3 +160,25 @@ $$;
 
 commit;
 
+
+
+drop function if exists api.atualizar_evento cascade;
+create or replace function api.atualizar_evento(p_evento_id uuid, p_dados jsonb)
+returns void
+language plpgsql
+security invoker
+as $$
+begin
+    update crm.eventos
+    set
+        nome = coalesce(p_dados->>'name', nome),
+        local = coalesce(p_dados->>'location', local),
+        status = coalesce(upper(p_dados->>'status'), status),
+        notas_estrategicas = coalesce(p_dados->>'strategicNotes', notas_estrategicas),
+        links = coalesce(p_dados->'links', links),
+        participantes = coalesce(p_dados->'participantIds', participantes),
+        contatos = coalesce(p_dados->'contacts', contatos),
+        atualizado_em = now()
+    where evento_id = p_evento_id;
+end;
+$$;
