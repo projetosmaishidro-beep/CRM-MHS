@@ -1,11 +1,11 @@
-(() => {
+﻿(() => {
   "use strict";
 
   /*
    * ============================================================
-   * CONFIGURAÇÃO
+   * CONFIGURAÃ‡ÃƒO
    * ============================================================
-   * A URL e a chave pública são informadas pelo painel Conexão.
+   * A URL e a chave pÃºblica sÃ£o informadas pelo painel ConexÃ£o.
    * O mapa consulta somente api.vw_mapa_clientes no banco unificado.
    */
   const RUNTIME_CONFIG = window.MAPA_CLIENTES_CONFIG || {};
@@ -254,28 +254,28 @@
 
   const PRECISION_META = Object.freeze({
     CONFIRMADA_CAMPO: {
-      title: "Localização confirmada",
+      title: "LocalizaÃ§Ã£o confirmada",
       text: "Ponto revisado e confirmado manualmente pela equipe de campo."
     },
     PRECISO_LOGRADOURO: {
-      title: "Localização por logradouro",
-      text: "Coordenada refinada a partir das informações de endereço disponíveis."
+      title: "LocalizaÃ§Ã£o por logradouro",
+      text: "Coordenada refinada a partir das informaÃ§Ãµes de endereÃ§o disponÃ­veis."
     },
     APROX_CEP_BAIRRO: {
-      title: "Localização aproximada",
-      text: "Posição estimada usando CEP, bairro/localidade e município."
+      title: "LocalizaÃ§Ã£o aproximada",
+      text: "PosiÃ§Ã£o estimada usando CEP, bairro/localidade e municÃ­pio."
     },
     APROX_CEP: {
-      title: "Localização aproximada por CEP",
-      text: "A posição representa a área do CEP e pode não coincidir com o imóvel."
+      title: "LocalizaÃ§Ã£o aproximada por CEP",
+      text: "A posiÃ§Ã£o representa a Ã¡rea do CEP e pode nÃ£o coincidir com o imÃ³vel."
     },
     APROX_SEDE_MUNICIPIO: {
-      title: "Localização aproximada",
-      text: "Este ponto usa a sede do município como referência. Não representa a posição exata do cliente."
+      title: "LocalizaÃ§Ã£o aproximada",
+      text: "Este ponto usa a sede do municÃ­pio como referÃªncia. NÃ£o representa a posiÃ§Ã£o exata do cliente."
     },
     SEM_STATUS: {
-      title: "Precisão não classificada",
-      text: "A base não informou o nível de precisão desta coordenada."
+      title: "PrecisÃ£o nÃ£o classificada",
+      text: "A base nÃ£o informou o nÃ­vel de precisÃ£o desta coordenada."
     }
   });
 
@@ -367,7 +367,7 @@
 
   async function init() {
     cacheDom();
-    // Ferramentas de manutenção restauradas a pedido do usuário
+    // Ferramentas de manutenÃ§Ã£o restauradas a pedido do usuÃ¡rio
 
     let isAdmin = false;
     try {
@@ -404,14 +404,14 @@
     const pinBtn = dom.newClientPin;
     if (!legend || !pinBtn) return;
 
-    // As instruções aparecem 1 vez brevemente (4.5s) para orientar o usuário e somem suavemente
+    // As instruÃ§Ãµes aparecem 1 vez brevemente (4.5s) para orientar o usuÃ¡rio e somem suavemente
     legend.classList.remove("is-hidden", "is-faded");
 
     let timer = setTimeout(() => {
       legend.classList.add("is-faded");
     }, 4500);
 
-    // Alternância inteligente: clicar no botão do pino re-exibe/oculta a legenda por 4s
+    // AlternÃ¢ncia inteligente: clicar no botÃ£o do pino re-exibe/oculta a legenda por 4s
     pinBtn.addEventListener("click", () => {
       clearTimeout(timer);
       if (legend.classList.contains("is-faded")) {
@@ -534,7 +534,7 @@
     for (const id of ids) {
       const element = document.getElementById(id);
       if (!element) {
-        throw new Error(`Elemento obrigatório não encontrado: #${id}`);
+        throw new Error(`Elemento obrigatÃ³rio nÃ£o encontrado: #${id}`);
       }
       dom[toCamelCase(id)] = element;
     }
@@ -543,8 +543,8 @@
   function initMap() {
     if (!window.L) {
       showFatalStatus(
-        "Mapa indisponível",
-        "A biblioteca Leaflet não foi carregada. Verifique sua conexão com a internet."
+        "Mapa indisponÃ­vel",
+        "A biblioteca Leaflet nÃ£o foi carregada. Verifique sua conexÃ£o com a internet."
       );
       return;
     }
@@ -641,7 +641,7 @@
 
     if (!heatAvailable) {
       dom.viewHeat.disabled = true;
-      dom.viewHeat.title = "Visualização de calor indisponível";
+      dom.viewHeat.title = "VisualizaÃ§Ã£o de calor indisponÃ­vel";
       if (state.viewMode === "heat") state.viewMode = "markers";
       syncViewButtons();
     }
@@ -745,13 +745,13 @@
       }
 
       if (cancelled || !drag.moved) {
-        if (!cancelled) showToast("Arraste o 📍 ate o local exato do novo cliente.");
+        if (!cancelled) showToast("Arraste o ðŸ“ ate o local exato do novo cliente.");
         return;
       }
 
       const latlng = getMapLatLngFromPointer(event.clientX, event.clientY);
       if (!latlng || !isPointInBrazil(latlng.lat, latlng.lng)) {
-        showToast("Solte o 📍 dentro do mapa do Brasil.");
+        showToast("Solte o ðŸ“ dentro do mapa do Brasil.");
         return;
       }
 
@@ -1249,8 +1249,8 @@
     dom.connectionKey.value = saved.apiKey || "";
     setConnectionMessage(
       saved.url && saved.apiKey
-        ? "Conexão do banco unificado salva neste navegador. Entre para carregar o mapa."
-        : "Nenhuma conexão preparada neste navegador.",
+        ? "ConexÃ£o do banco unificado salva neste navegador. Entre para carregar o mapa."
+        : "Nenhuma conexÃ£o preparada neste navegador.",
       saved.url && saved.apiKey ? "ready" : "neutral"
     );
     state.connectionOpen = true;
@@ -1277,16 +1277,16 @@
     try {
       parsedUrl = new URL(rawUrl);
     } catch {
-      throw new Error("Informe uma URL válida do projeto Supabase.");
+      throw new Error("Informe uma URL vÃ¡lida do projeto Supabase.");
     }
     if (!/^https?:$/.test(parsedUrl.protocol)) {
-      throw new Error("A URL precisa começar com https:// ou http://.");
+      throw new Error("A URL precisa comeÃ§ar com https:// ou http://.");
     }
     if (!apiKey || apiKey.length < 12) {
-      throw new Error("Informe a chave pública do projeto.");
+      throw new Error("Informe a chave pÃºblica do projeto.");
     }
     if (isRestrictedSupabaseKey(apiKey)) {
-      throw new Error("Use somente uma chave pública publishable ou anon.");
+      throw new Error("Use somente uma chave pÃºblica publishable ou anon.");
     }
     return { url: parsedUrl.href.replace(/\/$/, ""), apiKey };
   }
@@ -1309,10 +1309,10 @@
       const connection = normalizePreparedConnection();
       localStorage.setItem(CONNECTION_STORAGE_KEY, JSON.stringify(connection));
       renderPreparedAuthState();
-      setConnectionMessage("Conexão do banco unificado salva. Entre para carregar o mapa.", "success");
-      showToast("Conexão preparada.");
+      setConnectionMessage("ConexÃ£o do banco unificado salva. Entre para carregar o mapa.", "success");
+      showToast("ConexÃ£o preparada.");
     } catch (error) {
-      setConnectionMessage(error.message || "Não foi possível salvar a conexão.", "error");
+      setConnectionMessage(error.message || "NÃ£o foi possÃ­vel salvar a conexÃ£o.", "error");
     }
   }
 
@@ -1320,25 +1320,25 @@
     let connection;
     try {
       if (location.protocol === "file:") {
-        throw new Error("Abra o mapa por um servidor local (http://localhost), não diretamente pelo arquivo HTML.");
+        throw new Error("Abra o mapa por um servidor local (http://localhost), nÃ£o diretamente pelo arquivo HTML.");
       }
       connection = normalizePreparedConnection();
     } catch (error) {
-      setConnectionMessage(error.message || "Revise a conexão.", "error");
+      setConnectionMessage(error.message || "Revise a conexÃ£o.", "error");
       return;
     }
 
     dom.testConnection.disabled = true;
-    dom.testConnection.textContent = "Testando…";
-      setConnectionMessage("Validando acesso ao banco unificado…", "loading");
+    dom.testConnection.textContent = "Testandoâ€¦";
+      setConnectionMessage("Validando acesso ao banco unificadoâ€¦", "loading");
     try {
       const response = await fetch(`${connection.url}/auth/v1/settings`, {
         headers: { apikey: connection.apiKey }
       });
-      if (!response.ok) throw new Error(`A API respondeu com código ${response.status}.`);
-      setConnectionMessage("Projeto acessível. O mapa usará a view api.vw_mapa_clientes após o login.", "success");
+      if (!response.ok) throw new Error(`A API respondeu com cÃ³digo ${response.status}.`);
+      setConnectionMessage("Projeto acessÃ­vel. O mapa usarÃ¡ a view api.vw_mapa_clientes apÃ³s o login.", "success");
     } catch (error) {
-      setConnectionMessage(error.message || "Não foi possível alcançar o projeto. Confira a URL, a chave e sua internet.", "error");
+      setConnectionMessage(error.message || "NÃ£o foi possÃ­vel alcanÃ§ar o projeto. Confira a URL, a chave e sua internet.", "error");
     } finally {
       dom.testConnection.disabled = false;
       dom.testConnection.textContent = "Testar";
@@ -1350,7 +1350,7 @@
     dom.connectionUrl.value = "";
     dom.connectionKey.value = "";
     renderPreparedAuthState();
-    setConnectionMessage("Conexão removida deste navegador.", "neutral");
+    setConnectionMessage("ConexÃ£o removida deste navegador.", "neutral");
   }
 
   async function getPreparedSupabaseClient(connection = readPreparedConnection()) {
@@ -1369,7 +1369,7 @@
     if (!dom.connectionAuthStatus) return;
     const prepared = readPreparedConnection();
     if (!prepared.url || !prepared.apiKey) {
-      dom.connectionAuthStatus.textContent = "Salve a conexão para entrar.";
+      dom.connectionAuthStatus.textContent = "Salve a conexÃ£o para entrar.";
       dom.connectionSignIn.classList.remove("is-hidden");
       dom.connectionSignOut.classList.add("is-hidden");
       return;
@@ -1379,11 +1379,11 @@
       const { data, error } = await client.auth.getSession();
       if (error) throw error;
       const email = data.session?.user?.email;
-      dom.connectionAuthStatus.textContent = email ? `Sessão ativa: ${email}` : "Sem sessão iniciada.";
+      dom.connectionAuthStatus.textContent = email ? `SessÃ£o ativa: ${email}` : "Sem sessÃ£o iniciada.";
       dom.connectionSignIn.classList.toggle("is-hidden", Boolean(email));
       dom.connectionSignOut.classList.toggle("is-hidden", !email);
     } catch {
-      dom.connectionAuthStatus.textContent = "Não foi possível consultar a sessão.";
+      dom.connectionAuthStatus.textContent = "NÃ£o foi possÃ­vel consultar a sessÃ£o.";
       dom.connectionSignIn.classList.remove("is-hidden");
       dom.connectionSignOut.classList.add("is-hidden");
     }
@@ -1397,16 +1397,16 @@
       if (!email || !password) throw new Error("Informe e-mail e senha para entrar.");
       localStorage.setItem(CONNECTION_STORAGE_KEY, JSON.stringify(connection));
       dom.connectionSignIn.disabled = true;
-      dom.connectionSignIn.textContent = "Entrando…";
+      dom.connectionSignIn.textContent = "Entrandoâ€¦";
       const client = await getPreparedSupabaseClient(connection);
       const { error } = await client.auth.signInWithPassword({ email, password });
       if (error) throw error;
       dom.connectionPassword.value = "";
-      setConnectionMessage("Sessão iniciada. Carregando a carteira no mapa…", "success");
-      showToast("Sessão iniciada. Carregando dados…");
+      setConnectionMessage("SessÃ£o iniciada. Carregando a carteira no mapaâ€¦", "success");
+      showToast("SessÃ£o iniciada. Carregando dadosâ€¦");
       window.setTimeout(() => window.location.reload(), 450);
     } catch (error) {
-      setConnectionMessage(error.message || "Não foi possível iniciar a sessão.", "error");
+      setConnectionMessage(error.message || "NÃ£o foi possÃ­vel iniciar a sessÃ£o.", "error");
     } finally {
       dom.connectionSignIn.disabled = false;
       dom.connectionSignIn.textContent = "Entrar";
@@ -1417,10 +1417,10 @@
     try {
       const client = await getPreparedSupabaseClient();
       if (client) await client.auth.signOut();
-      showToast("Sessão encerrada.");
+      showToast("SessÃ£o encerrada.");
       window.setTimeout(() => window.location.reload(), 300);
     } catch (error) {
-      setConnectionMessage(error.message || "Não foi possível encerrar a sessão.", "error");
+      setConnectionMessage(error.message || "NÃ£o foi possÃ­vel encerrar a sessÃ£o.", "error");
     }
   }
 
@@ -1590,7 +1590,7 @@
 
     if (state.session?.user?.id) {
       const { data, error } = await state.supabaseClient
-        .schema(CONFIG.SCHEMA_NAME)
+        .schema("api")
         .from("vw_equipe")
         .select("usuario_id, nome, cargo, ativo")
         .eq("usuario_id", state.session.user.id)
@@ -1611,10 +1611,7 @@
   function renderMaintenanceSession() {
     if (!dom.maintenanceLoginView) return;
 
-    // Bypass universal a pedido do usuário:
-    state.session = state.session || { user: { email: "comercial@maisintegradora.com" } };
-    state.operator = state.operator || { nome: "Equipe Comercial", papel: "ADMIN" };
-    const authenticated = true;
+    const authenticated = !!state.session && !!state.operator;
     const clientView = authenticated && state.maintenanceView === "client";
     const routeView = authenticated && state.maintenanceView === "route";
     dom.maintenanceLoginView.classList.toggle("is-hidden", authenticated);
@@ -1766,9 +1763,9 @@
 
       const actions = document.createElement("div");
       actions.className = "route-stop-actions";
-      const up = createRouteStopAction("↑", "Mover parada para cima", () => moveRouteStop(index, -1));
-      const down = createRouteStopAction("↓", "Mover parada para baixo", () => moveRouteStop(index, 1));
-      const remove = createRouteStopAction("×", `Remover ${client.displayName} da rota`, () => toggleRouteClient(client));
+      const up = createRouteStopAction("â†‘", "Mover parada para cima", () => moveRouteStop(index, -1));
+      const down = createRouteStopAction("â†“", "Mover parada para baixo", () => moveRouteStop(index, 1));
+      const remove = createRouteStopAction("Ã—", `Remover ${client.displayName} da rota`, () => toggleRouteClient(client));
       up.disabled = index === 0;
       down.disabled = index === clients.length - 1;
       actions.append(up, down, remove);
@@ -1885,7 +1882,7 @@
 
     try {
       const { data: routeData, error: routeError } = await state.supabaseClient
-        .schema(CONFIG.SCHEMA_NAME)
+        .schema("api")
         .rpc("criar_rota_visita", {
           p_titulo: draft.title,
           p_data_planejada: draft.plannedDate || null,
@@ -1897,7 +1894,7 @@
       if (!routeId) throw new Error("A rota nao foi retornada pelo Supabase.");
 
       const { error: stopsError } = await state.supabaseClient
-        .schema(CONFIG.SCHEMA_NAME)
+        .schema("api")
         .rpc("definir_paradas_rota", {
           p_rota_id: routeId,
           p_paradas: clients.map((client) => ({ cliente_id: client.id }))
@@ -1908,14 +1905,14 @@
       state.routeDraft = null;
       state.maintenanceView = "home";
       renderMaintenanceSession();
-      showToast("Rota pré-definida salva com sucesso.");
+      showToast("Rota prÃ©-definida salva com sucesso.");
     } catch (error) {
       console.error("[Mapa de clientes] Falha ao salvar rota:", error);
       setRouteFormError(friendlyRouteError(error));
     } finally {
       dom.maintenanceRouteSubmit.disabled = !canManageClients();
       dom.maintenanceRoutePick.disabled = !canManageClients();
-      dom.maintenanceRouteSubmit.textContent = "Salvar rota pré-definida";
+      dom.maintenanceRouteSubmit.textContent = "Salvar rota prÃ©-definida";
     }
   }
 
@@ -1923,7 +1920,7 @@
     if (!state.supabaseClient || !state.operator) return;
 
     const { data, error } = await state.supabaseClient
-      .schema(CONFIG.SCHEMA_NAME)
+      .schema("api")
       .from("vw_rotas_visitas")
       .select("rota_id, titulo, data_planejada, status, total_paradas, paradas_visitadas, paradas_pendentes, criado_em")
       .order("data_planejada", { ascending: true, nullsFirst: false })
@@ -1957,7 +1954,7 @@
     if (!routes.length) {
       const empty = document.createElement("p");
       empty.className = "route-stop-empty";
-      empty.textContent = "Nenhuma rota pré-definida foi salva ainda.";
+      empty.textContent = "Nenhuma rota prÃ©-definida foi salva ainda.";
       dom.maintenanceRoutesSavedList.appendChild(empty);
       return;
     }
@@ -1974,7 +1971,7 @@
       meta.textContent = [
         date ? `Planejada: ${formatRouteDate(date)}` : "Sem data planejada",
         `${formatNumber(stopCount)} ${stopCount === 1 ? "parada" : "paradas"}`
-      ].join(" • ");
+      ].join(" â€¢ ");
       copy.append(title, meta);
 
       const status = document.createElement("span");
@@ -1993,9 +1990,9 @@
   function friendlyRouteError(error) {
     const message = String(error?.message || error || "");
     if (/relation|function|schema cache|not found/i.test(message)) {
-      return "O módulo de rotas ainda não está no banco. Execute o SQL de rotas e visitas e aguarde alguns segundos.";
+      return "O mÃ³dulo de rotas ainda nÃ£o estÃ¡ no banco. Execute o SQL de rotas e visitas e aguarde alguns segundos.";
     }
-    return message || "Não foi possível salvar a rota.";
+    return message || "NÃ£o foi possÃ­vel salvar a rota.";
   }
 
   function formatRouteDate(value) {
@@ -2009,7 +2006,7 @@
       RASCUNHO: "Rascunho",
       PLANEJADA: "Planejada",
       EM_ANDAMENTO: "Em andamento",
-      CONCLUIDA: "Concluída",
+      CONCLUIDA: "ConcluÃ­da",
       CANCELADA: "Cancelada"
     };
     return labels[cleanValue(value).toUpperCase()] || "Rota";
@@ -2373,7 +2370,7 @@
         if (edgeSuggestion) return edgeSuggestion;
       } catch (edgeError) {
         console.warn(
-          "[Mapa de clientes] Edge Function indisponível para geocodificação; alternando para provedor direto:",
+          "[Mapa de clientes] Edge Function indisponÃ­vel para geocodificaÃ§Ã£o; alternando para provedor direto:",
           edgeError?.message || edgeError
         );
       }
@@ -2405,7 +2402,7 @@
       }
     }
 
-    // Fallback gratuito e de alta precisão via OpenStreetMap (Nominatim)
+    // Fallback gratuito e de alta precisÃ£o via OpenStreetMap (Nominatim)
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${draft.latitude}&lon=${draft.longitude}&addressdetails=1`,
@@ -2437,12 +2434,12 @@
             formattedAddress: cleanValue(data.display_name) || `${logradouro}, ${bairro} - ${cidade}/${uf}`,
             address: addressObj,
             provider: "NOMINATIM",
-            attribution: "© OpenStreetMap contributors"
+            attribution: "Â© OpenStreetMap contributors"
           };
         }
       }
     } catch (nomErr) {
-      console.warn("[Mapa de clientes] Fallback Nominatim indisponível:", nomErr);
+      console.warn("[Mapa de clientes] Fallback Nominatim indisponÃ­vel:", nomErr);
     }
 
     return null;
@@ -2464,7 +2461,7 @@
     }
 
     if (!data?.ok) {
-      throw new Error(cleanValue(data?.error) || "Consulta de endereço indisponível.");
+      throw new Error(cleanValue(data?.error) || "Consulta de endereÃ§o indisponÃ­vel.");
     }
 
     if (!data.address && !data.formattedAddress) return null;
@@ -2677,18 +2674,18 @@
       let response;
       if (mode === "new") {
         response = await state.supabaseClient
-          .schema(CONFIG.SCHEMA_NAME)
+          .schema("api")
           .rpc("cadastrar_cliente", { p_dados: buildNewClientPayload() });
       } else if (mode === "edit") {
         response = await state.supabaseClient
-          .schema(CONFIG.SCHEMA_NAME)
+          .schema("api")
           .rpc("atualizar_comunicacao", {
             p_cliente_id: state.editingClientId,
             p_dados: buildCommunicationPayload()
           });
       } else {
         response = await state.supabaseClient
-          .schema(CONFIG.SCHEMA_NAME)
+          .schema("api")
           .rpc("confirmar_localizacao", {
             p_cliente_id: state.editingClientId,
             p_latitude: state.locationDraft.latitude,
@@ -2785,7 +2782,7 @@
       (client) => !client.hasValidCoordinates
     ).length;
     dom.dataCaption.textContent = invalidCoordinates > 0
-      ? `${formatNumber(state.clients.length)} registros • ${formatNumber(invalidCoordinates)} sem coordenada`
+      ? `${formatNumber(state.clients.length)} registros â€¢ ${formatNumber(invalidCoordinates)} sem coordenada`
       : `${formatNumber(state.clients.length)} registros carregados`;
   }
 
@@ -2841,7 +2838,7 @@
     if (!state.supabaseClient || !state.operator) return;
 
     const { data, error } = await state.supabaseClient
-      .schema(CONFIG.SCHEMA_NAME)
+      .schema("api")
       .from("vw_atividade_clientes")
       .select("evento_id, ocorrido_em, tipo_evento, cliente_id, cliente, municipio, uf, operador")
       .order("ocorrido_em", { ascending: false })
@@ -2880,7 +2877,7 @@
         [activity.municipio, activity.uf].filter(Boolean).join(" - "),
         formatActivityDate(activity.ocorrido_em),
         cleanValue(activity.operador)
-      ].filter(Boolean).join(" • ");
+      ].filter(Boolean).join(" â€¢ ");
       copy.append(title, meta);
 
       const type = document.createElement("span");
@@ -3869,12 +3866,12 @@
     if (state.loading) return;
 
     state.loading = true;
-    showLoadingStatus("Conectando ao Supabase", "Preparando sua base de clientes…");
+    showLoadingStatus("Conectando ao Supabase", "Preparando sua base de clientesâ€¦");
 
     try {
       if (!window.supabase?.createClient) {
         throw new Error(
-          "O cliente oficial do Supabase não foi carregado. Verifique sua conexão com a internet."
+          "O cliente oficial do Supabase nÃ£o foi carregado. Verifique sua conexÃ£o com a internet."
         );
       }
 
@@ -3885,7 +3882,7 @@
       if (!key || !configuredUrl) {
         showSetupStatus(
           "Conecte o banco unificado",
-          "Abra o painel Conexão e informe a URL e a chave pública do novo projeto Supabase."
+          "Abra o painel ConexÃ£o e informe a URL e a chave pÃºblica do novo projeto Supabase."
         );
         return;
       }
@@ -3911,7 +3908,7 @@
       if (!state.session) {
         showSetupStatus(
           "Entre para consultar a carteira",
-          "Abra Conexão, informe o e-mail e a senha de um usuário autorizado e tente novamente."
+          "Abra ConexÃ£o, informe o e-mail e a senha de um usuÃ¡rio autorizado e tente novamente."
         );
         return;
       }
@@ -3937,20 +3934,20 @@
 
       dom.dataCaption.textContent =
         invalidCoordinates > 0
-          ? `${formatNumber(state.clients.length)} registros • ${formatNumber(invalidCoordinates)} sem coordenada`
+          ? `${formatNumber(state.clients.length)} registros â€¢ ${formatNumber(invalidCoordinates)} sem coordenada`
           : `${formatNumber(state.clients.length)} registros carregados`;
 
       hideStatus();
 
       if (invalidCoordinates > 0) {
         showToast(
-          `${formatNumber(invalidCoordinates)} registro(s) sem coordenadas válidas não aparecem no mapa.`
+          `${formatNumber(invalidCoordinates)} registro(s) sem coordenadas vÃ¡lidas nÃ£o aparecem no mapa.`
         );
       }
     } catch (error) {
       console.error("[Mapa de clientes] Falha ao carregar:", error);
       showErrorStatus(
-        "Não foi possível carregar os clientes",
+        "NÃ£o foi possÃ­vel carregar os clientes",
         friendlySupabaseError(error)
       );
     } finally {
@@ -3983,7 +3980,7 @@
 
       if (page >= 50) {
         throw new Error(
-          "A leitura foi interrompida por segurança após 50 páginas. Reduza PAGE_SIZE ou revise a consulta."
+          "A leitura foi interrompida por seguranÃ§a apÃ³s 50 pÃ¡ginas. Reduza PAGE_SIZE ou revise a consulta."
         );
       }
     }
@@ -4382,7 +4379,7 @@
 
     try {
       const { data, error } = await state.supabaseClient
-        .schema(CONFIG.SCHEMA_NAME)
+        .schema("api")
         .rpc("confirmar_localizacao", {
           p_cliente_id: pending.client.id,
           p_latitude: Number(pending.nextLatLng.lat.toFixed(7)),
@@ -4454,7 +4451,7 @@
       cleanValue(address.bairro),
       cleanValue(address.municipio),
       cleanValue(address.uf).toUpperCase()
-    ].filter(Boolean).join(" · ");
+    ].filter(Boolean).join(" Â· ");
     const lines = [
       cleanValue(address.logradouro) ? `Rua: ${cleanValue(address.logradouro)}` : "",
       regionalAddress ? `Endereco: ${regionalAddress}` : "",
@@ -4760,7 +4757,7 @@
     setSelectOptions(
       dom.filterSituacao,
       situacoes,
-      "Todas as situações",
+      "Todas as situaÃ§Ãµes",
       state.filters.situacao
     );
   }
@@ -4801,7 +4798,7 @@
     setSelectOptions(
       dom.filterMunicipio,
       municipios,
-      "Todos os municípios",
+      "Todos os municÃ­pios",
       preferred
     );
 
@@ -6215,7 +6212,7 @@
       location.className = "search-result-location";
       location.textContent = [client.municipio, client.uf]
         .filter(Boolean)
-        .join(" • ");
+        .join(" â€¢ ");
 
       button.append(dot, copy, location);
       button.addEventListener("click", () => selectSearchResult(client));
@@ -6345,8 +6342,8 @@
     const recordLabel = getRecordClassificationLabel(client);
     dom.clientStatus.textContent =
       client.classificacaoRegistro === "BASE_ORIGINAL"
-        ? client.situacao || "Sem situação"
-        : `${client.situacao || "Sem situação"} - ${recordLabel}`;
+        ? client.situacao || "Sem situaÃ§Ã£o"
+        : `${client.situacao || "Sem situaÃ§Ã£o"} - ${recordLabel}`;
     dom.clientStatus.className = `status-badge ${
       isActive ? "" : "is-inactive"
     } ${
@@ -6388,7 +6385,7 @@
     setDetail(
       "phone",
       dom.detailPhone,
-      uniqueSorted(phones).join(" • ")
+      uniqueSorted(phones).join(" â€¢ ")
     );
 
     setDetail("cnae", dom.detailCnae, client.cnae);
@@ -6628,8 +6625,8 @@
         ? client.razaoSocial
         : null,
       client.cnpj ? `CNPJ: ${client.cnpj}` : null,
-      client.situacao ? `Situação: ${client.situacao}` : null,
-      formatAddress(client) ? `Endereço: ${formatAddress(client)}` : null,
+      client.situacao ? `SituaÃ§Ã£o: ${client.situacao}` : null,
+      formatAddress(client) ? `EndereÃ§o: ${formatAddress(client)}` : null,
       [client.telefone, client.telefone1, client.whatsapp].filter(Boolean).length
         ? `Telefone: ${[client.telefone, client.telefone1, client.whatsapp]
             .filter(Boolean)
@@ -6650,7 +6647,7 @@
       showToast("Dados do cliente copiados.");
     } catch (error) {
       console.error("[Mapa de clientes] Falha ao copiar:", error);
-      showToast("Não foi possível copiar automaticamente.");
+      showToast("NÃ£o foi possÃ­vel copiar automaticamente.");
     }
   }
 
@@ -7011,7 +7008,7 @@
         };
       }
     } catch {
-      // Preferências locais são opcionais.
+      // PreferÃªncias locais sÃ£o opcionais.
     }
   }
 
@@ -7037,15 +7034,15 @@
       state.dataSource?.type === "UNIFICADO" &&
       /relation .* does not exist|could not find the table|schema cache|PGRST106/i.test(message)
     ) {
-      return "A Data API ainda não reconhece a view do mapa. Execute 03_recarregar_cache_api.sql e confirme que somente o schema api está exposto.";
+      return "A Data API ainda nÃ£o reconhece a view do mapa. Execute 03_recarregar_cache_api.sql e confirme que somente o schema api estÃ¡ exposto.";
     }
 
     if (/permission denied|row-level security|rls/i.test(message)) {
-      return "O Supabase bloqueou a leitura. Revise o login e a política RLS/SELECT da view api.vw_mapa_clientes.";
+      return "O Supabase bloqueou a leitura. Revise o login e a polÃ­tica RLS/SELECT da view api.vw_mapa_clientes.";
     }
 
     if (/failed to fetch|network/i.test(message)) {
-      return "Falha de rede ao acessar o Supabase. Confira a URL do projeto, a chave pública e sua conexão.";
+      return "Falha de rede ao acessar o Supabase. Confira a URL do projeto, a chave pÃºblica e sua conexÃ£o.";
     }
 
     return message || "Erro inesperado ao consultar o Supabase.";

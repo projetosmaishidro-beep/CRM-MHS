@@ -52,16 +52,45 @@ window.Store = (() => {
   function setRemoteClients(clients, trips = [], users = null) {
     const state = getState();
     state.clients = Array.isArray(clients) ? clients : [];
-    state.visits = [];
     state.trips = Array.isArray(trips) ? trips : [];
-    state.expenses = [];
-    state.activities = [];
     if (Array.isArray(users) && users.length) state.users = users;
     state.remoteSource = {
       active: true,
       syncedAt: new Date().toISOString()
     };
     return setState(state);
+  }
+
+  // O estado local e apenas um cache de renderizacao. Esta funcao sempre recebe
+  // um retrato completo retornado pelo Supabase; nenhum dado de negocio e
+  // inventado ou preservado aqui entre sincronizacoes.
+  function setRemoteSnapshot(snapshot = {}) {
+    const state = getState();
+    ["users", "clients", "trips", "visits", "expenses", "events", "activities"].forEach((key) => {
+      if (Array.isArray(snapshot[key])) state[key] = snapshot[key];
+    });
+    state.remoteSource = {
+      active: true,
+      syncedAt: new Date().toISOString()
+    };
+    return setState(state);
+  }
+
+  function upsert(collection, record) {
+    if (!record?.id || !Array.isArray(getState()[collection])) return getState();
+    return update((state) => {
+      const rows = state[collection];
+      const index = rows.findIndex((item) => item.id === record.id);
+      if (index === -1) rows.unshift(record);
+      else rows[index] = { ...rows[index], ...record };
+    });
+  }
+
+  function remove(collection, id) {
+    return update((state) => {
+      if (!Array.isArray(state[collection])) return;
+      state[collection] = state[collection].filter((item) => item.id !== id);
+    });
   }
 
   function setRemoteUsers(users) {
@@ -181,8 +210,6 @@ window.Store = (() => {
         text: `registrou o evento ${record.name}`,
         targetId: record.id
       });
-      // Persiste no Supabase em background (cache otimista)
-      window.UI?.saveRemoteEvent?.(record);
     });
   }
 
@@ -192,7 +219,6 @@ window.Store = (() => {
       const ev = state.events.find((e) => e.id === eventId);
       if (ev) {
         Object.assign(ev, patch);
-        window.UI?.updateRemoteEvent?.(eventId, patch);
       }
     });
   }
@@ -244,13 +270,6 @@ window.Store = (() => {
         text: `registrou uma despesa em ${refName}`,
         targetId: targetId
       });
-      // Persiste no Supabase em background (cache otimista)
-      window.UI?.saveRemoteExpense?.(record).then(realId => {
-        if (realId && realId !== record.id) {
-          record.id = realId;
-          setState(state);
-        }
-      });
     });
   }
 
@@ -259,7 +278,6 @@ window.Store = (() => {
       const index = state.expenses.findIndex(e => e.id === id);
       if (index !== -1) {
         state.expenses.splice(index, 1);
-        window.UI?.deleteRemoteExpense?.(id);
       }
     });
   }
@@ -322,7 +340,6 @@ window.Store = (() => {
       const exp = state.expenses.find(e => e.id === id);
       if (exp) {
         Object.assign(exp, patch);
-        window.UI?.updateRemoteExpense?.(id, patch);
       }
     });
   }
@@ -340,8 +357,11 @@ window.Store = (() => {
     setState,
     reset,
     setRemoteClients,
+    setRemoteSnapshot,
     setRemoteUsers,
     setRemoteTrips,
+    upsert,
+    remove,
     uid,
     addClient,
     addVisit,

@@ -1,4 +1,4 @@
-window.PageModules = window.PageModules || {};
+﻿window.PageModules = window.PageModules || {};
 window.PageModules.trips = {
   init() {
     const render = () => {
@@ -17,7 +17,7 @@ window.PageModules.trips = {
                 <div class="trip-card-top">
                   <span>${UI.statusBadge(trip.status)}</span>
                   <div style="display:flex; gap:6px; align-items:center;">
-                    <span class="date-chip">${UI.shortDate(trip.startDate)} → ${UI.shortDate(trip.endDate)}</span>
+                    <span class="date-chip">${UI.shortDate(trip.startDate)} â†’ ${UI.shortDate(trip.endDate)}</span>
                     ${window.AuthUser?.isAdmin ? `<button class="mini-trash-btn" data-delete-trip="${trip.id}" aria-label="Excluir viagem" title="Excluir viagem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ""}
                   </div>
                 </div>
@@ -48,14 +48,14 @@ window.PageModules.trips = {
             <div class="trip-form-scroll">
             <div class="form-grid trip-form-grid">
               <label class="field span-2"><span>Nome da viagem</span><input name="name" required placeholder="Ex.: Circuito Cariri"></label>
-              <label class="field"><span>Data de início</span><input name="startDate" type="date" required></label>
+              <label class="field"><span>Data de inÃ­cio</span><input name="startDate" type="date" required></label>
               <label class="field"><span>Data final</span><input name="endDate" type="date" required></label>
               <label class="field span-2"><span>Objetivo</span><textarea name="objective" rows="3" required></textarea></label>
-              <fieldset class="field span-2 checklist trip-checklist"><legend>Participantes</legend><p class="checklist-hint">Selecione quem participa desta operação.</p>${state.users.map(u => `<label><input type="checkbox" name="participant" value="${u.id}"><span class="avatar mini">${u.initials}</span><span class="checklist-name">${u.name}</span></label>`).join("")}</fieldset>
-              <fieldset class="field span-2 checklist trip-checklist"><legend>Clientes planejados</legend><p class="checklist-hint">Marque os clientes que entram no roteiro desta viagem.</p>${state.clients.map(c => `<label><input type="checkbox" name="client" value="${c.id}"><span class="checklist-name">${c.name}</span><small>${c.city || "Cidade não informada"}</small></label>`).join("")}</fieldset>
+              <fieldset class="field span-2 checklist trip-checklist"><legend>Participantes</legend><p class="checklist-hint">Selecione quem participa desta operaÃ§Ã£o.</p>${state.users.map(u => `<label><input type="checkbox" name="participant" value="${u.id}"><span class="avatar mini">${u.initials}</span><span class="checklist-name">${u.name}</span></label>`).join("")}</fieldset>
+              <fieldset class="field span-2 checklist trip-checklist"><legend>Clientes planejados</legend><p class="checklist-hint">Marque os clientes que entram no roteiro desta viagem.</p>${state.clients.map(c => `<label><input type="checkbox" name="client" value="${c.id}"><span class="checklist-name">${c.name}</span><small>${c.city || "Cidade nÃ£o informada"}</small></label>`).join("")}</fieldset>
             </div>
             </div>
-            <div class="dialog-actions trip-dialog-actions"><span class="trip-form-status">${remoteMode ? "A viagem será gravada no banco unificado." : "Modo demonstração: a viagem será gravada somente neste navegador."}</span><div><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">${remoteMode ? "Salvar no banco" : "Criar viagem"}</button></div></div>
+            <div class="dialog-actions trip-dialog-actions"><span class="trip-form-status">${remoteMode ? "A viagem serÃ¡ gravada no banco unificado." : "Modo demonstraÃ§Ã£o: a viagem serÃ¡ gravada somente neste navegador."}</span><div><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">${remoteMode ? "Salvar no banco" : "Criar viagem"}</button></div></div>
           </form>
         </dialog>
       `;
@@ -74,9 +74,9 @@ window.PageModules.trips = {
           e.preventDefault();
           e.stopPropagation();
           const tripId = trashBtn.dataset.deleteTrip;
-          if (confirm("Tem certeza que deseja excluir esta viagem? Esta ação apagará as visitas e despesas associadas e é irreversível.")) {
+          if (confirm("Tem certeza que deseja excluir esta viagem? Esta aÃ§Ã£o apagarÃ¡ as visitas e despesas associadas e Ã© irreversÃ­vel.")) {
             Store.deleteTrip(tripId);
-            UI.toast("Viagem excluída com sucesso.");
+            UI.toast("Viagem excluÃ­da com sucesso.");
             render();
           }
         }
@@ -89,7 +89,7 @@ window.PageModules.trips = {
         const startDate = String(fd.get("startDate") || "");
         const endDate = String(fd.get("endDate") || "");
         if (startDate && endDate && endDate < startDate) {
-          UI.toast("A data final precisa ser posterior à data inicial.", "error");
+          UI.toast("A data final precisa ser posterior Ã  data inicial.", "error");
           return;
         }
         const payload = {
@@ -110,7 +110,7 @@ window.PageModules.trips = {
         const originalLabel = submitButton?.textContent || "Salvar";
         if (submitButton) {
           submitButton.disabled = true;
-          submitButton.textContent = "Salvando…";
+          submitButton.textContent = "Salvandoâ€¦";
         }
         try {
           if (Store.getState().remoteSource?.active) {
@@ -135,7 +135,7 @@ window.PageModules.trips = {
           UI.closeDialog("tripDialog");
           render();
         } catch (error) {
-          UI.toast(error.message || "Não foi possível salvar a viagem.", "error");
+          UI.toast(error.message || "NÃ£o foi possÃ­vel salvar a viagem.", "error");
         } finally {
           if (submitButton) {
             submitButton.disabled = false;

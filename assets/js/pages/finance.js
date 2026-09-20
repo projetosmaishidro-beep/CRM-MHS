@@ -1,4 +1,4 @@
-window.PageModules = window.PageModules || {};
+﻿window.PageModules = window.PageModules || {};
 window.PageModules.finance = {
   init() {
     const params = new URLSearchParams(location.search);
@@ -23,7 +23,7 @@ window.PageModules.finance = {
 
       UI.$("#pageContent").innerHTML = `
         <section class="filter-bar finance-filter-bar reveal">
-          <label class="field trip-filter"><span>Referência (Viagem ou Evento)</span>
+          <label class="field trip-filter"><span>ReferÃªncia (Viagem ou Evento)</span>
             <select id="tripFilter">
               <option value="all">Todas as despesas</option>
               <optgroup label="Viagens">
@@ -50,7 +50,7 @@ window.PageModules.finance = {
           </div>
 
           <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Lançamentos</span><h3>Histórico de despesas</h3></div><span class="count-pill">${list.length} registros</span></div>
+            <div class="panel-head"><div><span class="eyebrow">LanÃ§amentos</span><h3>HistÃ³rico de despesas</h3></div><span class="count-pill">${list.length} registros</span></div>
             <div class="expense-list">
               ${list.length ? list.map(e => {
                 const trip = state.trips.find(t=>t.id===e.tripId);
@@ -59,7 +59,7 @@ window.PageModules.finance = {
                 const refName = event ? event.name : (trip ? trip.name : "Avulsa");
                 const iconTag = event ? UI.icon("calendar", 12) : UI.icon("briefcase", 12);
                 
-                return `<div class="expense-row"><span class="expense-icon">${UI.icon("receipt")}</span><div><div class="row-inline"><strong>${e.category}</strong><span class="tag subtle" style="display:flex; align-items:center; gap:4px;">${iconTag} ${refName}</span>${e.costCenter ? `<span class="tag subtle" style="background:#eef2f6; color:#475569; margin-left:6px;">${e.costCenter}</span>` : ""}</div><p>${e.place}${e.notes ? ` · ${e.notes}` : ""}</p><small>${UI.date(e.date)} · ${user?.name || "Usuário"} ${e.attachment ? "· comprovante anexado" : ""}</small></div><b>${UI.money(e.amount)}</b></div>`;
+                return `<div class="expense-row"><span class="expense-icon">${UI.icon("receipt")}</span><div><div class="row-inline"><strong>${e.category}</strong><span class="tag subtle" style="display:flex; align-items:center; gap:4px;">${iconTag} ${refName}</span>${e.costCenter ? `<span class="tag subtle" style="background:#eef2f6; color:#475569; margin-left:6px;">${e.costCenter}</span>` : ""}</div><p>${e.place}${e.notes ? ` Â· ${e.notes}` : ""}</p><small>${UI.date(e.date)} Â· ${user?.name || "UsuÃ¡rio"} ${e.attachment ? "Â· comprovante anexado" : ""}</small></div><b>${UI.money(e.amount)}</b></div>`;
               }).join("") : UI.empty("Nenhuma despesa", "Adicione uma despesa para iniciar o controle financeiro.")}
             </div>
           </div>
@@ -67,9 +67,9 @@ window.PageModules.finance = {
 
         <dialog id="expenseDialog" class="form-dialog">
           <form method="dialog" id="expenseForm">
-            <div class="dialog-head"><div><span class="eyebrow">Lançamento rápido</span><h2>Nova despesa</h2></div><button class="icon-btn" value="cancel">${UI.icon("x")}</button></div>
+            <div class="dialog-head"><div><span class="eyebrow">LanÃ§amento rÃ¡pido</span><h2>Nova despesa</h2></div><button class="icon-btn" value="cancel">${UI.icon("x")}</button></div>
             <div class="form-grid">
-              <label class="field span-2"><span>Referência (Viagem ou Evento)</span>
+              <label class="field span-2"><span>ReferÃªncia (Viagem ou Evento)</span>
                 <select name="referenceId" required>
                   <option value="">Selecione...</option>
                   <optgroup label="Viagens">
@@ -80,12 +80,12 @@ window.PageModules.finance = {
                   </optgroup>
                 </select>
               </label>
-              <label class="field"><span>Categoria</span><select name="category"><option>Combustível</option><option>Alimentação</option><option>Hospedagem</option><option>Pedágio</option><option>Estacionamento</option><option>Outros</option></select></label>
-              <label class="field"><span>Centro de Custo</span><select name="costCenter" required><option value="">Selecione...</option><option>Previsto em Margem Operacional</option><option>Prospecção (Novos Clientes)</option><option>Captação / Retenção</option><option>Verba de Manutenção (Frota)</option><option>Outros</option></select></label>
+              <label class="field"><span>Categoria</span><select name="category"><option>CombustÃ­vel</option><option>AlimentaÃ§Ã£o</option><option>Hospedagem</option><option>PedÃ¡gio</option><option>Estacionamento</option><option>Outros</option></select></label>
+              <label class="field"><span>Centro de Custo</span><select name="costCenter" required><option value="">Selecione...</option><option>Previsto em Margem Operacional</option><option>ProspecÃ§Ã£o (Novos Clientes)</option><option>CaptaÃ§Ã£o / RetenÃ§Ã£o</option><option>Verba de ManutenÃ§Ã£o (Frota)</option><option>Outros</option></select></label>
               <label class="field span-2"><span>Valor e Local</span><div style="display:grid; grid-template-columns:1fr 2fr; gap:10px;"><input name="amount" type="number" step="0.01" min="0" required inputmode="decimal" placeholder="R$ 0,00"><input name="place" required placeholder="Local ou estabelecimento"></div></label>
-              <label class="field span-2"><span>Observações</span><textarea name="notes" rows="2"></textarea></label>
+              <label class="field span-2"><span>ObservaÃ§Ãµes</span><textarea name="notes" rows="2"></textarea></label>
             </div>
-            <label class="upload-card full">${UI.icon("camera",26)}<span><strong>Anexar comprovante ou nota fiscal</strong><small id="receiptLabel">Use a câmera ou selecione um arquivo</small></span><input type="file" id="receiptInput" accept="image/*,.pdf" capture="environment" hidden></label>
+            <label class="upload-card full">${UI.icon("camera",26)}<span><strong>Anexar comprovante ou nota fiscal</strong><small id="receiptLabel">Use a cÃ¢mera ou selecione um arquivo</small></span><input type="file" id="receiptInput" accept="image/*,.pdf" capture="environment" hidden></label>
             <div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Salvar despesa</button></div>
           </form>
         </dialog>
@@ -96,11 +96,12 @@ window.PageModules.finance = {
       UI.$("#receiptInput").addEventListener("change", async e => {
         const arr = await UI.filesToAttachments(e.target.files);
         attachment = arr[0] || null;
-        UI.$("#receiptLabel").textContent = attachment ? attachment.name : "Use a câmera ou selecione um arquivo";
+        UI.$("#receiptLabel").textContent = attachment ? attachment.name : "Use a cÃ¢mera ou selecione um arquivo";
       });
-      UI.$("#expenseForm").addEventListener("submit", e => {
+            UI.$("#expenseForm").addEventListener("submit", async e => {
         if (e.submitter?.value === "cancel") return;
         e.preventDefault();
+        const btn = e.currentTarget.querySelector("button[type='submit']");
         const fd = new FormData(e.currentTarget);
         
         const refId = fd.get("referenceId");
@@ -109,17 +110,34 @@ window.PageModules.finance = {
         if (refId.startsWith("t_")) tripId = refId.slice(2);
         if (refId.startsWith("e_")) eventId = refId.slice(2);
         
-        Store.addExpense({
-          tripId,
-          eventId,
-          userId: "u1",
-          category: fd.get("category"),
-          costCenter: fd.get("costCenter"),
-          amount: Number(fd.get("amount")),
-          place: fd.get("place"),
-          notes: fd.get("notes"),
-          attachment
-        });
+        if (!tripId && !eventId) {
+           UI.toast("Despesa deve estar vinculada a viagem ou evento.", "error");
+           return;
+        }
+
+        if (btn) btn.disabled = true;
+
+        try {
+          const payload = {
+            tripId,
+            eventId,
+            userId: "u1",
+            category: fd.get("category"),
+            costCenter: fd.get("costCenter"),
+            amount: Number(fd.get("amount")),
+            place: fd.get("place"),
+            notes: fd.get("notes")
+          };
+          
+          await UI.createSupabaseExpense(payload);
+          UI.toast("Despesa salva com sucesso.");
+          setTimeout(() => location.reload(), 350);
+        } catch (err) {
+          console.error(err);
+          UI.toast("Erro ao salvar despesa.", "error");
+          if (btn) btn.disabled = false;
+        }
+      });
         UI.toast("Despesa registrada.");
         attachment = null;
         UI.closeDialog("expenseDialog");

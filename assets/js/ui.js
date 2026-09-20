@@ -1,4 +1,4 @@
-window.UI = (() => {
+﻿window.UI = (() => {
   const isSubpage = () => location.pathname.includes("/pages/");
   const root = () => (isSubpage() ? "../" : "./");
   const pageLink = (path) => `${root()}${path}`;
@@ -46,15 +46,15 @@ window.UI = (() => {
   };
 
   const nav = [
-    { id: "dashboard", label: "Início", href: "index.html", icon: "home" },
+    { id: "dashboard", label: "InÃ­cio", href: "index.html", icon: "home" },
     { id: "clients", label: "Clientes", href: "pages/clientes.html", icon: "users" },
     { id: "visits", label: "Visitas", href: "pages/visitas.html", icon: "pin" },
     { id: "trips", label: "Viagens", href: "pages/viagens.html", icon: "briefcase" },
     { id: "events", label: "Eventos", href: "pages/eventos.html", icon: "calendar" },
     { id: "map", label: "Mapa", href: "HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html", icon: "map", target: "_blank" },
     { id: "finance", label: "Financeiro", href: "pages/financeiro.html", icon: "wallet" },
-    { id: "reports", label: "Relatórios", href: "pages/relatorios.html", icon: "chart" },
-    { id: "users", label: "Usuários", href: "pages/usuarios.html", icon: "user" }
+    { id: "reports", label: "RelatÃ³rios", href: "pages/relatorios.html", icon: "chart" },
+    { id: "users", label: "UsuÃ¡rios", href: "pages/usuarios.html", icon: "user" }
   ];
 
   function mountShell() {
@@ -80,8 +80,8 @@ window.UI = (() => {
                 ? `<a class="icon-btn mobile-menu" href="${pageLink(parentNav.href)}" aria-label="Voltar">${icon("arrow_left")}</a>`
                 : `<button class="icon-btn mobile-menu" id="mobileMenuBtn" aria-label="Abrir menu">${icon("menu")}</button>`
               }
-              <a class="topbar-logo" href="${pageLink("index.html")}" aria-label="Mais Hidro Soluções - início">
-                <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro Soluções" loading="eager">
+              <a class="topbar-logo" href="${pageLink("index.html")}" aria-label="Mais Hidro SoluÃ§Ãµes - inÃ­cio">
+                <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro SoluÃ§Ãµes" loading="eager">
               </a>
               <div class="topbar-title">
                 <span class="eyebrow">Central comercial</span>
@@ -89,7 +89,7 @@ window.UI = (() => {
               </div>
             </div>
 
-            <nav class="desktop-nav" aria-label="Navegação principal">
+            <nav class="desktop-nav" aria-label="NavegaÃ§Ã£o principal">
               ${nav.map(item => `
                 <a class="${activePage === item.id ? "active" : ""}" href="${pageLink(item.href)}" title="${item.label}" ${item.target ? `target="${item.target}" rel="noopener"` : ""}>
                   ${icon(item.icon, 17)}<span>${item.label}</span>
@@ -98,15 +98,15 @@ window.UI = (() => {
 
             <div class="topbar-actions">
               <button class="icon-btn" id="globalSearchBtn" aria-label="Buscar">${icon("search")}</button>
-              <button class="icon-btn hide-mobile" aria-label="Notificações">${icon("bell")}</button>
-              <button class="avatar-btn" id="profileMenuBtn" aria-label="Menu do usuário" style="padding: 0; overflow: hidden; border: none; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></button>
+              <button class="icon-btn hide-mobile" aria-label="NotificaÃ§Ãµes">${icon("bell")}</button>
+              <button class="avatar-btn" id="profileMenuBtn" aria-label="Menu do usuÃ¡rio" style="padding: 0; overflow: hidden; border: none; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></button>
             </div>
           </header>
 
           <main class="page-content" id="pageContent"></main>
         </div>
 
-        <nav class="bottom-nav" aria-label="Navegação móvel">
+        <nav class="bottom-nav" aria-label="NavegaÃ§Ã£o mÃ³vel">
           ${nav.slice(0, 5).map(item => `
             <a class="${activePage === item.id ? "active" : ""}" href="${pageLink(item.href)}" ${item.target ? `target="${item.target}" rel="noopener"` : ""}>
               ${icon(item.icon, 19)}<span>${item.label}</span>
@@ -117,7 +117,7 @@ window.UI = (() => {
           <div class="drawer-backdrop" data-close-drawer></div>
           <aside class="drawer-panel">
             <div class="drawer-brand">
-              <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro Soluções">
+              <img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro SoluÃ§Ãµes">
             </div>
             <div class="drawer-head"><strong>Menu</strong><button class="icon-btn" data-close-drawer>${icon("x")}</button></div>
             <nav class="drawer-nav">
@@ -134,14 +134,14 @@ window.UI = (() => {
             <div><span class="eyebrow">Busca global</span><h2>Encontre rapidamente</h2></div>
             <button class="icon-btn" data-close-dialog>${icon("x")}</button>
           </div>
-          <label class="search-field">${icon("search")}<input id="globalSearchInput" placeholder="Cliente, viagem, usuário..." autocomplete="off"></label>
+          <label class="search-field">${icon("search")}<input id="globalSearchInput" placeholder="Cliente, viagem, usuÃ¡rio..." autocomplete="off"></label>
           <div id="globalSearchResults" class="search-results"></div>
         </dialog>
 
         <div class="profile-popover" id="profilePopover">
           <div class="profile-chip large"><span class="avatar" style="padding: 0; overflow: hidden; border: 1px solid #e2e8f0; background: #fff;"><img src="${pageLink('assets/images/logo-mais.jpg')}" alt="Logo Mais Hidro" style="width: 100%; height: 100%; object-fit: contain;"></span><span><strong>${profileName}</strong><small>${profileRole}</small></span></div>
           <a href="${pageLink("pages/usuarios.html")}">${icon("user")} Meu perfil</a>
-          ${authUser.isAdmin ? `<button id="connectionBtn">${icon("database")} Configurações do banco</button>` : ""}
+          ${authUser.isAdmin ? `<button id="connectionBtn">${icon("database")} ConfiguraÃ§Ãµes do banco</button>` : ""}
           <button id="resetDemoBtn">${icon("rotate")} Restaurar demo</button>
           <button id="logoutBtn" style="color:var(--mais-red)">${icon("arrow")} Sair</button>
         </div>
@@ -150,13 +150,13 @@ window.UI = (() => {
           <form id="connectionForm" novalidate>
             <div class="dialog-head">
               <div>
-                <span class="eyebrow">Integração</span>
+                <span class="eyebrow">IntegraÃ§Ã£o</span>
                 <h2 id="connectionTitle">Banco de dados</h2>
               </div>
               <button class="icon-btn" type="button" data-close-dialog aria-label="Fechar">${icon("x")}</button>
             </div>
 
-            <p class="connection-intro">Informe a URL e a chave pública do projeto Supabase. Esta etapa só valida e guarda a conexão neste navegador; os dados locais continuam intactos.</p>
+            <p class="connection-intro">Informe a URL e a chave pÃºblica do projeto Supabase. Esta etapa sÃ³ valida e guarda a conexÃ£o neste navegador; os dados locais continuam intactos.</p>
 
             <div class="connection-schema-list" aria-label="Estrutura preparada">
               <span>${icon("database", 16)} cadastro</span>
@@ -170,7 +170,7 @@ window.UI = (() => {
                 <input id="connectionUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://seu-projeto.supabase.co" required>
               </label>
               <label class="field">
-                <span>Chave pública (publishable ou anon)</span>
+                <span>Chave pÃºblica (publishable ou anon)</span>
                 <div class="connection-key-field">
                   <input id="connectionKey" type="password" autocomplete="off" spellcheck="false" placeholder="sb_publishable_..." required>
                   <button id="toggleConnectionKey" class="connection-key-toggle" type="button" aria-label="Mostrar chave">${icon("eye", 17)}</button>
@@ -179,12 +179,12 @@ window.UI = (() => {
             </div>
 
             <p class="connection-security-note">Nunca use aqui a chave <strong>secret</strong> ou <strong>service_role</strong>.</p>
-            <p id="connectionStatus" class="connection-status" role="status">Nenhuma conexão salva neste navegador.</p>
+            <p id="connectionStatus" class="connection-status" role="status">Nenhuma conexÃ£o salva neste navegador.</p>
 
             <section class="connection-auth" aria-labelledby="connectionAuthTitle">
               <div class="connection-auth-head">
                 <div><span class="eyebrow">Acesso da equipe</span><strong id="connectionAuthTitle">Entrar para consultar a carteira</strong></div>
-                <small id="connectionAuthStatus">Sem sessão iniciada.</small>
+                <small id="connectionAuthStatus">Sem sessÃ£o iniciada.</small>
               </div>
               <div class="connection-auth-fields">
                 <label class="field"><span>E-mail</span><input id="connectionEmail" type="email" autocomplete="username" placeholder="voce@empresa.com"></label>
@@ -198,8 +198,8 @@ window.UI = (() => {
 
             <div class="dialog-actions connection-actions">
               <button id="clearConnectionBtn" class="btn btn-secondary" type="button">Limpar</button>
-              <button id="testConnectionBtn" class="btn btn-secondary" type="button">Testar conexão</button>
-              <button class="btn btn-primary" type="submit">Salvar conexão</button>
+              <button id="testConnectionBtn" class="btn btn-secondary" type="button">Testar conexÃ£o</button>
+              <button class="btn btn-primary" type="submit">Salvar conexÃ£o</button>
             </div>
           </form>
         </dialog>
@@ -227,7 +227,7 @@ window.UI = (() => {
     $("#connectionSignOutBtn")?.addEventListener("click", signOutFromSupabase);
     $("#resetDemoBtn")?.addEventListener("click", () => {
       Store.reset();
-      toast("Dados da demonstração restaurados.");
+      toast("Dados da demonstraÃ§Ã£o restaurados.");
       setTimeout(() => location.reload(), 350);
     });
 
@@ -270,16 +270,16 @@ window.UI = (() => {
     try {
       url = new URL(rawUrl);
     } catch {
-      throw new Error("Informe uma URL válida do projeto Supabase.");
+      throw new Error("Informe uma URL vÃ¡lida do projeto Supabase.");
     }
     if (!/^https?:$/.test(url.protocol)) {
-      throw new Error("A URL precisa começar com https:// ou http://.");
+      throw new Error("A URL precisa comeÃ§ar com https:// ou http://.");
     }
     if (!apiKey || apiKey.length < 12) {
-      throw new Error("Informe a chave pública do projeto.");
+      throw new Error("Informe a chave pÃºblica do projeto.");
     }
     if (isRestrictedSupabaseKey(apiKey)) {
-      throw new Error("Use somente uma chave pública publishable ou anon.");
+      throw new Error("Use somente uma chave pÃºblica publishable ou anon.");
     }
     return { url: url.href.replace(/\/$/, ""), apiKey };
   }
@@ -311,8 +311,8 @@ window.UI = (() => {
     $("#connectionKey").value = saved.apiKey || "";
     setConnectionStatus(
       saved.url && saved.apiKey
-        ? "Conexão salva neste navegador. Teste-a antes de seguir para a integração dos dados."
-        : "Nenhuma conexão salva neste navegador.",
+        ? "ConexÃ£o salva neste navegador. Teste-a antes de seguir para a integraÃ§Ã£o dos dados."
+        : "Nenhuma conexÃ£o salva neste navegador.",
       saved.url && saved.apiKey ? "ready" : "neutral"
     );
     $("#profilePopover")?.classList.remove("open");
@@ -326,11 +326,11 @@ window.UI = (() => {
     try {
       const connection = normalizeConnection();
       localStorage.setItem(CONNECTION_STORAGE_KEY, JSON.stringify(connection));
-      setConnectionStatus("Conexão salva neste navegador. Nenhum dado foi migrado ou exposto.", "success");
+      setConnectionStatus("ConexÃ£o salva neste navegador. Nenhum dado foi migrado ou exposto.", "success");
       renderConnectionAuthState();
-      toast("Conexão preparada.");
+      toast("ConexÃ£o preparada.");
     } catch (error) {
-      setConnectionStatus(error.message || "Não foi possível salvar a conexão.", "error");
+      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel salvar a conexÃ£o.", "error");
     }
   }
 
@@ -339,28 +339,28 @@ window.UI = (() => {
     let connection;
     try {
       if (location.protocol === "file:") {
-        throw new Error("Abra o aplicativo por um servidor local (http://localhost), não diretamente pelo arquivo HTML.");
+        throw new Error("Abra o aplicativo por um servidor local (http://localhost), nÃ£o diretamente pelo arquivo HTML.");
       }
       connection = normalizeConnection();
     } catch (error) {
-      setConnectionStatus(error.message || "Revise a conexão.", "error");
+      setConnectionStatus(error.message || "Revise a conexÃ£o.", "error");
       return;
     }
 
     button.disabled = true;
-    button.textContent = "Testando…";
-    setConnectionStatus("Validando URL e chave pública sem consultar dados comerciais…", "loading");
+    button.textContent = "Testandoâ€¦";
+    setConnectionStatus("Validando URL e chave pÃºblica sem consultar dados comerciaisâ€¦", "loading");
     try {
       const response = await fetch(`${connection.url}/auth/v1/settings`, {
         headers: { apikey: connection.apiKey }
       });
-      if (!response.ok) throw new Error(`A API respondeu com código ${response.status}.`);
-      setConnectionStatus("Projeto acessível. A leitura de clientes será liberada na próxima etapa, com autenticação e RLS.", "success");
+      if (!response.ok) throw new Error(`A API respondeu com cÃ³digo ${response.status}.`);
+      setConnectionStatus("Projeto acessÃ­vel. A leitura de clientes serÃ¡ liberada na prÃ³xima etapa, com autenticaÃ§Ã£o e RLS.", "success");
     } catch (error) {
-      setConnectionStatus(error.message || "Não foi possível alcançar o projeto. Confira a URL, a chave e sua internet.", "error");
+      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel alcanÃ§ar o projeto. Confira a URL, a chave e sua internet.", "error");
     } finally {
       button.disabled = false;
-      button.textContent = "Testar conexão";
+      button.textContent = "Testar conexÃ£o";
     }
   }
 
@@ -368,7 +368,7 @@ window.UI = (() => {
     localStorage.removeItem(CONNECTION_STORAGE_KEY);
     $("#connectionUrl").value = "";
     $("#connectionKey").value = "";
-    setConnectionStatus("Conexão removida deste navegador.", "neutral");
+    setConnectionStatus("ConexÃ£o removida deste navegador.", "neutral");
     renderConnectionAuthState();
   }
 
@@ -390,8 +390,8 @@ window.UI = (() => {
         script.async = true;
         script.onload = () => window.supabase?.createClient
           ? resolve(window.supabase)
-          : reject(new Error("A biblioteca do Supabase não foi carregada."));
-        script.onerror = () => reject(new Error("Não foi possível carregar a biblioteca do Supabase."));
+          : reject(new Error("A biblioteca do Supabase nÃ£o foi carregada."));
+        script.onerror = () => reject(new Error("NÃ£o foi possÃ­vel carregar a biblioteca do Supabase."));
         document.head.appendChild(script);
       });
     }
@@ -424,7 +424,7 @@ window.UI = (() => {
     if (!status || !signIn || !signOut) return;
     const connection = readConnection();
     if (!connection.url || !connection.apiKey) {
-      status.textContent = "Salve a conexão para entrar.";
+      status.textContent = "Salve a conexÃ£o para entrar.";
       signIn.hidden = false;
       signOut.hidden = true;
       return;
@@ -434,11 +434,11 @@ window.UI = (() => {
       const { data, error } = await client.auth.getSession();
       if (error) throw error;
       const email = data.session?.user?.email;
-      status.textContent = email ? `Sessão ativa: ${email}` : "Sem sessão iniciada.";
+      status.textContent = email ? `SessÃ£o ativa: ${email}` : "Sem sessÃ£o iniciada.";
       signIn.hidden = Boolean(email);
       signOut.hidden = !email;
     } catch {
-      status.textContent = "Não foi possível consultar a sessão.";
+      status.textContent = "NÃ£o foi possÃ­vel consultar a sessÃ£o.";
       signIn.hidden = false;
       signOut.hidden = true;
     }
@@ -453,17 +453,17 @@ window.UI = (() => {
       if (!email || !password) throw new Error("Informe e-mail e senha para entrar.");
       localStorage.setItem(CONNECTION_STORAGE_KEY, JSON.stringify(connection));
       button.disabled = true;
-      button.textContent = "Entrando…";
+      button.textContent = "Entrandoâ€¦";
       const client = await getSupabaseClient(connection);
       const { error } = await client.auth.signInWithPassword({ email, password });
       if (error) throw error;
       $("#connectionPassword").value = "";
       await renderConnectionAuthState();
-      setConnectionStatus("Sessão iniciada. Atualizando a carteira comercial…", "success");
-      toast("Sessão iniciada. Carregando dados…");
+      setConnectionStatus("SessÃ£o iniciada. Atualizando a carteira comercialâ€¦", "success");
+      toast("SessÃ£o iniciada. Carregando dadosâ€¦");
       setTimeout(() => location.reload(), 450);
     } catch (error) {
-      setConnectionStatus(error.message || "Não foi possível iniciar a sessão.", "error");
+      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel iniciar a sessÃ£o.", "error");
     } finally {
       if (button) {
         button.disabled = false;
@@ -477,18 +477,18 @@ window.UI = (() => {
       const client = await getSupabaseClient();
       if (client) await client.auth.signOut();
       Store.reset();
-      toast("Sessão encerrada.");
+      toast("SessÃ£o encerrada.");
       setTimeout(() => location.reload(), 300);
     } catch (error) {
-      setConnectionStatus(error.message || "Não foi possível encerrar a sessão.", "error");
+      setConnectionStatus(error.message || "NÃ£o foi possÃ­vel encerrar a sessÃ£o.", "error");
     }
   }
 
   const categoryLabels = {
     CARCINICULTOR: "Carcinicultor",
-    IRRIGACAO: "Irrigação",
-    CONSTRUCAO_CIVIL: "Construção civil",
-    MINERACAO: "Mineração",
+    IRRIGACAO: "IrrigaÃ§Ã£o",
+    CONSTRUCAO_CIVIL: "ConstruÃ§Ã£o civil",
+    MINERACAO: "MineraÃ§Ã£o",
     CONDOMINIAL: "Condominial",
     OUTRO: "Outro",
     PENDENTE_CLASSIFICACAO: "Outro"
@@ -503,7 +503,7 @@ window.UI = (() => {
       contact: row.contato_nome || "",
       phone: row.whatsapp || row.telefone || "",
       email: row.email || "",
-      city: row.municipio || "Não informado",
+      city: row.municipio || "NÃ£o informado",
       state: row.uf || "",
       segment: category,
       category,
@@ -525,14 +525,14 @@ window.UI = (() => {
     const statusMap = {
       PLANEJADA: "Planejada",
       EM_ANDAMENTO: "Em andamento",
-      CONCLUIDA: "Concluída",
+      CONCLUIDA: "ConcluÃ­da",
       CANCELADA: "Cancelada"
     };
     const snapshotId = (item) => typeof item === "string" ? item : item?.id;
 
     return {
       id: row.viagem_id,
-      name: row.titulo || "Viagem sem título",
+      name: row.titulo || "Viagem sem tÃ­tulo",
       status: statusMap[row.status] || row.status || "Planejada",
       startDate: row.inicio_em ? String(row.inicio_em).slice(0, 10) : "",
       endDate: row.fim_em ? String(row.fim_em).slice(0, 10) : "",
@@ -591,7 +591,7 @@ window.UI = (() => {
         .order("criado_em", { ascending: false });
       if (tripsResult.error) {
         tripError = tripsResult.error;
-        console.warn("[Central Comercial] A view de viagens ainda não está disponível:", tripError);
+        console.warn("[Central Comercial] A view de viagens ainda nÃ£o estÃ¡ disponÃ­vel:", tripError);
       } else {
         remoteTrips = (tripsResult.data || []).map(mapRemoteTrip);
       }
@@ -603,8 +603,8 @@ window.UI = (() => {
         .order("nome", { ascending: true });
       if (teamResult.error) {
         // A carteira continua funcionando se o cadastro opcional da equipe
-        // ainda não tiver sido executado no Supabase.
-        console.warn("[Central Comercial] O cadastro da equipe ainda não está disponível:", teamResult.error);
+        // ainda nÃ£o tiver sido executado no Supabase.
+        console.warn("[Central Comercial] O cadastro da equipe ainda nÃ£o estÃ¡ disponÃ­vel:", teamResult.error);
       } else {
         remoteUsers = (teamResult.data || []).map(mapRemoteUser);
       }
@@ -617,14 +617,14 @@ window.UI = (() => {
       };
     } catch (error) {
       console.error("[Central Comercial] Falha ao carregar a carteira remota:", error);
-      return { error: "A sessão está ativa, mas a leitura ainda não foi liberada. Execute o SQL 01 de conexão e exponha somente o schema api." };
+      return { error: "A sessÃ£o estÃ¡ ativa, mas a leitura ainda nÃ£o foi liberada. Execute o SQL 01 de conexÃ£o e exponha somente o schema api." };
     }
   }
 
   async function createRemoteTrip(payload) {
     const connection = readConnection();
     if (!connection.url || !connection.apiKey) {
-      throw new Error("Configure a conexão do Supabase antes de salvar a viagem.");
+      throw new Error("Configure a conexÃ£o do Supabase antes de salvar a viagem.");
     }
     const client = await getSupabaseClient(connection);
     const { data: sessionData, error: sessionError } = await client.auth.getSession();
@@ -641,17 +641,17 @@ window.UI = (() => {
     });
     if (error) {
       if (/criar_viagem|schema cache|PGRST202|function .* does not exist/i.test(error.message || "")) {
-        throw new Error("A escrita de viagens ainda não foi ativada. Execute 04_api_escrita_viagens.sql no Supabase.");
+        throw new Error("A escrita de viagens ainda nÃ£o foi ativada. Execute 04_api_escrita_viagens.sql no Supabase.");
       }
-      throw new Error(error.message || "Não foi possível salvar a viagem no Supabase.");
+      throw new Error(error.message || "NÃ£o foi possÃ­vel salvar a viagem no Supabase.");
     }
     const row = Array.isArray(data) ? data[0] : data;
-    if (!row?.viagem_id) throw new Error("O Supabase não retornou a viagem criada.");
+    if (!row?.viagem_id) throw new Error("O Supabase nÃ£o retornou a viagem criada.");
     return mapRemoteTrip(row);
   }
 
   // ------------------------------------------------------------------
-  // Eventos remotos (via schema api — views e RPCs)
+  // Eventos remotos (via schema api â€” views e RPCs)
   // ------------------------------------------------------------------
 
   async function hydrateRemoteEvents() {
@@ -723,7 +723,7 @@ window.UI = (() => {
         .schema("api")
         .rpc("criar_evento", {
           p_nome: payload.name,
-          p_local: payload.location || "Não informado",
+          p_local: payload.location || "NÃ£o informado",
           p_data_inicio: payload.startDate || new Date().toISOString().slice(0, 10),
           p_data_fim: payload.endDate || payload.startDate || new Date().toISOString().slice(0, 10),
           p_tipo_participacao: payload.role === "Expositor" ? "EXPOSITOR" : "PARTICIPANTE",
@@ -734,8 +734,8 @@ window.UI = (() => {
       console.log("[Central] Evento salvo no Supabase:", result);
       return result?.evento_id || null;
     } catch (err) {
-      console.warn("[Central] Evento não salvo no Supabase:", err);
-      toast("O evento foi criado localmente mas não foi salvo no banco. Verifique o console.", "error");
+      console.warn("[Central] Evento nÃ£o salvo no Supabase:", err);
+      toast("O evento foi criado localmente mas nÃ£o foi salvo no banco. Verifique o console.", "error");
       return null;
     }
   }
@@ -760,7 +760,7 @@ window.UI = (() => {
       console.log("[Central] Despesa salva no Supabase:", result);
       return result?.despesa_id || null;
     } catch (err) {
-      console.warn("[Central] Despesa não salva no Supabase:", err);
+      console.warn("[Central] Despesa nÃ£o salva no Supabase:", err);
       alert("ERRO SUPABASE (Criar Despesa): " + (err.message || JSON.stringify(err)));
       return null;
     }
@@ -799,10 +799,10 @@ window.UI = (() => {
           p_anexos: attachments || null
         });
       if (error) throw error;
-      console.log("[Central] Evento atualizado com mídia:", data);
+      console.log("[Central] Evento atualizado com mÃ­dia:", data);
       return true;
     } catch (err) {
-      console.error("[Central] Erro ao atualizar mídia do evento:", err);
+      console.error("[Central] Erro ao atualizar mÃ­dia do evento:", err);
       return false;
     }
   }
@@ -841,7 +841,7 @@ window.UI = (() => {
     const items = [
       ...state.clients.map(c => ({ type: "Cliente", label: c.name, meta: `${c.city}, ${c.state}`, href: pageLink(`pages/cliente.html?id=${c.id}`) })),
       ...state.trips.map(t => ({ type: "Viagem", label: t.name, meta: t.status, href: pageLink(`pages/viagem.html?id=${t.id}`) })),
-      ...state.users.map(u => ({ type: "Usuário", label: u.name, meta: u.role, href: pageLink("pages/usuarios.html") }))
+      ...state.users.map(u => ({ type: "UsuÃ¡rio", label: u.name, meta: u.role, href: pageLink("pages/usuarios.html") }))
     ].filter(item => !q || `${item.label} ${item.meta}`.toLowerCase().includes(q)).slice(0, 8);
 
     $("#globalSearchResults").innerHTML = items.length ? items.map(item => `
@@ -873,7 +873,7 @@ window.UI = (() => {
   }
 
   function date(value, withTime = false) {
-    if (!value) return "—";
+    if (!value) return "â€”";
     const d = new Date(value);
     const opts = withTime
       ? { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
@@ -882,7 +882,7 @@ window.UI = (() => {
   }
 
   function shortDate(value) {
-    if (!value) return "—";
+    if (!value) return "â€”";
     return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(new Date(`${value}T12:00:00`));
   }
 
@@ -925,7 +925,7 @@ window.UI = (() => {
 
   function statusBadge(status) {
     const key = String(status || "").toLowerCase().replace(/\s+/g, "-");
-    return `<span class="badge badge-${key}">${status || "—"}</span>`;
+    return `<span class="badge badge-${key}">${status || "â€”"}</span>`;
   }
 
   function empty(title, description, actionHtml = "") {
@@ -960,8 +960,8 @@ window.UI = (() => {
   function initRevealObserver() {
     observeRevealItems();
 
-    // Re-renderizações de filtros e modos de visualização também recebem
-    // animação sem ficarem presos em opacity: 0.
+    // Re-renderizaÃ§Ãµes de filtros e modos de visualizaÃ§Ã£o tambÃ©m recebem
+    // animaÃ§Ã£o sem ficarem presos em opacity: 0.
     const pageContent = $("#pageContent");
     if (pageContent && !revealMutationObserver && "MutationObserver" in window) {
       revealMutationObserver = new MutationObserver(() => observeRevealItems(pageContent));
@@ -1092,7 +1092,7 @@ window.UI = (() => {
     }).catch(console.error);
   }
 
-  function miniMap(lat, lng, label = "Localização registrada", linkUrl = null) {
+  function miniMap(lat, lng, label = "LocalizaÃ§Ã£o registrada", linkUrl = null) {
     const inner = `
       <div class="mini-map leaflet-mini-map" data-lat="${lat}" data-lng="${lng}" aria-label="${label}" style="z-index:1; isolation:isolate; height: clamp(140px, 30vh, 220px);">
         ${!lat || !lng ? `<div class="map-caption" style="position:absolute;bottom:10px;left:10px;z-index:900;background:rgba(255,255,255,0.9);padding:5px 8px;border-radius:6px;box-shadow:var(--shadow-sm);">${icon("pin", 16)}<span>Sem coordenadas</span></div>` : ""}
@@ -1179,13 +1179,130 @@ window.UI = (() => {
     }
   }
 
+  // ------------------------------------------------------------------
+  // API operacional: Supabase e a fonte de verdade. O Store recebe apenas
+  // respostas confirmadas pelo banco e funciona como cache de renderizacao.
+  // ------------------------------------------------------------------
+  const asArray = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== "string") return [];
+    try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed : []; } catch { return []; }
+  };
+  const rpcValue = (value) => {
+    const item = Array.isArray(value) ? value[0] : value;
+    if (typeof item !== "string") return item || null;
+    try { return JSON.parse(item); } catch { return null; }
+  };
+  const externalUrl = (value) => {
+    try { const url = new URL(String(value || ""), location.origin); return ["https:", "http:"].includes(url.protocol) ? url.href : "#"; } catch { return "#"; }
+  };
+  const escape = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+
+  async function operationalClient() {
+    const client = window.AuthClient || await getSupabaseClient(readConnection());
+    if (!client) throw new Error("ConexÃ£o do Supabase nÃ£o configurada.");
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    if (!data.session) throw new Error("Sua sessÃ£o expirou. Entre novamente.");
+    return client;
+  }
+
+  async function operationalRpc(name, args) {
+    const client = await operationalClient();
+    const { data, error } = await client.schema("api").rpc(name, args);
+    if (error) throw new Error(error.message || "Falha ao salvar no Supabase.");
+    return rpcValue(data);
+  }
+
+  const tripFromApi = (row) => {
+    const value = mapRemoteTrip(row);
+    value.stops = asArray(row.paradas);
+    value.odometerRecords = asArray(row.odometro_registros);
+    value.attachments = asArray(row.anexos);
+    value.ownerId = row.criado_por || "";
+    return value;
+  };
+  const visitFromApi = (row) => {
+    const needs = asArray(row.necessidades);
+    return { id: row.visita_id, clientId: row.empresa_id, tripId: row.viagem_id || null, userId: row.criado_por || "", type: row.tipo || "Acompanhamento", notes: row.observacao || "", needs: needs.map((need) => need.category || need), needRecords: needs, lat: row.latitude === null ? null : Number(row.latitude), lng: row.longitude === null ? null : Number(row.longitude), attachments: asArray(row.anexos), date: row.realizada_em || row.criado_em, remote: true };
+  };
+  const expenseFromApi = (row) => ({ id: row.despesa_id, tripId: row.viagem_id || null, eventId: row.evento_id || null, userId: row.criado_por || "", category: row.categoria || "Outros", costCenter: row.centro_custo || "", amount: Number(row.valor) || 0, place: row.estabelecimento || "", notes: row.descricao || "", attachments: asArray(row.anexos), date: row.data_despesa || row.criado_em, remote: true });
+  const eventFromApi = (row) => ({ id: row.evento_id, name: row.nome || "Evento", location: row.local || "", startDate: row.data_inicio ? String(row.data_inicio).slice(0, 10) : "", endDate: row.data_fim ? String(row.data_fim).slice(0, 10) : "", status: ({ PLANEJADO: "Planejado", EM_ANDAMENTO: "Em andamento", REALIZADO: "Realizado", CANCELADO: "Cancelado" })[row.status] || row.status || "Planejado", role: row.tipo_participacao === "EXPOSITOR" ? "Expositor" : "Participante", notes: row.notas_estrategicas || "", participantIds: asArray(row.participantes), attachments: asArray(row.anexos), links: asArray(row.links), contacts: asArray(row.contatos), createdAt: row.criado_em, userId: row.criado_por || "", remote: true });
+
+  async function hydrateSupabaseSnapshot() {
+    try {
+      const client = await operationalClient();
+      const api = client.schema("api");
+      const [clients, trips, visits, needs, expenses, events, users] = await Promise.all([
+        api.from("vw_carteira_crm").select("*").order("empresa"),
+        api.from("vw_viagens").select("*").order("inicio_em"),
+        api.from("vw_visitas_crm").select("*").order("realizada_em", { ascending: false }),
+        api.from("vw_necessidades").select("*").order("criado_em", { ascending: false }),
+        api.from("vw_despesas_crm").select("*").order("data_despesa", { ascending: false }),
+        api.from("vw_eventos").select("*").order("data_inicio", { ascending: false }),
+        api.from("vw_equipe").select("*").order("nome")
+      ]);
+      const failed = [clients, trips, visits, needs, expenses, events, users].find((result) => result.error);
+      if (failed?.error) throw failed.error;
+      const remoteClients = (clients.data || []).map(mapRemoteClient);
+      (needs.data || []).forEach((row) => {
+        const clientRow = remoteClients.find((item) => item.id === row.empresa_id);
+        if (!clientRow) return;
+        const need = { id: row.necessidade_id, clientId: row.empresa_id, visitId: row.visita_id, category: row.categoria, description: row.descricao, priority: row.prioridade, status: row.status, date: row.criado_em };
+        clientRow.needRecords.push(need);
+        if (!clientRow.needs.includes(need.category)) clientRow.needs.push(need.category);
+      });
+      const remoteUsers = (users.data || []).map((row) => {
+        const name = row.nome || row.email || "Membro da equipe";
+        return { id: row.usuario_id || row.membro_id, name, role: row.cargo || row.papel || "Equipe Comercial", initials: initials(name), email: row.email || "", active: row.ativo !== false, remote: true };
+      });
+      Store.setRemoteSnapshot({ clients: remoteClients, trips: (trips.data || []).map(tripFromApi), visits: (visits.data || []).map(visitFromApi), expenses: (expenses.data || []).map(expenseFromApi), events: (events.data || []).map(eventFromApi), users: remoteUsers, activities: [] });
+      return { count: remoteClients.length };
+    } catch (error) {
+      console.error("[Central] Falha no retrato remoto:", error);
+      return { error: error.message || "NÃ£o foi possÃ­vel carregar o Supabase." };
+    }
+  }
+
+  const createSupabaseClientRecord = async (payload) => mapRemoteClient(await operationalRpc("cadastrar_cliente", { p_dados: payload }));
+  const updateSupabaseClientRecord = async (id, payload) => mapRemoteClient(await operationalRpc("atualizar_comunicacao", { p_cliente_id: id, p_dados: payload }));
+  const archiveSupabaseClientRecord = async (id) => operationalRpc("arquivar_cliente", { p_cliente_id: id });
+  const createSupabaseVisit = async (payload) => visitFromApi(await operationalRpc("criar_visita", { p_dados: payload }));
+  const createSupabaseNeed = async (payload) => operationalRpc("criar_necessidade", { p_dados: payload });
+  const createSupabaseTrip = async (payload) => tripFromApi(await operationalRpc("criar_viagem", { p_titulo: payload.name, p_inicio: payload.startDate, p_fim: payload.endDate, p_observacao: payload.objective, p_participantes: payload.participants || [], p_clientes: payload.clients || [] }));
+  const updateSupabaseTrip = async (id, payload) => tripFromApi(await operationalRpc("atualizar_viagem", { p_viagem_id: id, p_dados: payload }));
+  const deleteSupabaseTrip = async (id) => operationalRpc("excluir_viagem", { p_viagem_id: id });
+  const createSupabaseExpense = async (payload) => expenseFromApi(await operationalRpc("criar_despesa", { p_dados: payload }));
+  const updateSupabaseExpense = async (id, payload) => expenseFromApi(await operationalRpc("atualizar_despesa", { p_despesa_id: id, p_dados: payload }));
+  const deleteSupabaseExpense = async (id) => operationalRpc("excluir_despesa", { p_despesa_id: id });
+  const createSupabaseEvent = async (payload) => eventFromApi(await operationalRpc("criar_evento", { p_nome: payload.name, p_local: payload.location || null, p_data_inicio: payload.startDate, p_data_fim: payload.endDate || payload.startDate, p_tipo_participacao: payload.role === "Expositor" ? "EXPOSITOR" : "PARTICIPANTE", p_notas: payload.notes || null }));
+  const updateSupabaseEvent = async (id, payload) => eventFromApi(await operationalRpc("atualizar_evento", { p_evento_id: id, p_dados: payload }));
+  const deleteSupabaseEvent = async (id) => operationalRpc("excluir_evento", { p_evento_id: id });
+
+  async function uploadPrivateFile(path, file) {
+    const client = await operationalClient();
+    if (!file || file.size > 20 * 1024 * 1024) throw new Error("O anexo deve ter no mÃ¡ximo 20 MB.");
+    const { data, error } = await client.storage.from("crm-anexos").upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
+    if (error) throw new Error(error.message || "Falha ao enviar o anexo.");
+    const { data: signed, error: signedError } = await client.storage.from("crm-anexos").createSignedUrl(data.path, 3600);
+    if (signedError) throw new Error(signedError.message || "Falha ao assinar o anexo.");
+    return { bucket: "crm-anexos", path: data.path, url: signed.signedUrl };
+  }
+
   return {
     $, $$, icon, root, pageLink, mountShell, toast, money, date, shortDate, initials,
     skeleton, loadingRender, statusBadge, empty, openDialog, closeDialog,
     filesToAttachments, miniMap, setupManualMap, initMaps, initRevealObserver, decorateVisuals,
     hydrateRemoteClients, createRemoteTrip,
     hydrateRemoteEvents, saveRemoteEvent, saveRemoteExpense, deleteRemoteExpense, updateRemoteExpense, updateRemoteEvent,
-    uploadToStorage, updateRemoteEventMedia
+    uploadToStorage, updateRemoteEventMedia,
+    escape, externalUrl, hydrateSupabaseSnapshot,
+    createSupabaseClientRecord, updateSupabaseClientRecord, archiveSupabaseClientRecord,
+    createSupabaseVisit, createSupabaseNeed,
+    createSupabaseTrip, updateSupabaseTrip, deleteSupabaseTrip,
+    createSupabaseExpense, updateSupabaseExpense, deleteSupabaseExpense,
+    createSupabaseEvent, updateSupabaseEvent, deleteSupabaseEvent,
+    uploadPrivateFile
   };
 })();
 
