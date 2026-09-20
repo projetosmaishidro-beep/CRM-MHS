@@ -37,7 +37,7 @@ window.PageModules.client = {
           <div class="profile-actions">
             <a class="btn btn-primary" href="${UI.pageLink(`pages/nova-visita.html?client=${client.id}`)}">${UI.icon("plus")} Registrar visita</a>
             <button class="btn btn-need" id="openNeedBtn">${UI.icon("plus", 18)} Necessidade</button>
-            <a class="btn btn-ghost" href="${UI.pageLink('HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html')}" target="_blank" rel="noopener">${UI.icon("pin")} Abrir no mapa</a>
+            <a class="btn btn-ghost" href="${UI.pageLink(`HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html?cliente=${client.id}`)}" target="_blank" rel="noopener">${UI.icon("pin")} Abrir no mapa</a>
             <button class="btn btn-secondary" id="clientHistoryPdfBtn">${UI.icon("file")} PDF de visitas</button>
           </div>
         </section>
