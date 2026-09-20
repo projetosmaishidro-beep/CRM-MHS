@@ -501,10 +501,7 @@ window.PageModules.event = {
           UI.updateSupabaseEvent(eventId, { links }).then(() => {
              UI.toast("Links do evento atualizados com sucesso.");
              setTimeout(() => location.reload(), 350);
-          }).catch(err => {
-             console.error(err);
-             UI.toast("Erro ao salvar links.", "error");
-          });
+          }).catch(err => { console.error(err); UI.toast("Erro ao salvar links.", "error"); alert("Erro ao salvar links.\n" + err.message); });
         }
       }
 
@@ -520,10 +517,7 @@ window.PageModules.event = {
           UI.updateSupabaseEvent(eventId, { participantIds }).then(() => {
              UI.toast("Equipe do evento atualizada.");
              setTimeout(() => location.reload(), 350);
-          }).catch(err => {
-             console.error(err);
-             UI.toast("Erro ao salvar equipe.", "error");
-          });
+          }).catch(err => { console.error(err); UI.toast("Erro ao salvar equipe.", "error"); alert("Erro ao salvar equipe.\n" + err.message); });
         }
       }
 
@@ -544,10 +538,7 @@ window.PageModules.event = {
           UI.updateSupabaseEvent(eventId, { contacts }).then(() => {
              UI.toast("Contatos do evento atualizados.");
              setTimeout(() => location.reload(), 350);
-          }).catch(err => {
-             console.error(err);
-             UI.toast("Erro ao salvar contatos.", "error");
-          });
+          }).catch(err => { console.error(err); UI.toast("Erro ao salvar contatos.", "error"); alert("Erro ao salvar contatos.\n" + err.message); });
         }
       }
 
@@ -576,11 +567,7 @@ window.PageModules.event = {
         req.then(() => {
            UI.toast("Custo registrado no evento.");
            setTimeout(() => location.reload(), 350);
-        }).catch(err => {
-           console.error(err);
-           UI.toast("Erro ao salvar custo.", "error");
-           if (btn) { btn.disabled = false; btn.textContent = originalText; }
-        });
+        }).catch(err => { console.error(err); UI.toast("Erro ao salvar custo.", "error"); alert("Erro ao salvar custo.\n" + err.message); if (btn) { btn.disabled = false; btn.textContent = originalText; } });
       }
     });
 
