@@ -694,10 +694,10 @@
               </span>
             </div>
             <div class="info-grid compact-info">
-              <div><small>CNPJ</small><strong id="detail-cnpj"></strong></div>
-              <div><small>Endereço</small><strong id="detail-address"></strong></div>
-              <div><small>Telefone</small><strong id="detail-phone"></strong></div>
-              <div><small>Atividade (CNAE)</small><strong id="detail-cnae"></strong></div>
+              <div class="detail-row" data-field="cnpj"><small>CNPJ</small><strong id="detail-cnpj"></strong></div>
+              <div class="detail-row" data-field="address"><small>Endereço</small><strong id="detail-address"></strong></div>
+              <div class="detail-row" data-field="phone"><small>Telefone</small><strong id="detail-phone"></strong></div>
+              <div class="detail-row" data-field="cnae"><small>Atividade (CNAE)</small><strong id="detail-cnae"></strong></div>
             </div>
           </section>
 
@@ -717,41 +717,7 @@
             </div>
           </section>
 
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Histórico</span><h3>Últimas visitas</h3></div>
-              <span class="panel-symbol">
-                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              </span>
-            </div>
-            <div class="media-empty">
-              <div class="media-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-              </div>
-              <div>
-                <strong>Nenhuma visita recente</strong>
-                <p>Os registros de visitas da Central ainda não foram sincronizados com o mapa interativo.</p>
-              </div>
-            </div>
-          </section>
 
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Registro visual</span><h3>Galeria do cliente</h3></div>
-              <span class="panel-symbol">
-                <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-              </span>
-            </div>
-            <div class="media-empty">
-              <div class="media-empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-              </div>
-              <div>
-                <strong>Sem fotos cadastradas</strong>
-                <p>A sincronização de mídias do Supabase será ativada nas próximas atualizações.</p>
-              </div>
-            </div>
-          </section>
 
           <div style="display:none;">
             <section id="client-preview"><span id="client-avatar"></span><span id="preview-label"></span><strong id="preview-title"></strong><small id="preview-meta"></small></section>
