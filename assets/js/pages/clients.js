@@ -23,7 +23,6 @@ window.PageModules.clients = {
 
     const render = () => {
       state = Store.getState();
-      const remoteReadOnly = Boolean(state.remoteSource?.active);
       const list = state.clients.filter(c => {
         return category === "Todos" || clientCategory(c) === category;
       });
@@ -75,7 +74,7 @@ window.PageModules.clients = {
               <button class="icon-btn ${viewMode === "cards" ? "active" : ""}" data-view="cards" type="button" aria-label="Exibir em cards" title="Cards">${UI.icon("grid", 17)}</button>
               <button class="icon-btn ${viewMode === "list" ? "active" : ""}" data-view="list" type="button" aria-label="Exibir em lista" title="Lista">${UI.icon("list", 18)}</button>
             </div>
-            <button class="compact-create-btn" id="newClientBtn" type="button" title="${remoteReadOnly ? "Cadastro será conectado na próxima etapa" : "Novo cliente"}" ${remoteReadOnly ? "disabled" : ""}>${UI.icon("plus", 18)}<span>${remoteReadOnly ? "Modo leitura" : "Novo cliente"}</span></button>
+            <button class="compact-create-btn" id="newClientBtn" type="button" title="Novo cliente">${UI.icon("plus", 18)}<span>Novo cliente</span></button>
           </div>
         </section>
 
@@ -144,11 +143,11 @@ window.PageModules.clients = {
         UI.openDialog("clientDialog");
         UI.setupManualMap(UI.$("#manualMap"), UI.$("#latInput"), UI.$("#lngInput"));
       });
-      UI.$("#clientForm").addEventListener("submit", (e) => {
+      UI.$("#clientForm").addEventListener("submit", async (e) => {
         if (e.submitter?.value === "cancel") return;
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
-        Store.addClient({
+        const payload = {
           name: fd.get("name"),
           company: fd.get("company") || fd.get("name"),
           contact: fd.get("contact"),
@@ -165,10 +164,21 @@ window.PageModules.clients = {
           lng: Number(fd.get("lng")) || null,
           notes: fd.get("notes"),
           needs: []
-        });
-        UI.toast("Cliente cadastrado com sucesso.");
-        UI.closeDialog("clientDialog");
-        render();
+        };
+        const submitButton = e.submitter || e.currentTarget.querySelector('button[value="default"]');
+        try {
+          if (submitButton) submitButton.disabled = true;
+          await UI.createSupabaseClientRecord(payload);
+          await UI.hydrateSupabaseSnapshot();
+          UI.toast("Cliente cadastrado com sucesso.");
+          UI.closeDialog("clientDialog");
+          render();
+        } catch (error) {
+          console.error(error);
+          UI.toast(error.message || "Não foi possível cadastrar o cliente.", "error");
+        } finally {
+          if (submitButton) submitButton.disabled = false;
+        }
       });
     };
 

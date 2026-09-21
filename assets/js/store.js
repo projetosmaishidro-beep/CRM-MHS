@@ -1,6 +1,6 @@
 window.Store = (() => {
-  const KEY = "central_comercial_state_v1";
   const clone = (value) => JSON.parse(JSON.stringify(value));
+  let state = null;
 
   /* Estado vazio para sessões autenticadas — sem dados mock. */
   function emptyState() {
@@ -8,33 +8,17 @@ window.Store = (() => {
   }
 
   function seed() {
-    // Se o usuário está autenticado, começar com estado vazio (dados vêm do Supabase).
-    if (window.AuthUser) {
-      const data = emptyState();
-      localStorage.setItem(KEY, JSON.stringify(data));
-      return data;
-    }
-    const data = clone(window.MockData);
-    localStorage.setItem(KEY, JSON.stringify(data));
-    return data;
+    state = window.AuthUser ? emptyState() : clone(window.MockData);
+    return state;
   }
 
   function getState() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(KEY));
-      if (!parsed || !Array.isArray(parsed.clients) || !Array.isArray(parsed.trips)) return seed();
-      // Se autenticado e o state local ainda contém dados mock, limpar.
-      if (window.AuthUser && parsed.clients?.some(c => (c.email || "").endsWith(".demo"))) {
-        return seed();
-      }
-      return parsed;
-    } catch {
-      return seed();
-    }
+    if (!state || !Array.isArray(state.clients) || !Array.isArray(state.trips)) return seed();
+    return state;
   }
 
-  function setState(state) {
-    localStorage.setItem(KEY, JSON.stringify(state));
+  function setState(nextState) {
+    state = nextState;
     window.dispatchEvent(new CustomEvent("store:changed", { detail: state }));
     return state;
   }

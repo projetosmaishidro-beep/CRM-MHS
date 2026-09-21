@@ -131,15 +131,24 @@ window.PageModules.events = {
           submitButton.textContent = "Salvandoâ€¦";
         }
         
-        Store.addEvent(payload);
-        UI.toast("Evento criado e enviado para o banco.");
-        UI.closeDialog("eventDialog");
-        
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = originalLabel;
+        try {
+          const created = await UI.createSupabaseEvent(payload);
+          if (payload.participantIds.length) {
+            await UI.updateSupabaseEvent(created.id, { participantIds: payload.participantIds });
+          }
+          await UI.hydrateSupabaseSnapshot();
+          UI.toast("Evento criado no banco de dados.");
+          UI.closeDialog("eventDialog");
+          render();
+        } catch (error) {
+          console.error(error);
+          UI.toast(error.message || "Não foi possível criar o evento.", "error");
+        } finally {
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalLabel;
+          }
         }
-        render();
       });
     };
 
@@ -150,10 +159,5 @@ window.PageModules.events = {
     const onStoreChange = () => render();
     window.addEventListener("store:changed", onStoreChange, { once: true });
 
-    // Se não há eventos no cache, força hidratação agora (usuário acessou a página diretamente)
-    if (!Store.getState().events?.length && window.AuthClient) {
-      UI.hydrateRemoteEvents?.().then(() => render());
-    }
   }
 };
-

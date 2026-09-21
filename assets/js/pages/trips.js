@@ -3,7 +3,6 @@ window.PageModules.trips = {
   init() {
     const render = () => {
       const state = Store.getState();
-      const remoteMode = Boolean(state.remoteSource?.active);
       UI.$("#pageContent").innerHTML = `
         <section class="trip-board reveal">
           <button class="trip-create-card" id="newTripBtn" type="button">${UI.icon("plus", 22)}<span>Nova viagem</span></button>
@@ -55,7 +54,7 @@ window.PageModules.trips = {
               <fieldset class="field span-2 checklist trip-checklist"><legend>Clientes planejados</legend><p class="checklist-hint">Marque os clientes que entram no roteiro desta viagem.</p>${state.clients.map(c => `<label><input type="checkbox" name="client" value="${c.id}"><span class="checklist-name">${c.name}</span><small>${c.city || "Cidade não informada"}</small></label>`).join("")}</fieldset>
             </div>
             </div>
-            <div class="dialog-actions trip-dialog-actions"><span class="trip-form-status">${remoteMode ? "A viagem será gravada no banco unificado." : "Modo demonstração: a viagem será gravada somente neste navegador."}</span><div><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">${remoteMode ? "Salvar no banco" : "Criar viagem"}</button></div></div>
+            <div class="dialog-actions trip-dialog-actions"><span class="trip-form-status">A viagem será gravada no banco unificado.</span><div><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Salvar no banco</button></div></div>
           </form>
         </dialog>
       `;
@@ -68,16 +67,22 @@ window.PageModules.trips = {
         requestAnimationFrame(() => tripForm.querySelector("input[name=name]")?.focus());
       });
       
-      UI.$(".trip-board")?.addEventListener("click", e => {
+      UI.$(".trip-board")?.addEventListener("click", async e => {
         const trashBtn = e.target.closest(".mini-trash-btn");
         if (trashBtn) {
           e.preventDefault();
           e.stopPropagation();
           const tripId = trashBtn.dataset.deleteTrip;
           if (confirm("Tem certeza que deseja excluir esta viagem? Esta ação apagará as visitas e despesas associadas e é irreversível.")) {
-            Store.deleteTrip(tripId);
-            UI.toast("Viagem excluída com sucesso.");
-            render();
+            try {
+              await UI.deleteSupabaseTrip(tripId);
+              await UI.hydrateSupabaseSnapshot();
+              UI.toast("Viagem excluída com sucesso.");
+              render();
+            } catch (error) {
+              console.error(error);
+              UI.toast(error.message || "Não foi possível excluir a viagem.", "error");
+            }
           }
         }
       });
@@ -113,25 +118,16 @@ window.PageModules.trips = {
           submitButton.textContent = "Salvandoâ€¦";
         }
         try {
-          if (Store.getState().remoteSource?.active) {
-            const currentState = Store.getState();
-            const participants = currentState.users
-              .filter(user => payload.participantIds.includes(user.id))
-              .map(user => ({ id: user.id, name: user.name, initials: user.initials, role: user.role }));
-            const clients = currentState.clients
-              .filter(client => payload.plannedClientIds.includes(client.id))
-              .map(client => ({ id: client.id, name: client.name, city: client.city, state: client.state }));
-            const created = await UI.createRemoteTrip({
-              ...payload,
-              participants,
-              clients
-            });
-            Store.setRemoteTrips([created, ...Store.getState().trips]);
-            UI.toast("Viagem salva no banco unificado.");
-          } else {
-            Store.addTrip(payload);
-            UI.toast("Viagem criada localmente.");
-          }
+          const currentState = Store.getState();
+          const participants = currentState.users
+            .filter(user => payload.participantIds.includes(user.id))
+            .map(user => ({ id: user.id, name: user.name, initials: user.initials, role: user.role }));
+          const clients = currentState.clients
+            .filter(client => payload.plannedClientIds.includes(client.id))
+            .map(client => ({ id: client.id, name: client.name, city: client.city, state: client.state }));
+          await UI.createSupabaseTrip({ ...payload, participants, clients });
+          await UI.hydrateSupabaseSnapshot();
+          UI.toast("Viagem salva no banco unificado.");
           UI.closeDialog("tripDialog");
           render();
         } catch (error) {

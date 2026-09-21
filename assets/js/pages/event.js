@@ -403,10 +403,11 @@ window.PageModules.event = {
         const newAttachments = [...(ev.attachments || [])];
         newAttachments.splice(currentGalleryIndex, 1);
         try {
-          await UI.updateRemoteEventMedia(eventId, { attachments: newAttachments });
+          await UI.updateSupabaseEvent(eventId, { attachments: newAttachments });
+          await UI.hydrateSupabaseSnapshot();
           UI.toast("Arquivo excluído.");
           UI.closeDialog('galleryDialog');
-          setTimeout(() => location.reload(), 350);
+          render();
         } catch(err) {
           console.error(err);
           UI.toast("Erro ao excluir arquivo.", "error");
@@ -452,31 +453,23 @@ window.PageModules.event = {
         
         const uploadedAttachments = [];
         for (const file of files) {
-          const ext = file.name.split('.').pop();
-          const path = `evento_${eventId}_${Date.now()}.${ext}`;
-          const url = await UI.uploadToStorage("eventos-anexos", path, file);
-          if (url) {
-            uploadedAttachments.push({
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              url: url
-            });
-          }
+          const path = `eventos/${eventId}/${Date.now()}-${file.name}`;
+          const uploaded = await UI.uploadPrivateFile(path, file);
+          uploadedAttachments.push({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            ...uploaded
+          });
         }
 
         if (uploadedAttachments.length) {
           const newAttachments = [...(event.attachments || []), ...uploadedAttachments];
           
-          Store.updateEvent(eventId, { attachments: newAttachments });
+          await UI.updateSupabaseEvent(eventId, { attachments: newAttachments });
+          await UI.hydrateSupabaseSnapshot();
           render();
-          
-          const success = await UI.updateRemoteEventMedia(eventId, { attachments: newAttachments });
-          if (success) {
-             UI.toast(`${uploadedAttachments.length} arquivo(s) salvo(s) na nuvem.`);
-          } else {
-             UI.toast("Erro ao salvar arquivos no banco de dados.", "error");
-          }
+          UI.toast(`${uploadedAttachments.length} arquivo(s) salvo(s) na nuvem.`);
         } else {
           UI.toast("Falha no upload dos arquivos.", "error");
         }

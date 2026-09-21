@@ -102,24 +102,49 @@ window.PageModules.trip = {
       `;
 
       UI.$$('[data-trip-modal]').forEach(button => button.addEventListener("click", () => UI.openDialog(button.dataset.tripModal)));
-      UI.$$('[data-stop]').forEach(input => input.addEventListener("change", () => { Store.toggleStop(trip.id, input.dataset.stop); render(); requestAnimationFrame(() => UI.openDialog("routeDialog")); }));
-      UI.$("#routeStopForm")?.addEventListener("submit", event => {
+      UI.$$('[data-stop]').forEach(input => input.addEventListener("change", async () => {
+        const stops = (trip.stops || []).map(stop => stop.id === input.dataset.stop ? { ...stop, done: input.checked } : stop);
+        try {
+          await UI.updateSupabaseTrip(trip.id, { stops });
+          await UI.hydrateSupabaseSnapshot();
+          render();
+          requestAnimationFrame(() => UI.openDialog("routeDialog"));
+        } catch (error) {
+          console.error(error);
+          UI.toast("Erro ao atualizar a parada.", "error");
+        }
+      }));
+      UI.$("#routeStopForm")?.addEventListener("submit", async event => {
         if (event.submitter?.value === "cancel") return;
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        Store.addStop(trip.id, { label: data.get("label"), place: data.get("place") });
-        UI.toast("Parada adicionada ao roteiro.");
-        render();
-        requestAnimationFrame(() => UI.openDialog("routeDialog"));
+        const stops = [...(trip.stops || []), { id: Store.uid("stop"), label: data.get("label"), place: data.get("place"), done: false }];
+        try {
+          await UI.updateSupabaseTrip(trip.id, { stops });
+          await UI.hydrateSupabaseSnapshot();
+          UI.toast("Parada adicionada ao roteiro.");
+          render();
+          requestAnimationFrame(() => UI.openDialog("routeDialog"));
+        } catch (error) {
+          console.error(error);
+          UI.toast("Erro ao adicionar a parada.", "error");
+        }
       });
-      UI.$("#kmForm")?.addEventListener("submit", event => {
+      UI.$("#kmForm")?.addEventListener("submit", async event => {
         if (event.submitter?.value === "cancel") return;
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const kmValue = Number(data.get("kmValue"));
         if (kmValue > 0) {
-          Store.addOdometerRecord(trip.id, kmValue);
-          UI.toast("Registro salvo no histórico do odômetro.");
+          try {
+            const odometerRecords = [{ id: Store.uid("km"), date: new Date().toISOString(), km: kmValue }, ...(trip.odometerRecords || [])];
+            await UI.updateSupabaseTrip(trip.id, { odometerRecords });
+            await UI.hydrateSupabaseSnapshot();
+            UI.toast("Registro salvo no histórico do odômetro.");
+          } catch (error) {
+            console.error(error);
+            UI.toast("Erro ao salvar o odômetro.", "error");
+          }
         }
         render();
         requestAnimationFrame(() => {
@@ -139,13 +164,19 @@ window.PageModules.trip = {
             UI.toast("Erro ao atualizar notas.", "error");
           }
         });
-      UI.$("#statusTripBtn")?.addEventListener("click", () => {
+      UI.$("#statusTripBtn")?.addEventListener("click", async () => {
         const nextStatus = trip.status === "Planejada" ? "Em andamento" : "Concluída";
         const patch = { status: nextStatus };
         if (nextStatus === "Concluída" && trip.currentKm && !trip.endKm) patch.endKm = trip.currentKm;
-        Store.updateTrip(trip.id, patch);
-        UI.toast(nextStatus === "Em andamento" ? "Viagem iniciada." : "Viagem concluída.");
-        render();
+        try {
+          await UI.updateSupabaseTrip(trip.id, patch);
+          await UI.hydrateSupabaseSnapshot();
+          UI.toast(nextStatus === "Em andamento" ? "Viagem iniciada." : "Viagem concluída.");
+          render();
+        } catch (error) {
+          console.error(error);
+          UI.toast("Erro ao atualizar a viagem.", "error");
+        }
       });
               UI.$("#tripFiles")?.addEventListener("change", async event => {
           const added = await UI.filesToAttachments(event.target.files);
