@@ -12,6 +12,7 @@
   const CONFIG = Object.freeze({
     PROFILE: String(RUNTIME_CONFIG.PROFILE || "production").trim(),
     PAGE_SIZE: Number(RUNTIME_CONFIG.SUPABASE_PAGE_SIZE) || 1000,
+    SCHEMA_NAME: "api",
     REVERSE_GEOCODING_FUNCTION: String(
       RUNTIME_CONFIG.REVERSE_GEOCODING_FUNCTION || ""
     ).trim(),
@@ -367,26 +368,6 @@
 
   async function init() {
     cacheDom();
-    // Ferramentas de manutenção restauradas a pedido do usuário
-
-    let isAdmin = false;
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.includes("-auth-token")) {
-          const data = JSON.parse(localStorage.getItem(key));
-          if (data?.user?.email === "comercial3@maisintegradora.com") {
-            isAdmin = true;
-            break;
-          }
-        }
-      }
-    } catch (e) {}
-
-    if (!isAdmin) {
-      dom.connectionAccess?.classList.add("is-hidden");
-    }
-
     restoreUiState();
     initMap();
     bindEvents();
@@ -1336,10 +1317,11 @@
 
   function getDataSourceConfig() {
     const prepared = readPreparedConnection();
+    const centralized = window.SUPABASE_CONFIG || {};
     return {
       type: "UNIFICADO",
-      url: String(prepared.url || "").trim(),
-      apiKey: String(prepared.apiKey || "").trim(),
+      url: String(prepared.url || centralized.SUPABASE_URL || "").trim(),
+      apiKey: String(prepared.apiKey || centralized.SUPABASE_ANON_KEY || "").trim(),
       schemaName: "api",
       tableName: "vw_mapa_clientes",
       orderColumn: "cliente_id"
@@ -1353,7 +1335,7 @@
   }
 
   function openConnectionPanel() {
-    const saved = readPreparedConnection();
+    const saved = getDataSourceConfig();
     dom.connectionUrl.value = saved.url || "";
     dom.connectionKey.value = saved.apiKey || "";
     setConnectionMessage(
@@ -1462,7 +1444,7 @@
     setConnectionMessage("Conexão removida deste navegador.", "neutral");
   }
 
-  async function getPreparedSupabaseClient(connection = readPreparedConnection()) {
+  async function getPreparedSupabaseClient(connection = getDataSourceConfig()) {
     if (!connection?.url || !connection?.apiKey || !window.supabase?.createClient) return null;
     const usesPreparedClient =
       state.dataSource?.type === "UNIFICADO" &&
@@ -1476,7 +1458,7 @@
 
   async function renderPreparedAuthState() {
     if (!dom.connectionAuthStatus) return;
-    const prepared = readPreparedConnection();
+    const prepared = getDataSourceConfig();
     if (!prepared.url || !prepared.apiKey) {
       dom.connectionAuthStatus.textContent = "Salve a conexão para entrar.";
       dom.connectionSignIn.classList.remove("is-hidden");
@@ -1700,7 +1682,7 @@
     if (state.session?.user?.id) {
       const { data, error } = await state.supabaseClient
         .schema(CONFIG.SCHEMA_NAME)
-        .from("operadores")
+        .from("vw_equipe")
         .select("usuario_id, nome, papel, ativo")
         .eq("usuario_id", state.session.user.id)
         .eq("ativo", true)
@@ -1720,10 +1702,7 @@
   function renderMaintenanceSession() {
     if (!dom.maintenanceLoginView) return;
 
-    // Bypass universal a pedido do usuário:
-    state.session = state.session || { user: { email: "comercial@maisintegradora.com" } };
-    state.operator = state.operator || { nome: "Equipe Comercial", papel: "ADMIN" };
-    const authenticated = true;
+    const authenticated = Boolean(state.session && state.operator);
     const clientView = authenticated && state.maintenanceView === "client";
     const routeView = authenticated && state.maintenanceView === "route";
     dom.maintenanceLoginView.classList.toggle("is-hidden", authenticated);
@@ -4014,9 +3993,8 @@
       const { data, error } = await state.supabaseClient.auth.getSession();
       if (error) throw error;
       state.session = data?.session || null;
-      state.operator = null;
-      dom.maintenanceAccess.classList.add("is-hidden");
-      dom.fieldMarkerLegend.classList.add("is-hidden");
+      await syncAuthSession(state.session);
+      startAuthListener();
       if (!state.session) {
         showSetupStatus(
           "Entre para consultar a carteira",
