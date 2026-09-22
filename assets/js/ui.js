@@ -512,6 +512,7 @@
       lng: row.longitude === null ? null : Number(row.longitude),
       notes: row.observacao_localizacao || "",
       needs: [],
+      needRecords: [],
       createdAt: row.relacionamento_criado_em || new Date().toISOString(),
       ownerId: row.responsavel_por || "",
       attachments: [],
