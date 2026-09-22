@@ -4006,7 +4006,10 @@
         return;
       }
 
-      const rawRows = await fetchAllRows();
+      const rawRows = await Promise.race([
+        fetchAllRows(),
+        new Promise((_, reject) => window.setTimeout(() => reject(new Error("A consulta ao Supabase excedeu o tempo limite.")), 15000))
+      ]);
       const normalized = rawRows
         .map(normalizeClient)
         .filter(Boolean);

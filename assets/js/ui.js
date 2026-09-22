@@ -1252,8 +1252,8 @@
       // falha pontual, por exemplo em despesas, não pode impedir o detalhe de
       // um evento já disponível em vw_eventos de ser exibido.
       const results = [clients, trips, visits, needs, expenses, events, users];
-      const failed = results.find((result) => result.error);
-      if (failed) console.error("[Central] Uma ou mais views não puderam ser carregadas:", failed.error);
+      const failures = results.filter((result) => result.error);
+      if (failures.length) console.error("[Central] Uma ou mais views não puderam ser carregadas:", failures.map((result) => result.error));
       const remoteClients = (clients.data || []).map(mapRemoteClient);
       (needs.data || []).forEach((row) => {
         const clientRow = remoteClients.find((item) => item.id === row.empresa_id);
@@ -1267,7 +1267,10 @@
         return { id: row.usuario_id || row.membro_id, name, role: row.cargo || row.papel || "Equipe Comercial", initials: initials(name), email: row.email || "", active: row.ativo !== false, remote: true };
       });
       Store.setRemoteSnapshot({ clients: remoteClients, trips: (trips.data || []).map(tripFromApi), visits: (visits.data || []).map(visitFromApi), expenses: (expenses.data || []).map(expenseFromApi), events: (events.data || []).map(eventFromApi), users: remoteUsers, activities: [] });
-      return { count: remoteClients.length };
+      return {
+        count: remoteClients.length,
+        ...(failures.length ? { warning: "Alguns dados não puderam ser carregados do Supabase. Verifique as permissões e as views expostas." } : {})
+      };
     } catch (error) {
       console.error("[Central] Falha no retrato remoto:", error);
       return { error: error.message || "Não foi possível carregar o Supabase." };
