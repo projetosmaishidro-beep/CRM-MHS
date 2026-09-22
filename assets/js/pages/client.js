@@ -8,6 +8,10 @@ window.PageModules.client = {
     const render = () => {
       const state = Store.getState();
       const client = state.clients.find(c => c.id === requestedId) || state.clients[0];
+      if (!client) {
+        UI.$("#pageContent").innerHTML = `<section class="content-section">${UI.empty("Cliente não encontrado", "A carteira ainda não possui clientes disponíveis.")}</section>`;
+        return;
+      }
       const visits = state.visits
         .filter(v => v.clientId === client.id)
         .sort((a,b) => new Date(b.date) - new Date(a.date));

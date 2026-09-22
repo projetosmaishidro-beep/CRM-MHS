@@ -483,7 +483,7 @@ window.PageModules.event = {
         const state = Store.getState();
         const ev = state.events.find(ev => ev.id === eventId);
         if (ev) {
-          const links = ev.links || [];
+          const links = [...(ev.links || [])];
           const editIndex = fd.get("editIndex");
           if (editIndex && editIndex !== "-1") {
             links[parseInt(editIndex, 10)] = { title: fd.get("title"), url: fd.get("url") };
@@ -520,7 +520,7 @@ window.PageModules.event = {
         const state = Store.getState();
         const ev = state.events.find(ev => ev.id === eventId);
         if (ev) {
-          const contacts = ev.contacts || [];
+          const contacts = [...(ev.contacts || [])];
           const editIndex = fd.get("editIndex");
           if (editIndex && editIndex !== "-1") {
             contacts[parseInt(editIndex, 10)] = { name: fd.get("name"), role: fd.get("role"), phone: fd.get("phone") };

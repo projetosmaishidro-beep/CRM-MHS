@@ -148,8 +148,8 @@ window.PageModules["new-visit"] = {
       }
     });
 
-    const ingestFiles = async (files) => {
-      attachments.push(...await UI.filesToAttachments(files));
+    const ingestFiles = (files) => {
+      attachments.push(...Array.from(files));
       UI.$("#attachmentPreview").innerHTML = attachments.map(a => `
         <div class="file-chip">${UI.icon(a.type.startsWith("image/") ? "camera" : "file", 16)}<span>${a.name}</span><small>${Math.round(a.size/1024)} KB</small></div>`).join("");
       UI.toast(`${files.length} arquivo(s) adicionado(s).`);
@@ -218,7 +218,13 @@ window.PageModules["new-visit"] = {
           clientId,
           tripId: fd.get("tripId") || null,
           notes: fd.get("notes"),
-          needs
+          needs,
+          attachments: await Promise.all(attachments.map(async (file, index) => ({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            ...(await UI.uploadPrivateFile(`visitas/${clientId}/${Date.now()}-${index}-${encodeURIComponent(file.name)}`, file))
+          })))
         };
 
         const createdVisit = await UI.createSupabaseVisit(visitPayload);

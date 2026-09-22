@@ -4,6 +4,10 @@ window.PageModules.user = {
     const state = Store.getState();
     const id = new URLSearchParams(location.search).get("id");
     const user = state.users.find(u => u.id === id) || state.users[0];
+    if (!user) {
+      UI.$("#pageContent").innerHTML = `<section class="content-section">${UI.empty("Usuário não encontrado", "Nenhum membro ativo da equipe está disponível.")}</section>`;
+      return;
+    }
     const trips = state.trips.filter(t => t.participantIds.includes(user.id));
     const visits = state.visits.filter(v => v.userId === user.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
     const expenses = state.expenses.filter(e => e.userId === user.id);

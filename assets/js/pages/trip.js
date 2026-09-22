@@ -6,6 +6,10 @@ window.PageModules.trip = {
     const render = () => {
       const state = Store.getState();
       const trip = state.trips.find(t => t.id === id) || state.trips[0];
+      if (!trip) {
+        UI.$("#pageContent").innerHTML = `<section class="content-section">${UI.empty("Viagem não encontrada", "Nenhuma viagem está disponível para exibir.")}</section>`;
+        return;
+      }
       const visits = state.visits.filter(v => v.tripId === trip.id);
       const expenses = state.expenses.filter(e => e.tripId === trip.id);
       const participants = trip.participantIds.map(uid => state.users.find(u => u.id === uid)).filter(Boolean);
@@ -178,9 +182,14 @@ window.PageModules.trip = {
           UI.toast("Erro ao atualizar a viagem.", "error");
         }
       });
-              UI.$("#tripFiles")?.addEventListener("change", async event => {
-          const added = await UI.filesToAttachments(event.target.files);
+      UI.$("#tripFiles")?.addEventListener("change", async event => {
           try {
+             const added = await Promise.all(Array.from(event.target.files || []).map(async (file, index) => ({
+               name: file.name,
+               size: file.size,
+               type: file.type,
+               ...(await UI.uploadPrivateFile(`viagens/${trip.id}/${Date.now()}-${index}-${encodeURIComponent(file.name)}`, file))
+             })));
              await UI.updateSupabaseTrip(trip.id, { attachments: [...(trip.attachments || []), ...added] });
              UI.toast(`${added.length} anexo(s) adicionado(s) à viagem.`);
              setTimeout(() => location.reload(), 350);

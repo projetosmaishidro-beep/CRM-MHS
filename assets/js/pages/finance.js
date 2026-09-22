@@ -93,9 +93,8 @@ window.PageModules.finance = {
 
       UI.$("#tripFilter").addEventListener("change", e => { selectedTrip = e.target.value; render(); });
       UI.$("#newExpenseBtn").addEventListener("click", () => UI.openDialog("expenseDialog"));
-      UI.$("#receiptInput").addEventListener("change", async e => {
-        const arr = await UI.filesToAttachments(e.target.files);
-        attachment = arr[0] || null;
+      UI.$("#receiptInput").addEventListener("change", e => {
+        attachment = e.target.files?.[0] || null;
         UI.$("#receiptLabel").textContent = attachment ? attachment.name : "Use a câmera ou selecione um arquivo";
       });
             UI.$("#expenseForm").addEventListener("submit", async e => {
@@ -118,6 +117,12 @@ window.PageModules.finance = {
         if (btn) btn.disabled = true;
 
         try {
+          const attachments = attachment ? [{
+            name: attachment.name,
+            size: attachment.size,
+            type: attachment.type,
+            ...(await UI.uploadPrivateFile(`despesas/${tripId || eventId}/${Date.now()}-${encodeURIComponent(attachment.name)}`, attachment))
+          }] : [];
           const payload = {
             tripId,
             eventId,
@@ -126,7 +131,8 @@ window.PageModules.finance = {
             costCenter: fd.get("costCenter"),
             amount: Number(fd.get("amount")),
             place: fd.get("place"),
-            notes: fd.get("notes")
+            notes: fd.get("notes"),
+            attachments
           };
           
           await UI.createSupabaseExpense(payload);

@@ -2931,8 +2931,8 @@
     const { data, error } = await state.supabaseClient
       .schema(CONFIG.SCHEMA_NAME)
       .from("vw_atividade_clientes")
-      .select("evento_id, ocorrido_em, tipo_evento, cliente_id, cliente, municipio, uf, operador")
-      .order("ocorrido_em", { ascending: false })
+      .select("auditoria_id, entidade, cliente_id, acao, criado_por, criado_em")
+      .order("criado_em", { ascending: false })
       .limit(20);
 
     if (error) {
@@ -2962,17 +2962,16 @@
 
       const copy = document.createElement("div");
       const title = document.createElement("strong");
-      title.textContent = cleanValue(activity.cliente) || "Cliente";
+      title.textContent = cleanValue(activity.entidade) || "Atividade";
       const meta = document.createElement("small");
       meta.textContent = [
-        [activity.municipio, activity.uf].filter(Boolean).join(" - "),
-        formatActivityDate(activity.ocorrido_em),
-        cleanValue(activity.operador)
+        formatActivityDate(activity.criado_em),
+        cleanValue(activity.criado_por)
       ].filter(Boolean).join(" • ");
       copy.append(title, meta);
 
       const type = document.createElement("span");
-      type.textContent = formatActivityType(activity.tipo_evento);
+      type.textContent = formatActivityType(activity.acao);
       item.append(copy, type);
       dom.maintenanceActivityList.appendChild(item);
     });
