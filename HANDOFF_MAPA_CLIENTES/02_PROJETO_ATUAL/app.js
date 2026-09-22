@@ -407,6 +407,66 @@
   }
 
   function cacheDom() {
+    // O HTML atual nao exibe os paineis de relatorio e de login de manutencao.
+    // Eles permanecem suportados pelo script quando presentes, mas nao podem
+    // impedir a inicializacao do mapa quando deliberadamente omitidos da tela.
+    const optionalIds = new Set([
+      "open-report",
+      "maintenance-login-view",
+      "maintenance-login-form",
+      "maintenance-email",
+      "maintenance-password",
+      "maintenance-login-error",
+      "maintenance-login-submit",
+      "client-maintenance-actions",
+      "report-panel",
+      "close-report",
+      "report-context",
+      "report-scope-label",
+      "report-scope-note",
+      "report-select-visible-area",
+      "report-fit-area",
+      "report-clear-area",
+      "report-export-filtered",
+      "report-export-area",
+      "report-export-hotspots",
+      "report-tabs",
+      "report-total-value",
+      "report-total-note",
+      "report-coverage-value",
+      "report-coverage-note",
+      "report-active-value",
+      "report-active-note",
+      "report-unmapped-value",
+      "report-unmapped-note",
+      "report-cities-value",
+      "report-cities-note",
+      "report-states-value",
+      "report-states-note",
+      "report-top-city-value",
+      "report-top-city-note",
+      "report-shared-value",
+      "report-shared-note",
+      "report-empty",
+      "report-top-caption",
+      "chart-top-cities",
+      "chart-status",
+      "chart-uf",
+      "chart-coordinate-groups",
+      "report-density-list",
+      "report-section-overview",
+      "report-section-territory",
+      "report-section-quality",
+      "report-district-caption",
+      "chart-top-districts",
+      "chart-top-streets",
+      "report-ranking-table",
+      "report-coverage-table",
+      "report-insights",
+      "chart-geocode-quality",
+      "report-quality-table",
+      "chart-cnae"
+    ]);
     const ids = [
       "app",
       "map",
@@ -623,6 +683,7 @@
 
     for (const id of ids) {
       const element = document.getElementById(id);
+      if (!element && optionalIds.has(id)) continue;
       if (!element) {
         throw new Error(`Elemento obrigatório não encontrado: #${id}`);
       }
@@ -1183,7 +1244,7 @@
     dom.connectionSignOut.addEventListener("click", signOutPreparedConnection);
     dom.maintenanceAccess.addEventListener("click", openMaintenancePanel);
     dom.closeMaintenance.addEventListener("click", closeMaintenancePanel);
-    dom.maintenanceLoginForm.addEventListener("submit", handleMaintenanceLogin);
+    dom.maintenanceLoginForm?.addEventListener("submit", handleMaintenanceLogin);
     dom.maintenanceSignOut.addEventListener("click", handleMaintenanceSignOut);
     dom.maintenanceNewClient.addEventListener("click", beginNewClientFlow);
     dom.maintenanceRoutes.addEventListener("click", openRouteBuilder);
@@ -1223,15 +1284,15 @@
     dom.shareClientWhatsapp.addEventListener("click", () => {
       showToast("Escolha o contato e confirme o envio no WhatsApp.");
     });
-    dom.openReport.addEventListener("click", openReportPanel);
-    dom.closeReport.addEventListener("click", closeReportPanel);
-    dom.reportSelectVisibleArea.addEventListener("click", selectVisibleMapArea);
-    dom.reportFitArea.addEventListener("click", fitAreaSelection);
-    dom.reportClearArea.addEventListener("click", () => clearAreaSelection({ apply: true }));
-    dom.reportExportFiltered.addEventListener("click", exportFilteredClients);
-    dom.reportExportArea.addEventListener("click", exportAreaClients);
-    dom.reportExportHotspots.addEventListener("click", exportHotspots);
-    dom.reportTabs.addEventListener("click", handleReportTabClick);
+    dom.openReport?.addEventListener("click", openReportPanel);
+    dom.closeReport?.addEventListener("click", closeReportPanel);
+    dom.reportSelectVisibleArea?.addEventListener("click", selectVisibleMapArea);
+    dom.reportFitArea?.addEventListener("click", fitAreaSelection);
+    dom.reportClearArea?.addEventListener("click", () => clearAreaSelection({ apply: true }));
+    dom.reportExportFiltered?.addEventListener("click", exportFilteredClients);
+    dom.reportExportArea?.addEventListener("click", exportAreaClients);
+    dom.reportExportHotspots?.addEventListener("click", exportHotspots);
+    dom.reportTabs?.addEventListener("click", handleReportTabClick);
     dom.modalBackdrop.addEventListener("click", closeTopModal);
 
     dom.statusAction.addEventListener("click", connectAndLoad);
@@ -1286,6 +1347,7 @@
   }
 
   function openReportPanel() {
+    if (!dom.reportPanel || !dom.openReport) return;
     state.reportOpen = true;
     dom.reportPanel.classList.add("is-open");
     dom.reportPanel.setAttribute("aria-hidden", "false");
@@ -1297,6 +1359,7 @@
   }
 
   function closeReportPanel() {
+    if (!dom.reportPanel || !dom.openReport) return;
     state.reportOpen = false;
     dom.reportPanel.classList.remove("is-open");
     dom.reportPanel.setAttribute("aria-hidden", "true");
@@ -1713,7 +1776,7 @@
     dom.maintenanceClientView.classList.toggle("is-hidden", !clientView);
     dom.maintenanceRouteView.classList.toggle("is-hidden", !routeView);
     dom.maintenanceAccess.classList.toggle("is-authenticated", authenticated);
-    if (!authenticated) dom.clientMaintenanceActions.classList.add("is-hidden");
+    if (!authenticated) dom.clientMaintenanceActions?.classList.add("is-hidden");
     dom.fieldMarkerLegend.classList.toggle("is-hidden", !authenticated);
     syncMarkerDragState();
 
@@ -1737,7 +1800,7 @@
     dom.maintenanceProfileInitials.textContent = getInitialsFromText(operatorName);
     dom.maintenanceNewClient.disabled = !canEdit;
     dom.maintenanceRoutes.disabled = !canEdit;
-    dom.clientMaintenanceActions.classList.toggle(
+    dom.clientMaintenanceActions?.classList.toggle(
       "is-hidden",
       !state.selectedClient || !canEdit
     );
@@ -3041,6 +3104,7 @@
   }
 
   function syncReportTabs() {
+    if (!dom.reportTabs || !dom.reportPanel) return;
     const tabs = dom.reportTabs.querySelectorAll("[data-report-tab]");
     const panels = dom.reportPanel.querySelectorAll("[data-report-panel]");
 
@@ -5380,20 +5444,24 @@
   function syncAreaSelectionUi() {
     const active = Boolean(state.areaSelection);
 
-    dom.reportFitArea.disabled = !active;
-    dom.reportClearArea.disabled = !active;
-    dom.reportExportArea.disabled = !active;
+    if (dom.reportFitArea) dom.reportFitArea.disabled = !active;
+    if (dom.reportClearArea) dom.reportClearArea.disabled = !active;
+    if (dom.reportExportArea) dom.reportExportArea.disabled = !active;
     dom.resultPill.classList.toggle("is-area-scoped", active);
     dom.resultPill.title = active
       ? "Clientes dentro da area visivel selecionada"
       : "";
 
-    dom.reportScopeLabel.textContent = active
-      ? "Area visivel selecionada"
-      : getReportScopeLabel();
-    dom.reportScopeNote.textContent = active
-      ? state.areaSelection.label
-      : getReportScopeNote();
+    if (dom.reportScopeLabel) {
+      dom.reportScopeLabel.textContent = active
+        ? "Area visivel selecionada"
+        : getReportScopeLabel();
+    }
+    if (dom.reportScopeNote) {
+      dom.reportScopeNote.textContent = active
+        ? state.areaSelection.label
+        : getReportScopeNote();
+    }
   }
 
   function drawAreaSelection() {
@@ -6510,7 +6578,7 @@
 
     renderSameCoordinate(client, { listMode });
     updateClientActions(client);
-    dom.clientMaintenanceActions.classList.toggle(
+    dom.clientMaintenanceActions?.classList.toggle(
       "is-hidden",
       listMode ||
       !state.operator ||
