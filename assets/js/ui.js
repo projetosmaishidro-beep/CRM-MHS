@@ -916,10 +916,16 @@
     const content = $("#pageContent");
     content.innerHTML = `<section class="content-section">${skeleton(6)}</section>`;
     setTimeout(() => {
-      renderFn();
-      decorateVisuals();
-      requestAnimationFrame(() => content.classList.add("ready"));
-      initRevealObserver();
+      try {
+        renderFn();
+        decorateVisuals();
+        requestAnimationFrame(() => content.classList.add("ready"));
+        initRevealObserver();
+      } catch (error) {
+        console.error("[Central] Falha ao renderizar a página:", error);
+        content.innerHTML = `<section class="content-section">${empty("Não foi possível abrir esta página", "Atualize a página. Se o erro persistir, verifique os dados do registro no banco.")}</section>`;
+        content.classList.add("ready");
+      }
     }, delay);
   }
 

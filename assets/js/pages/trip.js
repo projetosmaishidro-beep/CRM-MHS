@@ -5,20 +5,25 @@ window.PageModules.trip = {
 
     const render = () => {
       const state = Store.getState();
-      const trip = state.trips.find(t => t.id === id) || state.trips[0];
+      const trips = Array.isArray(state.trips) ? state.trips : [];
+      const trip = trips.find(t => String(t.id) === String(id)) || trips[0];
       if (!trip) {
         UI.$("#pageContent").innerHTML = `<section class="content-section">${UI.empty("Viagem não encontrada", "Nenhuma viagem está disponível para exibir.")}</section>`;
         return;
       }
-      const visits = state.visits.filter(v => v.tripId === trip.id);
-      const expenses = state.expenses.filter(e => e.tripId === trip.id);
-      const participants = trip.participantIds.map(uid => state.users.find(u => u.id === uid)).filter(Boolean);
-      const planned = trip.plannedClientIds.map(cid => state.clients.find(c => c.id === cid)).filter(Boolean);
+      const visits = (Array.isArray(state.visits) ? state.visits : []).filter(v => String(v.tripId) === String(trip.id));
+      const expenses = (Array.isArray(state.expenses) ? state.expenses : []).filter(e => String(e.tripId) === String(trip.id));
+      const users = Array.isArray(state.users) ? state.users : [];
+      const clients = Array.isArray(state.clients) ? state.clients : [];
+      const participantIds = Array.isArray(trip.participantIds) ? trip.participantIds : [];
+      const plannedClientIds = Array.isArray(trip.plannedClientIds) ? trip.plannedClientIds : [];
+      const participants = participantIds.map(uid => users.find(u => String(u.id) === String(uid))).filter(Boolean);
+      const planned = plannedClientIds.map(cid => clients.find(c => String(c.id) === String(cid))).filter(Boolean);
       const visitedIds = new Set(visits.map(v => v.clientId));
-      const stops = trip.stops || [];
-      const attachments = trip.attachments || [];
+      const stops = Array.isArray(trip.stops) ? trip.stops : [];
+      const attachments = Array.isArray(trip.attachments) ? trip.attachments : [];
       const progress = Math.round((stops.filter(s => s.done).length / Math.max(stops.length, 1)) * 100);
-      const records = trip.odometerRecords || [];
+      const records = Array.isArray(trip.odometerRecords) ? trip.odometerRecords : [];
       const legacyKm = trip.startKm && trip.currentKm ? trip.currentKm - trip.startKm : 0;
       const km = records.length >= 2 ? Math.max(...records.map(r => r.km)) - Math.min(...records.map(r => r.km)) : (records.length === 1 ? 0 : legacyKm);
       const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
