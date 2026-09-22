@@ -348,8 +348,8 @@
     }
 
     button.disabled = true;
-    button.textContent = "Testandoâ€¦";
-    setConnectionStatus("Validando URL e chave pública sem consultar dados comerciaisâ€¦", "loading");
+    button.textContent = "Testando…";
+    setConnectionStatus("Validando URL e chave pública sem consultar dados comerciais…", "loading");
     try {
       const response = await fetch(`${connection.url}/auth/v1/settings`, {
         headers: { apikey: connection.apiKey }
@@ -453,14 +453,14 @@
       if (!email || !password) throw new Error("Informe e-mail e senha para entrar.");
       localStorage.setItem(CONNECTION_STORAGE_KEY, JSON.stringify(connection));
       button.disabled = true;
-      button.textContent = "Entrandoâ€¦";
+      button.textContent = "Entrando…";
       const client = await getSupabaseClient(connection);
       const { error } = await client.auth.signInWithPassword({ email, password });
       if (error) throw error;
       $("#connectionPassword").value = "";
       await renderConnectionAuthState();
-      setConnectionStatus("Sessão iniciada. Atualizando a carteira comercialâ€¦", "success");
-      toast("Sessão iniciada. Carregando dadosâ€¦");
+      setConnectionStatus("Sessão iniciada. Atualizando a carteira comercial…", "success");
+      toast("Sessão iniciada. Carregando dados…");
       setTimeout(() => location.reload(), 450);
     } catch (error) {
       setConnectionStatus(error.message || "Não foi possível iniciar a sessão.", "error");
@@ -651,7 +651,7 @@
   }
 
   // ------------------------------------------------------------------
-  // Eventos remotos (via schema api â€” views e RPCs)
+  // Eventos remotos (via schema api — views e RPCs)
   // ------------------------------------------------------------------
 
   async function hydrateRemoteEvents() {
@@ -873,7 +873,7 @@
   }
 
   function date(value, withTime = false) {
-    if (!value) return "â€”";
+    if (!value) return "—";
     const d = new Date(value);
     const opts = withTime
       ? { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
@@ -882,7 +882,7 @@
   }
 
   function shortDate(value) {
-    if (!value) return "â€”";
+    if (!value) return "—";
     return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(new Date(`${value}T12:00:00`));
   }
 
@@ -931,7 +931,7 @@
 
   function statusBadge(status) {
     const key = String(status || "").toLowerCase().replace(/\s+/g, "-");
-    return `<span class="badge badge-${key}">${status || "â€”"}</span>`;
+    return `<span class="badge badge-${key}">${status || "—"}</span>`;
   }
 
   function empty(title, description, actionHtml = "") {

@@ -42,7 +42,7 @@ window.PageModules.events = {
             const evExpenses = expenses.filter(e => e.eventId === ev.id);
             const totalEvCost = evExpenses.reduce((s,e) => s + Number(e.amount), 0);
             const participants = (ev.participantIds || []).map(id => state.users.find(u => u.id === id)).filter(Boolean);
-            const editionBadge = ev._edition > 1 ? `<span class="tag tag-accent" style="font-size:10px; padding:2px 6px;">${ev._edition}Âª Edição</span>` : "";
+            const editionBadge = ev._edition > 1 ? `<span class="tag tag-accent" style="font-size:10px; padding:2px 6px;">${ev._edition}ª Edição</span>` : "";
             
             return `
               <a class="trip-card ${ev.status === 'Realizado' ? 'opacity-80' : ''}" href="${UI.pageLink(`pages/evento.html?id=${ev.id}`)}">
@@ -112,7 +112,7 @@ window.PageModules.events = {
         const startDate = String(fd.get("startDate") || "");
         const endDate = String(fd.get("endDate") || "");
         if (startDate && endDate && endDate < startDate) {
-          UI.toast("A data final precisa ser posterior Ã  data inicial.", "error");
+          UI.toast("A data final precisa ser posterior à data inicial.", "error");
           return;
         }
         const payload = {
@@ -128,7 +128,7 @@ window.PageModules.events = {
         const originalLabel = submitButton?.textContent || "Salvar";
         if (submitButton) {
           submitButton.disabled = true;
-          submitButton.textContent = "Salvandoâ€¦";
+          submitButton.textContent = "Salvando…";
         }
         
         try {

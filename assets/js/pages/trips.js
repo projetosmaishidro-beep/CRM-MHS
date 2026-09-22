@@ -94,7 +94,7 @@ window.PageModules.trips = {
         const startDate = String(fd.get("startDate") || "");
         const endDate = String(fd.get("endDate") || "");
         if (startDate && endDate && endDate < startDate) {
-          UI.toast("A data final precisa ser posterior Ã  data inicial.", "error");
+          UI.toast("A data final precisa ser posterior à data inicial.", "error");
           return;
         }
         const payload = {
@@ -115,7 +115,7 @@ window.PageModules.trips = {
         const originalLabel = submitButton?.textContent || "Salvar";
         if (submitButton) {
           submitButton.disabled = true;
-          submitButton.textContent = "Salvandoâ€¦";
+          submitButton.textContent = "Salvando…";
         }
         try {
           const currentState = Store.getState();

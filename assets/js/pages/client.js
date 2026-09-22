@@ -53,9 +53,9 @@ window.PageModules.client = {
               <span class="panel-symbol">${UI.icon("user", 23)}</span>
             </div>
             <div class="info-grid compact-info">
-              <div><small>Contato</small><strong>${client.contact || "Não informado"}</strong><span>${client.phone || "â€”"}</span></div>
+              <div><small>Contato</small><strong>${client.contact || "Não informado"}</strong><span>${client.phone || "—"}</span></div>
               <div><small>E-mail</small><strong>${client.email || "Não informado"}</strong><span>${client.city}, ${client.state}</span></div>
-              <div><small>Responsável interno</small><strong>${owner?.name || "â€”"}</strong><span>${owner?.role || ""}</span></div>
+              <div><small>Responsável interno</small><strong>${owner?.name || "—"}</strong><span>${owner?.role || ""}</span></div>
               <div><small>Relacionamento desde</small><strong>${UI.date(client.createdAt)}</strong><span>${visits.length} visita(s)</span></div>
             </div>
             <div class="note-box"><small>Observações gerais</small><p>${client.notes || "Sem observações."}</p></div>

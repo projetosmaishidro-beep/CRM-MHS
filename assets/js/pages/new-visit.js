@@ -100,7 +100,7 @@ window.PageModules["new-visit"] = {
 
     if (preselected && searchInput) {
       const preClient = allClients.find(c => c.id === preselected);
-      if (preClient) searchInput.value = `${preClient.name} â€” ${preClient.city}`;
+      if (preClient) searchInput.value = `${preClient.name} — ${preClient.city}`;
     }
 
     function renderAutocomplete(query) {
@@ -142,7 +142,7 @@ window.PageModules["new-visit"] = {
         const client = allClients.find(c => c.id === id);
         if (client && hiddenInput && searchInput) {
           hiddenInput.value = client.id;
-          searchInput.value = `${client.name} â€” ${client.city}`;
+          searchInput.value = `${client.name} — ${client.city}`;
           autocompleteList.style.display = "none";
         }
       }
