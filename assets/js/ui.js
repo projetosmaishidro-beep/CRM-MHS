@@ -1251,9 +1251,12 @@
       // Cada tela deve continuar recebendo os dados da sua própria view. Uma
       // falha pontual, por exemplo em despesas, não pode impedir o detalhe de
       // um evento já disponível em vw_eventos de ser exibido.
+      const viewNames = ["vw_carteira_crm", "vw_viagens", "vw_visitas_crm", "vw_necessidades", "vw_despesas_crm", "vw_eventos", "vw_equipe"];
       const results = [clients, trips, visits, needs, expenses, events, users];
-      const failures = results.filter((result) => result.error);
-      if (failures.length) console.error("[Central] Uma ou mais views não puderam ser carregadas:", failures.map((result) => result.error));
+      const failures = results
+        .map((result, index) => ({ view: viewNames[index], error: result.error }))
+        .filter((result) => result.error);
+      if (failures.length) console.error("[Central] Views que não puderam ser carregadas:", failures);
       const remoteClients = (clients.data || []).map(mapRemoteClient);
       (needs.data || []).forEach((row) => {
         const clientRow = remoteClients.find((item) => item.id === row.empresa_id);
@@ -1269,7 +1272,7 @@
       Store.setRemoteSnapshot({ clients: remoteClients, trips: (trips.data || []).map(tripFromApi), visits: (visits.data || []).map(visitFromApi), expenses: (expenses.data || []).map(expenseFromApi), events: (events.data || []).map(eventFromApi), users: remoteUsers, activities: [] });
       return {
         count: remoteClients.length,
-        ...(failures.length ? { warning: "Alguns dados não puderam ser carregados do Supabase. Verifique as permissões e as views expostas." } : {})
+        ...(failures.length ? { warning: `Falha ao carregar: ${failures.map((failure) => failure.view).join(", ")}. Consulte o Console para o detalhe retornado pelo Supabase.` } : {})
       };
     } catch (error) {
       console.error("[Central] Falha no retrato remoto:", error);

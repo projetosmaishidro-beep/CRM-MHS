@@ -1,4 +1,7 @@
 ﻿const CACHE = "central-comercial-v6";
+const CACHE_VERSION = "v7";
+const ACTIVE_CACHE = `${CACHE}-${CACHE_VERSION}`;
+
 const ASSETS = [
   "./",
   "./index.html",
@@ -13,7 +16,7 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE)
+    caches.open(ACTIVE_CACHE)
       .then((cache) => cache.addAll(ASSETS))
       .then(() => self.skipWaiting())
   );
@@ -22,7 +25,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))
+      Promise.all(keys.filter((key) => key !== ACTIVE_CACHE).map((key) => caches.delete(key)))
     ).then(() => self.clients.claim())
   );
 });
@@ -37,7 +40,7 @@ self.addEventListener("fetch", (event) => {
     fetch(event.request)
       .then((networkResponse) => {
         const resClone = networkResponse.clone();
-        caches.open(CACHE).then((cache) => cache.put(event.request, resClone));
+        caches.open(ACTIVE_CACHE).then((cache) => cache.put(event.request, resClone));
         return networkResponse;
       })
       .catch(() => {
