@@ -218,6 +218,7 @@ window.Store = (() => {
     return update((state) => {
       const trip = state.trips.find((t) => t.id === tripId);
       if (!trip) return;
+      if (!Array.isArray(trip.stops)) trip.stops = [];
       trip.stops.push({ id: uid("s"), done: false, ...stop });
       addActivity(state, {
         type: "route",
@@ -270,8 +271,8 @@ window.Store = (() => {
     return update((state) => {
       const client = state.clients.find((c) => c.id === clientId);
       if (!client) return;
-      client.needs = client.needs || [];
-      client.needRecords = client.needRecords || [];
+      if (!Array.isArray(client.needs)) client.needs = [];
+      if (!Array.isArray(client.needRecords)) client.needRecords = [];
       const record = {
         id: uid("n"),
         date: new Date().toISOString(),

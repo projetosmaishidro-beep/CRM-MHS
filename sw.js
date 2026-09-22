@@ -1,5 +1,5 @@
 ﻿const CACHE = "central-comercial-v6";
-const CACHE_VERSION = "v7";
+const CACHE_VERSION = "v8";
 const ACTIVE_CACHE = `${CACHE}-${CACHE_VERSION}`;
 
 const ASSETS = [
