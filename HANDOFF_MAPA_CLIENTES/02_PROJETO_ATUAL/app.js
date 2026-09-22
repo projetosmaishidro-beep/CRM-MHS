@@ -4003,6 +4003,9 @@
           "Entre para consultar a carteira",
           "Abra Conexão, informe o e-mail e a senha de um usuário autorizado e tente novamente."
         );
+        // A view do mapa é protegida para usuários autenticados. Abrir o
+        // painel evita uma tela aparentemente vazia em novos dispositivos.
+        openConnectionPanel();
         return;
       }
 
@@ -4028,6 +4031,22 @@
       const validCoordinates = state.clients.filter((client) => client.hasValidCoordinates).length;
       const invalidCoordinates = state.clients.length - validCoordinates;
 
+      if (state.clients.length === 0) {
+        showErrorStatus(
+          "Nenhum cliente disponível para este acesso",
+          "A view api.vw_mapa_clientes não retornou registros. Confirme se a importação criou relacionamentos ativos e se o usuário possui permissão de leitura."
+        );
+        return;
+      }
+
+      if (validCoordinates === 0) {
+        showErrorStatus(
+          "Clientes carregados sem coordenadas válidas",
+          "Os registros foram lidos, mas nenhum possui latitude e longitude dentro do Brasil para ser exibido no mapa."
+        );
+        return;
+      }
+
       dom.dataCaption.textContent =
         invalidCoordinates > 0
           ? `${formatNumber(state.clients.length)} registros • ${formatNumber(invalidCoordinates)} sem coordenada`
@@ -4042,6 +4061,9 @@
       }
     } catch (error) {
       console.error("[Mapa de clientes] Falha ao carregar:", error);
+      if (/jwt|token|not authenticated|permission denied|row-level security|rls/i.test(String(error?.message || error))) {
+        openConnectionPanel();
+      }
       showErrorStatus(
         "Não foi possível carregar os clientes",
         friendlySupabaseError(error)
