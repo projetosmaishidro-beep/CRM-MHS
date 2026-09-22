@@ -131,7 +131,7 @@ window.PageModules.event = {
 
     const render = () => {
       const state = Store.getState();
-      const event = state.events?.find(e => e.id === eventId);
+      const event = state.events?.find(e => String(e.id) === String(eventId));
       if (!event) {
         UI.$("#pageContent").innerHTML = UI.empty("Evento não encontrado", "O evento que você procura não existe ou foi excluído.");
         return;

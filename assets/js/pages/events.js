@@ -7,8 +7,8 @@ window.PageModules.events = {
       const expenses = state.expenses || [];
       
       const totalInvested = expenses.filter(e => e.eventId).reduce((sum, e) => sum + Number(e.amount), 0);
-      const concludedEvents = events.filter(e => e.status === 'Concluído');
-      const upcomingEvents = events.filter(e => e.status !== 'Concluído');
+      const concludedEvents = events.filter(e => e.status === 'Realizado');
+      const upcomingEvents = events.filter(e => e.status !== 'Realizado');
       
       const getBaseName = (name) => name.replace(/\b(20\d{2}|\d{2})\b/g, '').trim().toUpperCase();
       const editionsCount = {};
@@ -20,8 +20,8 @@ window.PageModules.events = {
       });
 
       const sortedEvents = [
-        ...eventsWithEditions.filter(e => e.status !== 'Concluído').sort((a,b) => new Date(a.startDate) - new Date(b.startDate)),
-        ...eventsWithEditions.filter(e => e.status === 'Concluído').sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
+        ...eventsWithEditions.filter(e => e.status !== 'Realizado').sort((a,b) => new Date(a.startDate) - new Date(b.startDate)),
+        ...eventsWithEditions.filter(e => e.status === 'Realizado').sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
       ];
 
       UI.$("#pageContent").innerHTML = `
@@ -45,7 +45,7 @@ window.PageModules.events = {
             const editionBadge = ev._edition > 1 ? `<span class="tag tag-accent" style="font-size:10px; padding:2px 6px;">${ev._edition}Âª Edição</span>` : "";
             
             return `
-              <a class="trip-card ${ev.status === 'Concluído' ? 'opacity-80' : ''}" href="${UI.pageLink(`pages/evento.html?id=${ev.id}`)}">
+              <a class="trip-card ${ev.status === 'Realizado' ? 'opacity-80' : ''}" href="${UI.pageLink(`pages/evento.html?id=${ev.id}`)}">
                 <div class="trip-card-top">
                   <div style="display:flex; gap:6px; align-items:center;">
                     ${UI.statusBadge(ev.status)}

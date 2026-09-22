@@ -15,7 +15,7 @@ window.PageModules.dashboard = {
         <article class="metric-card"><span>Clientes</span><strong>${state.clients.length}</strong><small>${leads.length} oportunidades abertas</small></article>
         <article class="metric-card"><span>Visitas no mês</span><strong>${visitsThisMonth.length}</strong><small>${state.visits.length} no histórico</small></article>
         <article class="metric-card"><span>Viagens ativas</span><strong>${activeTrips.length}</strong><small>${state.trips.filter(t => t.status === "Planejada").length} planejada(s)</small></article>
-        <article class="metric-card"><span>Gastos em viagens</span><strong>${UI.money(state.expenses.reduce((s, e) => s + Number(e.amount), 0))}</strong><small>Base demonstrativa local</small></article>
+        <article class="metric-card"><span>Gastos em viagens</span><strong>${UI.money(state.expenses.reduce((s, e) => s + Number(e.amount), 0))}</strong><small>Registros consolidados no banco</small></article>
       </section>
 
       <section class="two-col reveal">

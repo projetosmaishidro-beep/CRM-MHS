@@ -1242,8 +1242,12 @@
         api.from("vw_eventos").select("*").order("data_inicio", { ascending: false }),
         api.from("vw_equipe").select("*").order("nome")
       ]);
-      const failed = [clients, trips, visits, needs, expenses, events, users].find((result) => result.error);
-      if (failed?.error) throw failed.error;
+      // Cada tela deve continuar recebendo os dados da sua própria view. Uma
+      // falha pontual, por exemplo em despesas, não pode impedir o detalhe de
+      // um evento já disponível em vw_eventos de ser exibido.
+      const results = [clients, trips, visits, needs, expenses, events, users];
+      const failed = results.find((result) => result.error);
+      if (failed) console.error("[Central] Uma ou mais views não puderam ser carregadas:", failed.error);
       const remoteClients = (clients.data || []).map(mapRemoteClient);
       (needs.data || []).forEach((row) => {
         const clientRow = remoteClients.find((item) => item.id === row.empresa_id);

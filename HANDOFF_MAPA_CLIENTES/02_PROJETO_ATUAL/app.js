@@ -1320,8 +1320,11 @@
     const centralized = window.SUPABASE_CONFIG || {};
     return {
       type: "UNIFICADO",
-      url: String(prepared.url || centralized.SUPABASE_URL || "").trim(),
-      apiKey: String(prepared.apiKey || centralized.SUPABASE_ANON_KEY || "").trim(),
+      // A configuração versionada é a fonte oficial. Dados locais só atendem
+      // instalações sem configuração central e não podem apontar o mapa para
+      // um projeto Supabase anterior.
+      url: String(centralized.SUPABASE_URL || prepared.url || "").trim(),
+      apiKey: String(centralized.SUPABASE_ANON_KEY || prepared.apiKey || "").trim(),
       schemaName: "api",
       tableName: "vw_mapa_clientes",
       orderColumn: "cliente_id"
@@ -2931,8 +2934,8 @@
     const { data, error } = await state.supabaseClient
       .schema(CONFIG.SCHEMA_NAME)
       .from("vw_atividade_clientes")
-      .select("auditoria_id, entidade, cliente_id, acao, criado_por, criado_em")
-      .order("criado_em", { ascending: false })
+      .select("evento_id, ocorrido_em, tipo_evento, cliente_id, cliente, municipio, uf, operador")
+      .order("ocorrido_em", { ascending: false })
       .limit(20);
 
     if (error) {
@@ -2962,16 +2965,17 @@
 
       const copy = document.createElement("div");
       const title = document.createElement("strong");
-      title.textContent = cleanValue(activity.entidade) || "Atividade";
+      title.textContent = cleanValue(activity.cliente) || "Cliente";
       const meta = document.createElement("small");
       meta.textContent = [
-        formatActivityDate(activity.criado_em),
-        cleanValue(activity.criado_por)
+        [activity.municipio, activity.uf].filter(Boolean).join(" - "),
+        formatActivityDate(activity.ocorrido_em),
+        cleanValue(activity.operador)
       ].filter(Boolean).join(" • ");
       copy.append(title, meta);
 
       const type = document.createElement("span");
-      type.textContent = formatActivityType(activity.acao);
+      type.textContent = formatActivityType(activity.tipo_evento);
       item.append(copy, type);
       dom.maintenanceActivityList.appendChild(item);
     });
