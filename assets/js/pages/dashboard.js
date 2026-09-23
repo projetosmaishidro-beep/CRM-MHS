@@ -26,8 +26,9 @@ window.PageModules.dashboard = {
               <div class="trip-focus-top"><span>${UI.statusBadge(activeTrip.status)}</span><small>${UI.shortDate(activeTrip.startDate)} → ${UI.shortDate(activeTrip.endDate)}</small></div>
               <h4>${activeTrip.name}</h4>
               <p>${activeTrip.objective}</p>
-              <div class="progress-row"><span><b>${activeTrip.stops.filter(s => s.done).length}</b> de ${activeTrip.stops.length} paradas concluídas</span><strong>${Math.round((activeTrip.stops.filter(s => s.done).length / Math.max(activeTrip.stops.length, 1)) * 100)}%</strong></div>
-              <div class="progress"><span style="width:${(activeTrip.stops.filter(s => s.done).length / Math.max(activeTrip.stops.length, 1)) * 100}%"></span></div>
+              <div class="trip-stats show-mobile" style="margin-top: 15px;"><span><small>Visitas</small><strong>${activeTrip.stops.filter(s => s.done).length}</strong></span><span><small>KM rodados</small><strong>${activeTrip.currentKm && activeTrip.startKm ? activeTrip.currentKm - activeTrip.startKm : 0}</strong></span><span><small>Participantes</small><strong>${activeTrip.participantIds ? activeTrip.participantIds.length : 1}</strong></span></div>
+              <div class="progress-row hide-mobile"><span><b>${activeTrip.stops.filter(s => s.done).length}</b> de ${activeTrip.stops.length} paradas concluídas</span><strong>${Math.round((activeTrip.stops.filter(s => s.done).length / Math.max(activeTrip.stops.length, 1)) * 100)}%</strong></div>
+              <div class="progress hide-mobile"><span style="width:${(activeTrip.stops.filter(s => s.done).length / Math.max(activeTrip.stops.length, 1)) * 100}%"></span></div>
             </a>` : UI.empty("Nenhuma viagem em andamento", "Planeje uma viagem para começar.")}
         </div>
 

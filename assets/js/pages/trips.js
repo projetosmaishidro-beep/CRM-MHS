@@ -26,13 +26,14 @@ window.PageModules.trips = {
                   <p>${trip.objective}</p>
                 </div>
                 
-                <div class="trip-stats">
+                <div class="trip-stats hide-mobile">
                   <span><small>participantes</small><strong>${participants.length}</strong></span>
                   <span><small>visitas</small><strong>${visits.length}</strong></span>
                   <span><small>gastos</small><strong>${UI.money(expenses.reduce((s,e)=>s+Number(e.amount),0))}</strong></span>
                 </div>
                 
-                <div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px;">
+                <div class="trip-stats show-mobile" style="margin-top: auto;"><span><small>Visitas</small><strong>${visits.length}</strong></span><span><small>KM rodados</small><strong>${trip.currentKm && trip.startKm ? trip.currentKm - trip.startKm : 0}</strong></span><span><small>Participantes</small><strong>${participants.length}</strong></span></div>
+                <div class="hide-mobile" style="margin-top: auto; display: flex; flex-direction: column; gap: 6px;">
                   <div class="progress-row"><span>Roteiro</span><strong>${progress}%</strong></div>
                   <div class="progress"><span style="width:${progress}%"></span></div>
                   <div class="avatar-stack" style="margin-top: 2px;">${participants.map(u => `<span class="avatar mini">${u.initials}</span>`).join("")}</div>
