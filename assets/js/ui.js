@@ -1226,6 +1226,7 @@
     value.stops = asArray(row.paradas);
     value.odometerRecords = asArray(row.odometro_registros);
     value.attachments = asArray(row.anexos);
+    value.noteBlocks = asArray(row.notas);
     value.ownerId = row.criado_por || "";
     return value;
   };

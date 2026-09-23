@@ -2,6 +2,56 @@ window.PageModules = window.PageModules || {};
 window.PageModules.trip = {
   init() {
     const id = new URLSearchParams(location.search).get("id");
+    let routeSynchronizationRunning = false;
+
+    const synchronizeRouteFromVisits = async () => {
+      if (routeSynchronizationRunning) return;
+      const state = Store.getState();
+      const trips = Array.isArray(state.trips) ? state.trips : [];
+      const trip = trips.find(item => String(item.id) === String(id));
+      if (!trip) return;
+
+      const currentStops = Array.isArray(trip.stops) ? trip.stops : [];
+      // Uma parada sem a marca de origem foi criada manualmente e deve ser
+      // preservada; a sincronizacao automatica só opera roteiros gerados por visitas.
+      if (currentStops.some(stop => stop.source !== "visit")) return;
+
+      const clients = Array.isArray(state.clients) ? state.clients : [];
+      const visits = (Array.isArray(state.visits) ? state.visits : [])
+        .filter(visit => String(visit.tripId) === String(trip.id))
+        .sort((left, right) => new Date(left.date) - new Date(right.date));
+      if (!visits.length) return;
+
+      const stops = visits.map(visit => {
+        const client = clients.find(item => String(item.id) === String(visit.clientId));
+        if (!client) return null;
+        return {
+          id: `visit-${visit.id}`,
+          visitId: visit.id,
+          clientId: client.id,
+          label: client.name,
+          place: [client.city, client.state].filter(Boolean).join(", ") || "Local não informado",
+          latitude: Number.isFinite(Number(client.lat)) ? Number(client.lat) : null,
+          longitude: Number.isFinite(Number(client.lng)) ? Number(client.lng) : null,
+          done: true,
+          source: "visit"
+        };
+      }).filter(Boolean);
+
+      const unchanged = currentStops.length === stops.length && currentStops.every((stop, index) => stop.visitId === stops[index].visitId);
+      if (unchanged) return;
+
+      routeSynchronizationRunning = true;
+      try {
+        await UI.updateSupabaseTrip(trip.id, { stops });
+        await UI.hydrateSupabaseSnapshot();
+        render();
+      } catch (error) {
+        console.error("[Viagem] Não foi possível sincronizar o roteiro pelas visitas:", error);
+      } finally {
+        routeSynchronizationRunning = false;
+      }
+    };
 
     const render = () => {
       const state = Store.getState();
@@ -22,6 +72,7 @@ window.PageModules.trip = {
       const visitedIds = new Set(visits.map(v => v.clientId));
       const stops = Array.isArray(trip.stops) ? trip.stops : [];
       const attachments = Array.isArray(trip.attachments) ? trip.attachments : [];
+      const noteBlocks = Array.isArray(trip.noteBlocks) ? trip.noteBlocks : [];
       const progress = Math.round((stops.filter(s => s.done).length / Math.max(stops.length, 1)) * 100);
       const records = Array.isArray(trip.odometerRecords) ? trip.odometerRecords : [];
       const legacyKm = trip.startKm && trip.currentKm ? trip.currentKm - trip.startKm : 0;
@@ -54,11 +105,10 @@ window.PageModules.trip = {
         <section class="trip-actions-grid reveal" aria-label="Gestão da viagem">
           ${action("routeDialog", "route", "Roteiro", `${stops.length} parada(s)`)}
           ${action("participantsDialog", "users", "Participantes", `${participants.length} na equipe`)}
-          ${action("clientsDialog", "user", "Clientes", `${planned.length} planejados`)}
-          ${action("visitsDialog", "pin", "Visitas", `${visits.length} registro(s)`)}
+          ${action("clientVisitsDialog", "pin", "Clientes e visitas", `${planned.length} planejados · ${visits.length} visita(s)`)}
           ${action("financeDialog", "wallet", "Financeiro", UI.money(totalExpenses))}
           ${action("kmDialog", "route", "Quilometragem", `${km} km registrados`)}
-          ${action("notesDialog", "file", "Notas", trip.notes ? "1 nota registrada" : "Sem notas")}
+          ${action("notesDialog", "file", "Notas", noteBlocks.length ? `${noteBlocks.length} nota(s) registrada(s)` : "Sem notas")}
           ${action("attachmentsDialog", "paperclip", "Anexos", `${attachments.length} arquivo(s)`)}
         </section>
 
@@ -74,9 +124,13 @@ window.PageModules.trip = {
           <div class="people-list modal-list">${participants.length ? participants.map(user => `<div class="person-row"><span class="avatar">${user.initials}</span><span><strong>${user.name}</strong><small>${user.role}</small></span></div>`).join("") : UI.empty("Sem participantes", "Inclua participantes no planejamento da viagem.")}</div>
         </form></dialog>
 
-        <dialog id="clientsDialog" class="form-dialog trip-modal"><form method="dialog">
-          <div class="dialog-head"><div><span class="eyebrow">Planejamento</span><h2>Clientes previstos</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
+        <dialog id="clientVisitsDialog" class="form-dialog large trip-modal"><form method="dialog">
+          <div class="dialog-head"><div><span class="eyebrow">Planejamento e campo</span><h2>Clientes e visitas</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
           <div class="check-list modal-list">${planned.length ? planned.map(client => `<a href="${UI.pageLink(`pages/cliente.html?id=${client.id}`)}"><span class="check-state ${visitedIds.has(client.id) ? "ok" : ""}">${visitedIds.has(client.id) ? UI.icon("check",14) : ""}</span><span><strong>${client.name}</strong><small>${client.city}, ${client.state}</small></span></a>`).join("") : UI.empty("Sem clientes planejados", "Adicione clientes no planejamento da viagem.")}</div>
+          <div class="trip-modal-divider"></div>
+          <h3>Visitas registradas</h3>
+          <div class="mini-list modal-list">${visits.length ? visits.map(visit => { const client = state.clients.find(item => item.id === visit.clientId); return `<a href="${UI.pageLink(`pages/cliente.html?id=${client?.id || ""}`)}"><span class="mini-icon">${UI.icon("pin",15)}</span><span><strong>${client?.name || "Cliente"}</strong><small>${UI.date(visit.date)} - ${visit.type}</small></span></a>`; }).join("") : UI.empty("Nenhuma visita", "Registre a primeira visita desta viagem.")}</div>
+          <div class="dialog-actions"><a class="btn btn-primary" href="${UI.pageLink(`pages/nova-visita.html?trip=${trip.id}`)}">${UI.icon("plus",17)} Nova visita</a></div>
         </form></dialog>
 
         <dialog id="visitsDialog" class="form-dialog large trip-modal"><form method="dialog">
@@ -94,13 +148,14 @@ window.PageModules.trip = {
         <dialog id="kmDialog" class="form-dialog trip-modal"><form method="dialog" id="kmForm">
           <div class="dialog-head"><div><span class="eyebrow">Odômetro</span><h2>Quilometragem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
           <div class="km-quick-read"><span>Distância rodada calculada</span><strong>${km} km</strong></div>
-          <div class="form-grid" style="align-items: end; grid-template-columns: 1fr auto; margin-bottom: 20px;"><label class="field"><span>Novo registro do odômetro (km)</span><input name="kmValue" type="number" step="0.1" required placeholder="Ex.: 125400"></label><button class="btn btn-primary" value="default">${UI.icon("plus", 17)} Inserir</button></div>
+          <div class="form-grid" style="align-items: end; grid-template-columns: 1fr auto; margin-bottom: 20px;"><label class="field"><span>${records.length ? "Próximo registro do odômetro (km)" : "KM inicial do odômetro"}</span><input name="kmValue" type="number" min="${records.length ? Math.max(...records.map(record => Number(record.km) || 0)) : 0}" step="0.1" required placeholder="Ex.: 125400"></label><button class="btn btn-primary" value="default">${UI.icon("plus", 17)} ${records.length ? "Registrar" : "Definir KM inicial"}</button></div>
           ${records.length ? `<div class="mini-list modal-list">${records.map((r, i) => `<div><span class="mini-icon">${UI.icon("route", 15)}</span><span><strong>${r.km} km</strong><small>${UI.shortDate(r.date)} às ${new Date(r.date).toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"})}</small></span>${i === 0 ? `<b>Último</b>` : ""}</div>`).join("")}</div>` : UI.empty("Nenhum registro", "Insira o km atual do painel do carro para começar.")}
         </form></dialog>
 
         <dialog id="notesDialog" class="form-dialog trip-modal"><form method="dialog" id="notesForm">
           <div class="dialog-head"><div><span class="eyebrow">Registro interno</span><h2>Notas da viagem</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
-          <label class="field"><span>Observações</span><textarea name="notes" rows="6" placeholder="Registre decisões, observações e próximos passos.">${trip.notes || ""}</textarea></label><div class="dialog-actions"><button class="btn btn-primary" value="default">Salvar nota</button></div>
+          <div class="mini-list modal-list">${noteBlocks.length ? noteBlocks.map(note => `<div><span class="mini-icon">${UI.icon("file", 15)}</span><span><strong>${note.author || "Participante"}</strong><small>${UI.shortDate(note.createdAt)} às ${new Date(note.createdAt).toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"})}</small><p>${UI.escape(note.text || "")}</p></span></div>`).join("") : UI.empty("Sem notas", "Registre a primeira observação desta viagem.")}</div>
+          <label class="field"><span>Nova observação</span><textarea name="noteText" rows="4" required placeholder="Registre decisões, observações e próximos passos."></textarea></label><div class="dialog-actions"><button class="btn btn-primary" value="default">Adicionar nota</button></div>
         </form></dialog>
 
         <dialog id="attachmentsDialog" class="form-dialog trip-modal"><form method="dialog">
@@ -146,10 +201,24 @@ window.PageModules.trip = {
         const kmValue = Number(data.get("kmValue"));
         if (kmValue > 0) {
           try {
-            const odometerRecords = [{ id: Store.uid("km"), date: new Date().toISOString(), km: kmValue }, ...(trip.odometerRecords || [])];
-            await UI.updateSupabaseTrip(trip.id, { odometerRecords });
+            const currentRecords = Array.isArray(trip.odometerRecords) ? trip.odometerRecords : [];
+            const latestKm = currentRecords.length ? Math.max(...currentRecords.map(record => Number(record.km) || 0)) : null;
+            if (latestKm !== null && kmValue < latestKm) {
+              UI.toast("O próximo KM não pode ser menor que o último registro.", "error");
+              return;
+            }
+            const odometerRecords = [{
+              id: Store.uid("km"),
+              date: new Date().toISOString(),
+              km: kmValue,
+              type: currentRecords.length ? "REGISTRO" : "INICIAL"
+            }, ...currentRecords];
+            await UI.updateSupabaseTrip(trip.id, {
+              odometerRecords,
+              ...(currentRecords.length ? {} : { startKm: kmValue })
+            });
             await UI.hydrateSupabaseSnapshot();
-            UI.toast("Registro salvo no histórico do odômetro.");
+            UI.toast(currentRecords.length ? "Registro salvo no histórico do odômetro." : "KM inicial salvo no histórico do odômetro.");
           } catch (error) {
             console.error(error);
             UI.toast("Erro ao salvar o odômetro.", "error");
@@ -165,12 +234,26 @@ window.PageModules.trip = {
           if (event.submitter?.value === "cancel") return;
           event.preventDefault();
           try {
-            await UI.updateSupabaseTrip(trip.id, { notes: String(new FormData(event.currentTarget).get("notes") || "").trim() });
-            UI.toast("Nota da viagem atualizada.");
-            setTimeout(() => location.reload(), 350);
+            const text = String(new FormData(event.currentTarget).get("noteText") || "").trim();
+            if (!text) return;
+            const noteBlocks = [{
+              id: Store.uid("note"),
+              text,
+              authorId: window.AuthUser?.id || "",
+              author: window.AuthUser?.name || "Participante",
+              createdAt: new Date().toISOString()
+            }, ...(Array.isArray(trip.noteBlocks) ? trip.noteBlocks : [])];
+            const updatedTrip = await UI.updateSupabaseTrip(trip.id, { noteBlocks });
+            if (!Array.isArray(updatedTrip?.notas)) {
+              throw new Error("A estrutura de notas da viagem ainda não foi criada no banco.");
+            }
+            await UI.hydrateSupabaseSnapshot();
+            UI.toast("Nota adicionada ao histórico da viagem.");
+            render();
+            requestAnimationFrame(() => UI.openDialog("notesDialog"));
           } catch(err) {
             console.error(err);
-            UI.toast("Erro ao atualizar notas.", "error");
+            UI.toast(err.message || "Erro ao atualizar notas.", "error");
           }
         });
       UI.$("#statusTripBtn")?.addEventListener("click", async () => {
@@ -219,5 +302,6 @@ window.PageModules.trip = {
     }
 
     render();
+    void synchronizeRouteFromVisits();
   }
 };

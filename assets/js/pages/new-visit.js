@@ -180,6 +180,7 @@ window.PageModules["new-visit"] = {
       const fd = new FormData(e.currentTarget);
       const mode = e.currentTarget.dataset.mode;
       let clientId = fd.get("clientId");
+      let selectedClient = allClients.find(client => String(client.id) === String(clientId)) || null;
       const btn = e.currentTarget.querySelector("button[type='submit']");
 
       try {
@@ -205,6 +206,7 @@ window.PageModules["new-visit"] = {
           const createdLead = await UI.createSupabaseClientRecord(leadPayload);
           if (!createdLead || !createdLead.id) throw new Error("Falha ao cadastrar lead remoto.");
           clientId = createdLead.id;
+          selectedClient = createdLead;
         }
 
         if (!clientId) {
@@ -229,6 +231,32 @@ window.PageModules["new-visit"] = {
 
         const createdVisit = await UI.createSupabaseVisit(visitPayload);
         if (!createdVisit) throw new Error("Falha ao registrar visita remota.");
+
+        // Sem roteiro manual, cada visita vira uma parada concluída no roteiro
+        // da viagem, usando a localização registrada do cliente ou lead.
+        const trip = state.trips.find(item => String(item.id) === String(visitPayload.tripId));
+        const currentStops = Array.isArray(trip?.stops) ? trip.stops : [];
+        const hasManualRoute = currentStops.some(stop => stop.source !== "visit");
+        if (trip && selectedClient && !hasManualRoute && !currentStops.some(stop => String(stop.visitId) === String(createdVisit.id))) {
+          const automaticStop = {
+            id: `visit-${createdVisit.id}`,
+            visitId: createdVisit.id,
+            clientId: selectedClient.id,
+            label: selectedClient.name,
+            place: [selectedClient.city, selectedClient.state].filter(Boolean).join(", ") || "Local não informado",
+            latitude: Number.isFinite(Number(selectedClient.lat)) ? Number(selectedClient.lat) : null,
+            longitude: Number.isFinite(Number(selectedClient.lng)) ? Number(selectedClient.lng) : null,
+            done: true,
+            source: "visit"
+          };
+          try {
+            await UI.updateSupabaseTrip(trip.id, { stops: [...currentStops, automaticStop] });
+          } catch (routeError) {
+            // A visita já foi persistida; a ficha da viagem se recompõe na
+            // próxima abertura e tentará sincronizar o roteiro novamente.
+            console.warn("[Visita] Não foi possível atualizar o roteiro automático:", routeError);
+          }
+        }
 
         UI.toast("Visita salva com sucesso!");
         setTimeout(() => location.href = UI.pageLink("pages/cliente.html?id=" + clientId), 350);
