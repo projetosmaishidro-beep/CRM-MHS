@@ -1,5 +1,5 @@
 ﻿const CACHE = "central-comercial-v6";
-const CACHE_VERSION = "v8";
+const CACHE_VERSION = "v9";
 const ACTIVE_CACHE = `${CACHE}-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -32,15 +32,28 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  if (event.request.url.includes("supabase.co") || event.request.url.includes("/rest/v1/") || event.request.url.includes("/storage/v1/")) {
+  const requestUrl = new URL(event.request.url);
+  if (
+    !["http:", "https:"].includes(requestUrl.protocol) ||
+    requestUrl.origin !== self.location.origin ||
+    requestUrl.hostname.endsWith("supabase.co") ||
+    requestUrl.pathname.includes("/rest/v1/") ||
+    requestUrl.pathname.includes("/storage/v1/")
+  ) {
     return;
   }
-  
+
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        const resClone = networkResponse.clone();
-        caches.open(ACTIVE_CACHE).then((cache) => cache.put(event.request, resClone));
+        if (networkResponse.ok) {
+          const responseForCache = networkResponse.clone();
+          event.waitUntil(
+            caches.open(ACTIVE_CACHE)
+              .then((cache) => cache.put(event.request, responseForCache))
+              .catch((error) => console.warn("[SW] Nao foi possivel atualizar o cache:", error))
+          );
+        }
         return networkResponse;
       })
       .catch(() => {
