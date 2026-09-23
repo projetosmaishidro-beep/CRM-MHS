@@ -48,7 +48,17 @@ window.__authGuardReady = (async () => {
       await new Promise(() => {});
     }
 
-    const user = data.session.user;
+    // getSession() le apenas a sessao persistida no navegador. Confirma-la no
+    // servidor evita que uma sessao expirada ou revogada libere a interface e
+    // gere consultas anonimas (401) nas views protegidas do schema api.
+    const { data: userData, error: userError } = await client.auth.getUser();
+    if (userError || !userData?.user) {
+      await client.auth.signOut();
+      window.location.replace(loginPath);
+      await new Promise(() => {});
+    }
+
+    const user = userData.user;
     const email = (user.email || "").toLowerCase();
     const adminEmails = (config.ADMIN_EMAILS || []).map(e => e.toLowerCase().trim());
     const isAdmin = adminEmails.includes(email);
