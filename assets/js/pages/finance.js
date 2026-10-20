@@ -5,6 +5,122 @@ window.PageModules.finance = {
     let selectedTrip = params.get("trip") || "all";
     let attachment = null;
 
+    const XLSX_CDN = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+    let xlsxLoader = null;
+
+    const loadXlsx = () => {
+      if (window.XLSX) return Promise.resolve(window.XLSX);
+      if (xlsxLoader) return xlsxLoader;
+      xlsxLoader = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = XLSX_CDN;
+        script.async = true;
+        script.onload = () => window.XLSX ? resolve(window.XLSX) : reject(new Error("Biblioteca de exportação não foi carregada."));
+        script.onerror = () => reject(new Error("Não foi possível carregar a biblioteca de exportação."));
+        document.head.appendChild(script);
+      });
+      return xlsxLoader;
+    };
+
+    const exportTripCosts = async (tripIds, state) => {
+      const trips = state.trips.filter((trip) => tripIds.includes(String(trip.id)));
+      const expenses = state.expenses
+        .filter((expense) => expense.tripId && tripIds.includes(String(expense.tripId)))
+        .sort((left, right) => new Date(left.date) - new Date(right.date));
+
+      if (!trips.length) throw new Error("Selecione ao menos uma viagem.");
+
+      const tripById = new Map(trips.map((trip) => [String(trip.id), trip]));
+      const usersById = new Map((state.users || []).map((user) => [String(user.id), user]));
+      const clientsById = new Map((state.clients || []).map((client) => [String(client.id), client]));
+      const totals = new Map(trips.map((trip) => [String(trip.id), 0]));
+      expenses.forEach((expense) => totals.set(String(expense.tripId), (totals.get(String(expense.tripId)) || 0) + Number(expense.amount || 0)));
+
+      const namesFromSnapshot = (items, lookup) => (items || []).map((item) => {
+        const id = typeof item === "string" ? item : item?.id;
+        return lookup.get(String(id))?.name || item?.name || item?.nome || item?.empresa || id || "";
+      }).filter(Boolean).join(", ");
+      const tripContext = (trip) => ({
+        id: trip?.id || "",
+        name: trip?.name || "Viagem sem título",
+        status: trip?.status || "",
+        startDate: trip?.startDate || "",
+        endDate: trip?.endDate || "",
+        objective: trip?.objective || trip?.notes || "",
+        participants: namesFromSnapshot(trip?.participantSnapshots?.length ? trip.participantSnapshots : trip?.participantIds, usersById),
+        plannedClients: namesFromSnapshot(trip?.plannedClientSnapshots?.length ? trip.plannedClientSnapshots : trip?.plannedClientIds, clientsById),
+        startKm: trip?.startKm ?? "",
+        endKm: trip?.endKm ?? ""
+      });
+      const attachmentNames = (attachments) => (attachments || []).map((item) => typeof item === "string" ? item : item?.name || item?.path || "").filter(Boolean).join(" | ");
+
+      const summaryRows = trips.map((trip) => {
+        const context = tripContext(trip);
+        return {
+        "ID da viagem": context.id,
+        "Viagem": context.name,
+        "Status": context.status,
+        "Início": context.startDate,
+        "Fim": context.endDate,
+        "Objetivo / observações": context.objective,
+        "Participantes": context.participants,
+        "Clientes planejados": context.plannedClients,
+        "KM inicial": context.startKm,
+        "KM final": context.endKm,
+        "KM percorridos": Number.isFinite(Number(context.startKm)) && Number.isFinite(Number(context.endKm)) ? Number(context.endKm) - Number(context.startKm) : "",
+        "Quantidade de despesas": expenses.filter((expense) => String(expense.tripId) === String(trip.id)).length,
+        "Total (R$)": totals.get(String(trip.id)) || 0
+        };
+      });
+      summaryRows.push({
+        "ID da viagem": "",
+        "Viagem": "TOTAL SELECIONADO",
+        "Status": "",
+        "Início": "",
+        "Fim": "",
+        "Objetivo / observações": "",
+        "Participantes": "",
+        "Clientes planejados": "",
+        "KM inicial": "",
+        "KM final": "",
+        "KM percorridos": "",
+        "Quantidade de despesas": expenses.length,
+        "Total (R$)": expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0)
+      });
+
+      const detailRows = expenses.map((expense) => {
+        const context = tripContext(tripById.get(String(expense.tripId)));
+        return {
+        "ID da despesa": expense.id || "",
+        "Data": expense.date ? String(expense.date).slice(0, 10) : "",
+        "ID da viagem": context.id,
+        "Viagem": context.name,
+        "Status da viagem": context.status,
+        "Período da viagem": [context.startDate, context.endDate].filter(Boolean).join(" até "),
+        "Objetivo / observações da viagem": context.objective,
+        "Participantes da viagem": context.participants,
+        "Clientes planejados": context.plannedClients,
+        "Categoria": expense.category || "",
+        "Centro de custo": expense.costCenter || "",
+        "Estabelecimento": expense.place || "",
+        "Observações": expense.notes || "",
+        "Responsável": usersById.get(String(expense.userId))?.name || "",
+        "Comprovantes / anexos": attachmentNames(expense.attachments),
+        "Valor (R$)": Number(expense.amount || 0)
+        };
+      });
+
+      const XLSX = await loadXlsx();
+      const workbook = XLSX.utils.book_new();
+      const summarySheet = XLSX.utils.json_to_sheet(summaryRows);
+      const detailSheet = XLSX.utils.json_to_sheet(detailRows.length ? detailRows : [{ "ID da despesa": "", "Data": "", "ID da viagem": "", "Viagem": "Nenhuma despesa nas viagens selecionadas", "Status da viagem": "", "Período da viagem": "", "Objetivo / observações da viagem": "", "Participantes da viagem": "", "Clientes planejados": "", "Categoria": "", "Centro de custo": "", "Estabelecimento": "", "Observações": "", "Responsável": "", "Comprovantes / anexos": "", "Valor (R$)": "" }]);
+      summarySheet["!cols"] = [{ wch: 18 }, { wch: 34 }, { wch: 18 }, { wch: 13 }, { wch: 13 }, { wch: 45 }, { wch: 36 }, { wch: 42 }, { wch: 13 }, { wch: 13 }, { wch: 16 }, { wch: 22 }, { wch: 16 }];
+      detailSheet["!cols"] = [{ wch: 18 }, { wch: 13 }, { wch: 18 }, { wch: 34 }, { wch: 18 }, { wch: 26 }, { wch: 45 }, { wch: 36 }, { wch: 42 }, { wch: 18 }, { wch: 30 }, { wch: 30 }, { wch: 45 }, { wch: 26 }, { wch: 42 }, { wch: 16 }];
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumo por viagem");
+      XLSX.utils.book_append_sheet(workbook, detailSheet, "Despesas");
+      XLSX.writeFile(workbook, `custos-viagens-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    };
+
     const render = () => {
       const state = Store.getState();
       const events = state.events || [];
@@ -35,6 +151,7 @@ window.PageModules.finance = {
             </select>
           </label>
           <div class="finance-total"><small>Total no filtro</small><strong>${UI.money(total)}</strong></div>
+          <button class="btn btn-secondary btn-small" id="exportTripCostsBtn" type="button">${UI.icon("download", 17)} Exportar viagens</button>
           <button class="btn btn-primary btn-small" id="newExpenseBtn">${UI.icon("plus", 17)} Nova despesa</button>
         </section>
 
@@ -89,10 +206,54 @@ window.PageModules.finance = {
             <div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Salvar despesa</button></div>
           </form>
         </dialog>
+
+        <dialog id="tripExportDialog" class="form-dialog">
+          <form method="dialog" id="tripExportForm">
+            <div class="dialog-head"><div><span class="eyebrow">Exportação financeira</span><h2>Custos de viagens</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">${UI.icon("x")}</button></div>
+            <p class="muted" style="margin:0 0 16px;">Selecione as viagens que devem entrar no arquivo Excel. Despesas de eventos não serão incluídas.</p>
+            <label class="check-row" style="margin-bottom:10px;"><input type="checkbox" id="selectAllTrips" checked> <strong>Todas as viagens (${state.trips.length})</strong></label>
+            <div class="expense-list" style="max-height:290px; overflow:auto; border:1px solid #e2e8f0; border-radius:12px; padding:4px 14px;">
+              ${state.trips.length ? state.trips.map((trip, index) => `<label class="check-row" style="display:flex; gap:10px; padding:12px 0; border-bottom:1px solid #eef2f6;"><input class="trip-export-choice" type="checkbox" value="${UI.escape(String(trip.id))}" data-trip-index="${index}" checked><span><strong>${UI.escape(trip.name || "Viagem sem título")}</strong><small style="display:block;">${UI.escape(trip.startDate || "Sem data")} · ${UI.escape(trip.status || "Sem status")}</small></span></label>`).join("") : UI.empty("Nenhuma viagem", "Cadastre uma viagem para exportar seus custos.")}
+            </div>
+            <div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" id="confirmTripExportBtn" value="default" ${state.trips.length ? "" : "disabled"}>${UI.icon("download", 17)} Baixar Excel</button></div>
+          </form>
+        </dialog>
       `;
 
       UI.$("#tripFilter").addEventListener("change", e => { selectedTrip = e.target.value; render(); });
       UI.$("#newExpenseBtn").addEventListener("click", () => UI.openDialog("expenseDialog"));
+      UI.$("#exportTripCostsBtn").addEventListener("click", () => UI.openDialog("tripExportDialog"));
+      const selectAllTrips = UI.$("#selectAllTrips");
+      const tripChoices = [...document.querySelectorAll(".trip-export-choice")];
+      selectAllTrips?.addEventListener("change", () => tripChoices.forEach((choice) => { choice.checked = selectAllTrips.checked; }));
+      tripChoices.forEach((choice) => choice.addEventListener("change", () => {
+        if (!selectAllTrips) return;
+        selectAllTrips.checked = tripChoices.length > 0 && tripChoices.every((item) => item.checked);
+        selectAllTrips.indeterminate = !selectAllTrips.checked && tripChoices.some((item) => item.checked);
+      }));
+      UI.$("#tripExportForm").addEventListener("submit", async (event) => {
+        if (event.submitter?.value === "cancel") return;
+        event.preventDefault();
+        const button = UI.$("#confirmTripExportBtn");
+        const tripIds = tripChoices.filter((choice) => choice.checked).map((choice) => choice.value);
+        if (!tripIds.length) {
+          UI.toast("Selecione ao menos uma viagem para exportar.", "error");
+          return;
+        }
+        try {
+          button.disabled = true;
+          button.textContent = "Gerando arquivo…";
+          await exportTripCosts(tripIds, state);
+          UI.closeDialog("tripExportDialog");
+          UI.toast("Planilha de custos baixada com sucesso.");
+        } catch (error) {
+          console.error("[Central] Falha ao exportar custos de viagens:", error);
+          UI.toast(error.message || "Não foi possível gerar a planilha.", "error");
+        } finally {
+          button.disabled = false;
+          button.innerHTML = `${UI.icon("download", 17)} Baixar Excel`;
+        }
+      });
       UI.$("#receiptInput").addEventListener("change", e => {
         attachment = e.target.files?.[0] || null;
         UI.$("#receiptLabel").textContent = attachment ? attachment.name : "Use a câmera ou selecione um arquivo";
