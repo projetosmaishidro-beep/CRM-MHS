@@ -1,5 +1,5 @@
 ﻿const CACHE = "central-comercial-v6";
-const CACHE_VERSION = "v11";
+const CACHE_VERSION = "v12";
 const ACTIVE_CACHE = `${CACHE}-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -8,6 +8,7 @@ const ASSETS = [
   "./assets/css/styles.css",
   "./assets/js/data.js",
   "./assets/js/store.js",
+  "./assets/js/api.js",
   "./assets/js/ui.js",
   "./assets/js/app.js",
   "./assets/images/logo-mais.jpg",

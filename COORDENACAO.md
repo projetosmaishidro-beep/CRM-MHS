@@ -16,4 +16,11 @@ Ao concluir um pedido, marque `[x]` e cite o commit.
 
 Alterações no formato dos objetos do `Store` ou nas funções `UI.*Supabase*`.
 
-- _(nenhuma)_
+- **2026-10-20 — camada de dados extraída para `assets/js/api.js`** (branch
+  `backend/claude`). Nomes e assinaturas de `UI.*Supabase*`,
+  `UI.hydrateSupabaseSnapshot` e `UI.uploadPrivateFile` não mudaram. Foram
+  removidas funções legadas sem uso: `UI.hydrateRemoteClients`,
+  `UI.createRemoteTrip`, `UI.hydrateRemoteEvents`, `UI.saveRemoteEvent`,
+  `UI.saveRemoteExpense`, `UI.uploadToStorage`, `UI.updateRemoteEventMedia`,
+  `UI.deleteRemoteExpense`, `UI.updateRemoteExpense`, `UI.updateRemoteEvent`.
+  Todos os HTMLs passaram a carregar `api.js` antes de `ui.js`.

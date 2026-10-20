@@ -20,11 +20,11 @@ sempre pelo schema `api` (views `vw_*` para leitura, RPCs para escrita).
 ### Claude (técnico)
 
 - `database/**` (migrations, SQL, RLS, grants, storage, edge functions)
+- `assets/js/api.js` (toda a camada de dados: cliente Supabase, views, RPCs, Storage)
 - `assets/js/supabase-config.js`, `assets/js/auth-guard.js`, `assets/js/store.js`, `assets/js/app.js`
 - Lógica de login em `login.html` (o bloco `<script>`)
-- Em `assets/js/ui.js`: todo o acesso a dados — cliente Supabase, `mapRemote*`,
-  `*FromApi`, `hydrate*`, `operationalRpc`, `createSupabase*`, `updateSupabase*`,
-  `deleteSupabase*`, `uploadPrivateFile`, funções legadas `*Remote*`
+- Em `assets/js/ui.js`: apenas a linha `const { ... } = window.Api;` e o bloco
+  "Camada de dados" no `return` final, que reexpõe o `Api` como `UI.*Supabase*`
 - Em `assets/js/pages/*.js`: somente as chamadas de dados (`UI.createSupabase*`,
   `UI.updateSupabase*`, `UI.hydrateSupabaseSnapshot`, `UI.uploadPrivateFile`)
   e os payloads enviados a elas
@@ -33,9 +33,12 @@ sempre pelo schema `api` (views `vw_*` para leitura, RPCs para escrita).
 ### Codex (interface)
 
 - `assets/css/**`, `assets/images/**`, `manifest.webmanifest`
-- `index.html`, `pages/*.html` e o HTML/CSS de `login.html`
-- Em `assets/js/ui.js`: shell, navegação, menus, drawer, busca, toasts,
-  diálogos, skeleton, badges, mapas (Leaflet), animações e formatação visual
+- `index.html`, `pages/*.html` e o HTML/CSS de `login.html` (mantenha a ordem dos
+  `<script>`: `supabase-config` → `auth-guard` → `data` → `store` → `api` → `ui`
+  → página → `app`)
+- `assets/js/ui.js` inteiro (shell, navegação, menus, drawer, busca, toasts,
+  diálogos, skeleton, badges, mapas, animações, formatação visual), exceto o
+  trecho de reexportação do `Api` listado na área do Claude
 - Em `assets/js/pages/*.js`: renderização (templates HTML), eventos de tela,
   filtros, ordenação, paginação, validação visual de formulários, estados
   vazios/carregando/erro
