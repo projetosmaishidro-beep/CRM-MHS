@@ -193,6 +193,42 @@ window.Api = (() => {
     return { id: row.visita_id, clientId: row.empresa_id, tripId: row.viagem_id || null, userId: row.criado_por || "", type: row.tipo || "Acompanhamento", notes: row.observacao || "", needs: needs.map((need) => need.category || need), needRecords: needs, lat: row.latitude === null ? null : Number(row.latitude), lng: row.longitude === null ? null : Number(row.longitude), attachments: asArray(row.anexos), date: row.realizada_em || row.criado_em, remote: true };
   };
   const expenseFromApi = (row) => ({ id: row.despesa_id, tripId: row.viagem_id || null, eventId: row.evento_id || null, userId: row.criado_por || "", category: row.categoria || "Outros", costCenter: row.centro_custo || "", amount: Number(row.valor) || 0, place: row.estabelecimento || "", notes: row.descricao || "", attachments: asArray(row.anexos), date: row.data_despesa || row.criado_em, remote: true });
+  // URLs assinadas do Storage expiram. O banco guarda o caminho do anexo e a
+  // URL é renovada a cada carga; anexos antigos que só têm a URL têm o
+  // caminho recuperado a partir dela.
+  const ATTACHMENT_BUCKET = "crm-anexos";
+  const SIGNED_URL_TTL_SECONDS = 3600;
+  const storageUrlPattern = new RegExp(`/storage/v1/object/(?:sign|public|authenticated)/${ATTACHMENT_BUCKET}/([^?#]+)`);
+
+  function attachmentPath(item) {
+    if (!item || typeof item !== "object") return null;
+    if (item.path && (!item.bucket || item.bucket === ATTACHMENT_BUCKET)) return item.path;
+    const match = typeof item.url === "string" ? item.url.match(storageUrlPattern) : null;
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  async function refreshAttachmentUrls(client, attachmentLists) {
+    const items = attachmentLists.flat().filter((item) => attachmentPath(item));
+    const paths = [...new Set(items.map(attachmentPath))];
+    if (!paths.length) return;
+    const signed = new Map();
+    for (let index = 0; index < paths.length; index += 100) {
+      const { data, error } = await client.storage.from(ATTACHMENT_BUCKET).createSignedUrls(paths.slice(index, index + 100), SIGNED_URL_TTL_SECONDS);
+      if (error) {
+        console.warn("[Central] Não foi possível renovar os links dos anexos:", error);
+        continue;
+      }
+      (data || []).forEach((row) => { if (row.signedUrl && !row.error) signed.set(row.path, row.signedUrl); });
+    }
+    items.forEach((item) => {
+      const path = attachmentPath(item);
+      if (!signed.has(path)) return;
+      item.bucket = ATTACHMENT_BUCKET;
+      item.path = path;
+      item.url = signed.get(path);
+    });
+  }
+
   const eventFromApi = (row) => ({ id: row.evento_id, name: row.nome || "Evento", location: row.local || "", startDate: row.data_inicio ? String(row.data_inicio).slice(0, 10) : "", endDate: row.data_fim ? String(row.data_fim).slice(0, 10) : "", status: ({ PLANEJADO: "Planejado", EM_ANDAMENTO: "Em andamento", REALIZADO: "Realizado", CANCELADO: "Cancelado" })[row.status] || row.status || "Planejado", role: row.tipo_participacao === "EXPOSITOR" ? "Expositor" : "Participante", notes: row.notas_estrategicas || "", participantIds: asArray(row.participantes), attachments: asArray(row.anexos), links: asArray(row.links), contacts: asArray(row.contatos), createdAt: row.criado_em, userId: row.criado_por || "", remote: true });
 
   async function hydrateSupabaseSnapshot() {
@@ -229,7 +265,16 @@ window.Api = (() => {
         const name = row.nome || row.email || "Membro da equipe";
         return { id: row.usuario_id || row.membro_id, name, role: row.cargo || row.papel || "Equipe Comercial", initials: initials(name), email: row.email || "", active: row.ativo !== false, remote: true };
       });
-      Store.setRemoteSnapshot({ clients: remoteClients, trips: (trips.data || []).map(tripFromApi), visits: (visits.data || []).map(visitFromApi), expenses: (expenses.data || []).map(expenseFromApi), events: (events.data || []).map(eventFromApi), users: remoteUsers, activities: [] });
+      const remoteTrips = (trips.data || []).map(tripFromApi);
+      const remoteVisits = (visits.data || []).map(visitFromApi);
+      const remoteExpenses = (expenses.data || []).map(expenseFromApi);
+      const remoteEvents = (events.data || []).map(eventFromApi);
+      try {
+        await refreshAttachmentUrls(client, [remoteTrips, remoteVisits, remoteExpenses, remoteEvents].flat().map((row) => row.attachments || []));
+      } catch (error) {
+        console.warn("[Central] Falha ao renovar os links dos anexos:", error);
+      }
+      Store.setRemoteSnapshot({ clients: remoteClients, trips: remoteTrips, visits: remoteVisits, expenses: remoteExpenses, events: remoteEvents, users: remoteUsers, activities: [] });
       return {
         count: remoteClients.length,
         ...(failures.length ? { warning: `Falha ao carregar: ${failures.map((failure) => failure.view).join(", ")}. Consulte o Console para o detalhe retornado pelo Supabase.` } : {})
@@ -258,11 +303,12 @@ window.Api = (() => {
   async function uploadPrivateFile(path, file) {
     const client = await operationalClient();
     if (!file || file.size > 20 * 1024 * 1024) throw new Error("O anexo deve ter no máximo 20 MB.");
-    const { data, error } = await client.storage.from("crm-anexos").upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
+    const { data, error } = await client.storage.from(ATTACHMENT_BUCKET).upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
     if (error) throw new Error(error.message || "Falha ao enviar o anexo.");
-    const { data: signed, error: signedError } = await client.storage.from("crm-anexos").createSignedUrl(data.path, 3600);
+    const { data: signed, error: signedError } = await client.storage.from(ATTACHMENT_BUCKET).createSignedUrl(data.path, SIGNED_URL_TTL_SECONDS);
     if (signedError) throw new Error(signedError.message || "Falha ao assinar o anexo.");
-    return { bucket: "crm-anexos", path: data.path, url: signed.signedUrl };
+    // A URL serve para a exibição imediata; o que vale de forma permanente é o path.
+    return { bucket: ATTACHMENT_BUCKET, path: data.path, url: signed.signedUrl };
   }
 
   return {
