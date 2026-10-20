@@ -145,7 +145,6 @@ $$;
 
 -- Registra o arquivo/lote antes de criar os cadastros.
 create temporary table migracao_carcinicultura_contexto
-on commit drop
 as
 with importacao_criada as (
     insert into mapa.importacoes (
