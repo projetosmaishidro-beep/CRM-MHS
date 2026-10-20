@@ -6,7 +6,20 @@ Ao concluir um pedido, marque `[x]` e cite o commit.
 
 ## Pedidos para o Claude (dados, API, banco)
 
-- [ ] _(vazio)_
+- [ ] **Auditoria de segurança — parte 2 (complemento da migration 0057).**
+  Trabalhar na worktree `claude-backend` (branch `backend/claude`), com os
+  MCPs `supabase-central`/`supabase-central-admin`. A 0057 só validou policies
+  de SELECT em cadastro, crm, mapa e propostas_mhs. Verificar no banco real e
+  **mostrar ao usuário antes de alterar**:
+  1. Policies com cmd ALL/INSERT/UPDATE/DELETE em qualquer schema da aplicação
+     com using/with check `true` ou sem eh_editor/eh_admin/eh_membro (em
+     especial "Equipe pode gerenciar despesas/eventos/participantes").
+  2. Schema `mapa_clientes` (existe? exposto na API? `base_mapa_anon_select`
+     ainda existe? anon tem SELECT?), além de core, integracao e public.
+  3. Policies de SELECT em storage.objects e buckets públicos.
+  4. Grants de tabela para anon em todos os schemas da aplicação.
+  Se houver exposição: migration 0058 corrigindo e ampliando a validação para
+  cmd ALL e todos os schemas; rodar advisors; commitar na backend/claude.
 
 ## Pedidos para o Codex (interface, CSS, usabilidade)
 
