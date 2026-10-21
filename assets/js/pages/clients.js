@@ -4,7 +4,11 @@ window.PageModules.clients = {
     let state = Store.getState();
     let category = "Todos";
     let viewMode = "cards";
-    let filtersOpen = false;
+    let search = "";
+    let region = "";
+    let statusFilter = "Todos";
+    let page = 1;
+    const pageSize = 12;
     const categories = ["Todos", "Carcinicultor", "Irrigação", "Construção civil", "Mineração", "Condominial", "Outro"];
     const clientCategory = (client) => {
       if (categories.includes(client.category)) return client.category;
@@ -14,88 +18,88 @@ window.PageModules.clients = {
 
     const applyViewMode = () => {
       const grid = UI.$("#clientGrid");
-      if (!grid) return;
+      const table = UI.$("#clientTableWrap");
+      if (!grid || !table) return;
       const isList = viewMode === "list";
-      grid.classList.toggle("client-list", isList);
-      UI.$$("#clientGrid .client-card").forEach(card => card.classList.toggle("client-list-row", isList));
-      UI.$$('[data-view]').forEach(button => button.classList.toggle("active", button.dataset.view === viewMode));
+      grid.hidden = isList;
+      table.hidden = !isList;
+      UI.$$('[data-view]').forEach(button => { const active = button.dataset.view === viewMode; button.classList.toggle("active", active); button.setAttribute("aria-pressed", String(active)); });
     };
 
     const render = () => {
       state = Store.getState();
-      const list = state.clients.filter(c => {
-        return category === "Todos" || clientCategory(c) === category;
+      const visitsByClient = new Map();
+      state.visits.forEach(visit => { if (!visitsByClient.has(visit.clientId)) visitsByClient.set(visit.clientId, []); visitsByClient.get(visit.clientId).push(visit); });
+      const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const counts = { Todos: state.clients.length, Cliente: 0, Lead: 0, "Sem visitas": 0 };
+      state.clients.forEach(client => { if (client.status === "Cliente") counts.Cliente++; if (["Lead", "Prospect"].includes(client.status)) counts.Lead++; if (!visitsByClient.get(client.id)?.length) counts["Sem visitas"]++; });
+      const regions = [...new Set(state.clients.map(client => String(client.state || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const list = state.clients.filter(client => {
+        const query = normalize(search.trim());
+        const matchesText = !query || normalize([client.name, client.company, client.city, client.segment, clientCategory(client)].join(" ")).includes(query);
+        const matchesStatus = statusFilter === "Todos" || (statusFilter === "Sem visitas" ? !visitsByClient.get(client.id)?.length : statusFilter === "Lead" ? ["Lead", "Prospect"].includes(client.status) : client.status === statusFilter);
+        return matchesText && matchesStatus && (category === "Todos" || clientCategory(client) === category) && (!region || String(client.state || "").trim() === region);
       });
-      const categoryCounts = Object.fromEntries(categories.map(item => [item, item === "Todos" ? state.clients.length : state.clients.filter(c => clientCategory(c) === item).length]));
-      const browserLabel = category === "Todos" ? "Todos os clientes" : category;
+      const pages = Math.max(1, Math.ceil(list.length / pageSize));
+      page = Math.min(page, pages);
+      const visible = list.slice((page - 1) * pageSize, page * pageSize);
+      const escape = UI.escape;
+      const displayed = visible.map(client => {
+        const visits = visitsByClient.get(client.id) || [];
+        const validDates = visits.map(visit => visit.date ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(visit.date)) ? `${visit.date}T12:00:00` : visit.date) : null).filter(date => date && Number.isFinite(date.getTime())).sort((a, b) => b - a);
+        const last = validDates[0];
+        return {
+          client,
+          visitCount: visits.length,
+          lastLabel: last ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(last) : visits.length ? "Data indisponível" : "Sem visitas",
+          ownerName: state.users.find(user => user.id === client.ownerId)?.name || "Não informado",
+          location: [client.city, client.state].filter(value => value && value !== "Não informado").join(", ") || "Local não informado"
+        };
+      });
 
       UI.$("#pageContent").innerHTML = `
-        <style>
-          #clientCategoryPanel {
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(-8px);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-          }
-          #clientCategoryPanel.open {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-          }
-          #clientFilterToggle .dropdown-icon {
-            transition: transform 0.2s ease;
-          }
-          #clientFilterToggle.active .dropdown-icon {
-            transform: rotate(180deg);
-          }
-        </style>
-        <section class="client-browser-bar reveal" style="position:relative; z-index:20;">
-          <div class="modern-dropdown-wrapper" style="position:relative; width:100%;">
-            <button class="modern-dropdown-trigger ${filtersOpen ? "active" : ""}" id="clientFilterToggle" type="button" aria-expanded="${filtersOpen}" style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:100%; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 14px; cursor:pointer; text-align:left; box-shadow:0 2px 5px rgba(0,0,0,0.02); transition:all 0.2s ease;">
-              <span style="display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;">
-                <small style="font-size:10px; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Segmento de Clientes</small>
-                <strong style="font-size:15px; color:var(--text);">${browserLabel}</strong>
-              </span>
-              <span class="dropdown-icon" style="color:var(--muted);">${UI.icon("chevron-down", 16)}</span>
-            </button>
-            
-            <div class="modern-dropdown-menu ${filtersOpen ? "open" : ""}" id="clientCategoryPanel" style="position:absolute; top:calc(100% + 8px); left:0; width:100%; min-width:100%; max-width:100vw; background:#fff; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04); padding:8px; display:flex; flex-direction:column; gap:2px;">
-              ${categories.map(item => `
-                <button class="modern-dropdown-item ${item === category ? "active" : ""}" data-category="${item}" type="button" style="width:100%; display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border:none; background:${item === category ? '#f3f8f5' : 'transparent'}; border-radius:8px; cursor:pointer; text-align:left; transition:background 0.15s ease;" onmouseover="this.style.background='${item === category ? '#f3f8f5' : '#f9fafa'}'" onmouseout="this.style.background='${item === category ? '#f3f8f5' : 'transparent'}'">
-                  <span style="font-size:13px; font-weight:${item === category ? '750' : '500'}; color:${item === category ? 'var(--primary)' : 'var(--text)'};">${item}</span>
-                  <small style="background:${item === category ? '#e1ecdf' : '#f0f3f1'}; padding:4px 8px; border-radius:999px; font-size:10px; font-weight:800; color:${item === category ? 'var(--primary-2)' : 'var(--muted)'};">${categoryCounts[item]}</small>
-                </button>
-              `).join("")}
-            </div>
-          </div>
-
-          <div class="client-browser-actions">
-            <div class="view-mode-toggle" aria-label="Modo de visualização">
-              <button class="icon-btn ${viewMode === "cards" ? "active" : ""}" data-view="cards" type="button" aria-label="Exibir em cards" title="Cards">${UI.icon("grid", 17)}</button>
-              <button class="icon-btn ${viewMode === "list" ? "active" : ""}" data-view="list" type="button" aria-label="Exibir em lista" title="Lista">${UI.icon("list", 18)}</button>
-            </div>
-            <button class="compact-create-btn" id="newClientBtn" type="button" title="Novo cliente">${UI.icon("plus", 18)}<span>Novo cliente</span></button>
-          </div>
+        <section class="clients-overview" aria-label="Resumo da carteira">
+          <div class="clients-overview-item"><span class="clients-overview-icon clients-icon-blue">${UI.icon("users", 21)}</span><div><small>Total de clientes</small><strong>${counts.Todos}</strong><span>Na carteira</span></div></div>
+          <div class="clients-overview-item"><span class="clients-overview-icon clients-icon-green">${UI.icon("user", 21)}</span><div><small>Clientes</small><strong>${counts.Cliente}</strong><span>Relacionamento cliente</span></div></div>
+          <div class="clients-overview-item"><span class="clients-overview-icon clients-icon-amber">${UI.icon("grid", 21)}</span><div><small>Leads e prospects</small><strong>${counts.Lead}</strong><span>Oportunidades na carteira</span></div></div>
+          <div class="clients-overview-item"><span class="clients-overview-icon clients-icon-red">${UI.icon("pin", 21)}</span><div><small>Sem visitas</small><strong>${counts["Sem visitas"]}</strong><span>Sem registros de visita</span></div></div>
         </section>
-
-        <section class="client-grid ${viewMode === "list" ? "client-list" : ""} reveal" id="clientGrid">
-          ${list.length ? list.map(c => {
-            const visits = state.visits.filter(v => v.clientId === c.id);
-            const last = visits.sort((a,b) => new Date(b.date)-new Date(a.date))[0];
-            return `
-              <a class="client-card ${viewMode === "list" ? "client-list-row" : ""}" href="${UI.pageLink(`pages/cliente.html?id=${c.id}`)}">
-                <div class="client-card-head"><span class="avatar client-avatar">${UI.initials(c.name)}</span><span>${UI.statusBadge(c.status)}</span></div>
-                <div class="client-card-title"><h3>${c.name}</h3><span class="client-category-tag">${clientCategory(c)}</span></div>
-                <p>${c.company}</p>
-                <div class="client-meta"><span>${UI.icon("pin", 15)} ${c.city}, ${c.state}</span><span>${visits.length} visita(s)</span></div>
-                <div class="client-card-foot"><span>${last ? `Última visita ${UI.date(last.date)}` : "Sem visitas"}</span>${UI.icon("chevron")}</div>
-              </a>`;
-          }).join("") : UI.empty("Nenhum cliente encontrado", "Ajuste a busca ou cadastre um novo cliente.")}
+        <section class="clients-controls" aria-label="Filtros de clientes">
+          <label class="clients-search">${UI.icon("search", 18)}<span class="clients-sr-only">Buscar clientes</span><input id="clientSearch" type="search" placeholder="Buscar por nome, cidade ou segmento" autocomplete="off"></label>
+          <label><span class="clients-sr-only">Filtrar por segmento</span><select id="clientCategory"><option value="Todos">Todos os segmentos</option>${categories.slice(1).map(item => `<option value="${escape(item)}">${escape(item)}</option>`).join("")}</select></label>
+          <label><span class="clients-sr-only">Filtrar por estado</span><select id="clientRegion"><option value="">Todos os estados</option>${regions.map(item => `<option value="${escape(item)}">${escape(item)}</option>`).join("")}</select></label>
+          <div class="client-browser-actions"><div class="view-mode-toggle" role="group" aria-label="Modo de visualização"><button class="icon-btn ${viewMode === "cards" ? "active" : ""}" data-view="cards" type="button" aria-label="Exibir em cartões" title="Cartões">${UI.icon("grid", 17)}</button><button class="icon-btn ${viewMode === "list" ? "active" : ""}" data-view="list" type="button" aria-label="Exibir em tabela" title="Tabela">${UI.icon("list", 18)}</button></div><button class="compact-create-btn" id="newClientBtn" type="button" title="Novo cliente">${UI.icon("plus", 18)}<span>Novo cliente</span></button></div>
         </section>
+        <nav class="clients-tabs" aria-label="Filtrar carteira por situação">${[["Todos", "Todos"], ["Cliente", "Clientes"], ["Lead", "Leads e prospects"], ["Sem visitas", "Sem visitas"]].map(([value, label]) => `<button type="button" data-client-status="${value}" class="${statusFilter === value ? "active" : ""}" aria-pressed="${statusFilter === value}"><span>${label}</span><strong>${counts[value]}</strong></button>`).join("")}</nav>
+        <section class="client-grid" id="clientGrid" aria-label="Clientes encontrados">
+          ${displayed.length ? displayed.map(({ client: c, visitCount, lastLabel, ownerName, location }) => {
+            return `<a class="client-card" href="${UI.pageLink(`pages/cliente.html?id=${encodeURIComponent(c.id)}`)}">
+              <div class="client-card-heading"><span class="avatar client-avatar">${escape(UI.initials(c.name || "Cliente"))}</span><div class="client-card-name"><h3>${escape(c.name || "Cliente")}</h3><p>${escape(c.company || "")}</p></div><div class="client-card-tags">${UI.statusBadge(c.status)}<span class="client-category-tag">${escape(clientCategory(c))}</span></div></div>
+              <div class="client-card-location">${UI.icon("pin", 16)}<span>${escape(location)}</span></div>
+              <div class="client-card-details"><div>${UI.icon("calendar", 16)}<span><strong>${visitCount}</strong><small>Visitas</small></span></div><div>${UI.icon("clock", 16)}<span><strong>${escape(lastLabel)}</strong><small>Última visita</small></span></div><div>${UI.icon("user", 16)}<span><strong>${escape(ownerName)}</strong><small>Responsável</small></span></div><span class="client-card-arrow">${UI.icon("chevron", 17)}</span></div>
+            </a>`;
+          }).join("") : UI.empty("Nenhum cliente encontrado", "Ajuste os filtros ou cadastre um novo cliente.")}
+        </section>
+        <div class="clients-table-wrap" id="clientTableWrap" role="region" aria-label="Lista de clientes" tabindex="0" hidden>
+          ${displayed.length ? `<table class="clients-table">
+            <thead><tr><th scope="col">Cliente</th><th scope="col">Situação / segmento</th><th scope="col">Localização</th><th scope="col">Visitas</th><th scope="col">Última visita</th><th scope="col">Responsável</th><th scope="col"><span class="clients-sr-only">Abrir ficha</span></th></tr></thead>
+            <tbody>${displayed.map(({ client: c, visitCount, lastLabel, ownerName, location }) => {
+              const href = UI.pageLink(`pages/cliente.html?id=${encodeURIComponent(c.id)}`);
+              return `<tr>
+                <th scope="row"><a class="clients-table-client" href="${href}"><span class="avatar client-avatar">${escape(UI.initials(c.name || "Cliente"))}</span><span class="clients-table-client-name"><strong>${escape(c.name || "Cliente")}</strong><small>${escape(c.company || "")}</small></span></a></th>
+                <td><span class="clients-table-tags">${UI.statusBadge(c.status)}<span class="client-category-tag">${escape(clientCategory(c))}</span></span></td>
+                <td>${escape(location)}</td><td class="clients-table-number">${visitCount}</td><td>${escape(lastLabel)}</td><td>${escape(ownerName)}</td>
+                <td><a class="clients-table-open" href="${href}" aria-label="Abrir ficha de ${escape(c.name || "Cliente")}">${UI.icon("chevron", 17)}</a></td>
+              </tr>`;
+            }).join("")}</tbody>
+          </table>` : UI.empty("Nenhum cliente encontrado", "Ajuste os filtros ou cadastre um novo cliente.")}
+        </div>
+        <div class="clients-pagination"><span>${list.length ? `Mostrando ${(page - 1) * pageSize + 1} a ${Math.min(page * pageSize, list.length)} de ${list.length}` : "Nenhum cliente encontrado"}</span><div><button type="button" id="clientsPrev" aria-label="Página anterior" ${page <= 1 ? "disabled" : ""}>${UI.icon("arrow_left", 16)}</button><strong>${page} / ${pages}</strong><button type="button" id="clientsNext" aria-label="Próxima página" ${page >= pages ? "disabled" : ""}>${UI.icon("arrow", 16)}</button></div></div>
 
-        <dialog id="clientDialog" class="form-dialog large">
+        <dialog id="clientDialog" class="form-dialog large client-create-dialog">
           <form method="dialog" id="clientForm">
             <div class="dialog-head"><div><span class="eyebrow">Cadastro rápido</span><h2>Novo cliente</h2></div><button class="icon-btn" value="cancel">${UI.icon("x")}</button></div>
+            <div class="client-create-scroll">
             <div class="form-grid">
               <label class="field span-2"><span>Nome do cliente / propriedade</span><input name="name" required placeholder="Ex.: Fazenda Santa Clara"></label>
               <label class="field span-2"><span>Razão ou nome empresarial</span><input name="company" placeholder="Opcional"></label>
@@ -110,9 +114,10 @@ window.PageModules.clients = {
               <label class="field span-2"><span>Observação inicial</span><textarea name="notes" rows="3"></textarea></label>
             </div>
             <div class="location-card">
-              <div><span class="eyebrow">Localização rural</span><h3>Marque manualmente no mapa</h3><p>Clique na área aproximada para registrar coordenadas simuladas nesta demonstração.</p></div>
+              <div><span class="eyebrow">Localização rural</span><h3>Marque manualmente no mapa</h3><p>Clique no mapa para marcar a localização aproximada do cliente.</p></div>
               <div class="manual-map" id="manualMap"><div class="map-grid"></div><span class="manual-pin">${UI.icon("pin", 20)}</span></div>
               <div class="coord-row"><label class="field"><span>Latitude</span><input id="latInput" name="lat" readonly></label><label class="field"><span>Longitude</span><input id="lngInput" name="lng" readonly></label></div>
+            </div>
             </div>
             <div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Salvar cliente</button></div>
           </form>
@@ -127,18 +132,27 @@ window.PageModules.clients = {
         }
       });
 
-      UI.$("#clientFilterToggle").addEventListener("click", () => {
-        filtersOpen = !filtersOpen;
-        UI.$("#clientCategoryPanel")?.classList.toggle("open", filtersOpen);
-        const button = UI.$("#clientFilterToggle");
-        button?.classList.toggle("active", filtersOpen);
-        button?.setAttribute("aria-expanded", String(filtersOpen));
+      const searchInput = UI.$("#clientSearch");
+      searchInput.value = search;
+      UI.$("#clientCategory").value = category;
+      UI.$("#clientRegion").value = region;
+      searchInput.addEventListener("input", () => {
+        const position = searchInput.selectionStart;
+        search = searchInput.value; page = 1; render();
+        const input = UI.$("#clientSearch");
+        input.focus();
+        if (position != null) input.setSelectionRange(position, position);
       });
-      UI.$$('[data-category]').forEach(button => button.addEventListener("click", () => { category = button.dataset.category; filtersOpen = false; render(); }));
+      UI.$("#clientCategory").addEventListener("change", e => { category = e.target.value; page = 1; render(); });
+      UI.$("#clientRegion").addEventListener("change", e => { region = e.target.value; page = 1; render(); });
+      UI.$$('[data-client-status]').forEach(button => button.addEventListener("click", () => { statusFilter = button.dataset.clientStatus; page = 1; render(); }));
+      UI.$("#clientsPrev").addEventListener("click", () => { if (page > 1) { page--; render(); } });
+      UI.$("#clientsNext").addEventListener("click", () => { if (page < pages) { page++; render(); } });
       UI.$$('[data-view]').forEach(button => button.addEventListener("click", () => {
         viewMode = button.dataset.view === "list" ? "list" : "cards";
         applyViewMode();
       }));
+      applyViewMode();
       UI.$("#newClientBtn").addEventListener("click", () => {
         UI.openDialog("clientDialog");
         UI.setupManualMap(UI.$("#manualMap"), UI.$("#latInput"), UI.$("#lngInput"));

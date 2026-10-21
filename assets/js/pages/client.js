@@ -12,9 +12,26 @@ window.PageModules.client = {
         UI.$("#pageContent").innerHTML = `<section class="content-section">${UI.empty("Cliente não encontrado", "A carteira ainda não possui clientes disponíveis.")}</section>`;
         return;
       }
+      const safeDate = (value, withTime = false) => {
+        if (!value) return "Não informado";
+        const input = /^\d{4}-\d{2}-\d{2}$/.test(String(value)) ? `${value}T12:00:00` : value;
+        const date = new Date(input);
+        if (!Number.isFinite(date.getTime())) return "Não informado";
+        return new Intl.DateTimeFormat("pt-BR", withTime
+          ? { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }
+          : { day: "2-digit", month: "short", year: "numeric" }).format(date);
+      };
+      const detailIcon = (name) => {
+        const paths = {
+          phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3.1 5.2 2 2 0 0 1 5.1 3h3a2 2 0 0 1 2 1.7l.4 2.5a2 2 0 0 1-.6 1.7L8.6 10a16 16 0 0 0 5.4 5.4l1.1-1.3a2 2 0 0 1 1.7-.6l2.5.4a2 2 0 0 1 1.7 2Z"/>',
+          mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+          tag: '<path d="M20 13 13 20 4 11V4h7l9 9Z"/><circle cx="8" cy="8" r="1"/>'
+        };
+        return `<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
+      };
       const visits = state.visits
         .filter(v => v.clientId === client.id)
-        .sort((a,b) => new Date(b.date) - new Date(a.date));
+        .sort((a,b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
       const owner = state.users.find(u => u.id === client.ownerId);
       const needRecords = client.needRecords || [];
 
@@ -22,16 +39,17 @@ window.PageModules.client = {
         ...(client.attachments || []).map(a => ({ ...a, source: "Perfil do cliente", date: client.createdAt })),
         ...visits.flatMap(v => (v.attachments || []).map(a => ({
           ...a,
-          source: `Visita de ${UI.date(v.date)}`,
+          source: `Visita de ${safeDate(v.date)}`,
           visitId: v.id,
           date: v.date
         })))
       ].filter(a => a.type?.startsWith("image/") || a.type?.startsWith("video/"));
 
       UI.$("#pageContent").innerHTML = `
+        <a class="client-detail-back" href="${UI.pageLink("pages/clientes.html")}">${UI.icon("arrow_left", 16)} Voltar para clientes</a>
         <section class="profile-hero client-profile-hero reveal">
           <div class="profile-main">
-
+            <div class="client-detail-avatar" aria-hidden="true">${(client.name || "C").trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase()}</div>
             <div class="client-profile-heading">
               <div class="title-inline"><h2>${client.name}</h2>${UI.statusBadge(client.status)}</div>
               <p class="client-company">${client.company}</p>
@@ -46,33 +64,111 @@ window.PageModules.client = {
           </div>
         </section>
 
+        <section class="client-detail-metrics reveal" aria-label="Resumo do cliente">
+          <div class="client-detail-metric"><span class="client-metric-icon">${UI.icon("calendar", 20)}</span><div><small>Total de visitas</small><strong>${visits.length}</strong><span>Histórico registrado</span></div></div>
+          <div class="client-detail-metric"><span class="client-metric-icon metric-green">${UI.icon("clock", 20)}</span><div><small>Última visita</small><strong>${visits.length ? safeDate(visits[0].date) : "Sem visitas"}</strong><span>Registro mais recente</span></div></div>
+          <div class="client-detail-metric"><span class="client-metric-icon metric-amber">${UI.icon("calendar", 20)}</span><div><small>Próxima visita</small><strong class="client-metric-unavailable">Não disponível</strong><span>Agenda não integrada</span></div></div>
+          <div class="client-detail-metric"><span class="client-metric-icon metric-violet">${UI.icon("chart", 20)}</span><div><small>Oportunidades</small><strong class="client-metric-unavailable">Não disponível</strong><span>Dados não integrados</span></div></div>
+        </section>
+
         <section class="client-overview-grid reveal">
           <div class="panel panel-contact">
             <div class="panel-head">
-              <div><span class="eyebrow">Dados essenciais</span><h3>Contato e relacionamento</h3></div>
+              <div><h3>Informações do cliente</h3></div>
               <span class="panel-symbol">${UI.icon("user", 23)}</span>
             </div>
-            <div class="info-grid compact-info">
-              <div><small>Contato</small><strong>${client.contact || "Não informado"}</strong><span>${client.phone || "—"}</span></div>
-              <div><small>E-mail</small><strong>${client.email || "Não informado"}</strong><span>${client.city}, ${client.state}</span></div>
-              <div><small>Responsável interno</small><strong>${owner?.name || "—"}</strong><span>${owner?.role || ""}</span></div>
-              <div><small>Relacionamento desde</small><strong>${UI.date(client.createdAt)}</strong><span>${visits.length} visita(s)</span></div>
+            <div class="client-info-list">
+              <div><span class="client-info-icon">${UI.icon("user", 16)}</span><span><strong>Contato</strong><small>${client.contact || "Não informado"}</small></span></div>
+              <div><span class="client-info-icon">${detailIcon("phone")}</span><span><strong>Telefone</strong><small>${client.phone || "Não informado"}</small></span></div>
+              <div><span class="client-info-icon">${detailIcon("mail")}</span><span><strong>E-mail</strong><small>${client.email || "Não informado"}</small></span></div>
+              <div><span class="client-info-icon">${UI.icon("user", 16)}</span><span><strong>Responsável</strong><small>${owner?.name || "Não informado"}</small></span></div>
+              <div><span class="client-info-icon">${detailIcon("tag")}</span><span><strong>Segmento</strong><small>${client.segment || "Não informado"}</small></span></div>
+              <div><span class="client-info-icon">${UI.icon("pin", 16)}</span><span><strong>Localização</strong><small>${client.city || "Não informado"}${client.state ? ` - ${client.state}` : ""}</small></span></div>
             </div>
             <div class="note-box"><small>Observações gerais</small><p>${client.notes || "Sem observações."}</p></div>
           </div>
 
           <div class="panel location-panel">
             <div class="panel-head">
-              <div><span class="eyebrow">Localização rural</span><h3>Ponto do cliente</h3></div>
-              <span class="panel-symbol">${UI.icon("pin", 23)}</span>
+              <div><h3>Localização</h3></div>
+              <a class="client-detail-link" href="${UI.pageLink(`HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html?cliente=${client.id}`)}" target="_blank" rel="noopener">Abrir no mapa ${UI.icon("arrow", 14)}</a>
             </div>
             ${UI.miniMap(client.lat, client.lng, "Ponto do cliente", UI.pageLink("HANDOFF_MAPA_CLIENTES/02_PROJETO_ATUAL/index.html?cliente=" + client.id))}
-            <div class="coord-row" style="margin-top: 16px; padding: 12px 14px; background: rgba(0,0,0,0.02); border-radius: 10px; border: 1px solid var(--line);">
-              <div><span class="eyebrow">Coordenadas (Lat / Lng)</span><br><strong style="font-size: 13px; font-family: monospace;">${client.lat && client.lng ? `${Number(client.lat).toFixed(5)}, ${Number(client.lng).toFixed(5)}` : "Não definidas"}</strong></div>
-              <div><span class="eyebrow">Município base</span><br><strong style="font-size: 13px;">${client.municipio || "Não informado"} - ${client.uf || "--"}</strong></div>
-            </div>
+
+          </div>
+          <div class="panel client-recent-panel">
+            <div class="panel-head"><h3>Últimas visitas</h3><a class="client-detail-link" href="#clientVisitHistory">Ver todas</a></div>
+            ${visits.length ? `<div class="client-recent-list">${visits.slice(0, 4).map(v => {
+              const user = state.users.find(u => u.id === v.userId);
+              return `<div class="client-recent-item"><span class="client-recent-icon">${UI.icon("calendar", 17)}</span><div><strong>${safeDate(v.date, true)}</strong><span>${v.type || "Visita"}${user?.name ? ` · ${user.name}` : ""}</span></div></div>`;
+            }).join("")}</div>` : `<p class="client-recent-empty">Nenhuma visita registrada.</p>`}
           </div>
         </section>
+
+        <section class="client-secondary-grid reveal">
+            <div class="panel needs-history-panel">
+              <div class="panel-head"><div><h3>Necessidades e interesses</h3></div></div>
+              <div class="tag-row">${(client.needs || []).length ? client.needs.map(n => `<span class="tag tag-accent">${n}</span>`).join("") : `<span class="muted">Nenhuma necessidade registrada.</span>`}</div>
+              ${needRecords.length ? `<div class="need-records">${needRecords.slice(0,5).map(n => `
+                <div class="need-record">
+                  <span class="need-priority priority-${n.priority?.toLowerCase()}"></span>
+                  <div><strong>${n.category}</strong><p>${n.description}</p><small>${safeDate(n.date, true)} · ${n.priority || "Normal"}</small></div>
+                </div>`).join("")}</div>` : ""}
+              <button class="client-add-need" type="button" id="addNeedPanelBtn">${UI.icon("plus",16)} Adicionar necessidade</button>
+            </div>
+
+            <div class="panel client-opportunities-panel">
+              <div class="panel-head"><h3>Oportunidades</h3></div>
+              <p class="client-section-empty">As oportunidades ainda não estão disponíveis nesta ficha.</p>
+            </div>
+            <div class="panel attachments-panel">
+              <div class="panel-head"><div><h3>Documentos</h3></div></div>
+              ${client.attachments?.length
+                ? client.attachments.map(a => `<div class="file-row">${UI.icon("paperclip")}<span><strong>${a.name}</strong><small>${Math.round(a.size/1024)} KB</small></span></div>`).join("")
+                : `<p class="client-section-empty">Nenhum documento no cadastro do cliente. Os anexos das visitas estão no histórico.</p>`}
+            </div>
+
+        </section>
+
+        <section class="client-history-layout reveal">
+          <div class="panel history-panel" id="clientVisitHistory">
+            <div class="panel-head">
+              <div><span class="eyebrow">Histórico completo</span><h3>Visitas realizadas</h3></div>
+              <span class="count-pill">${visits.length} visitas</span>
+            </div>
+            <div class="visit-report-list">
+              ${visits.length ? visits.map((v, index) => {
+                const user = state.users.find(u => u.id === v.userId);
+                const trip = state.trips.find(t => t.id === v.tripId);
+                const images = (v.attachments || []).filter(a => a.type?.startsWith("image/")).length;
+                const files = (v.attachments || []).length;
+                return `
+                  <article class="visit-report-card">
+                    <div class="visit-report-index"><span>${String(visits.length - index).padStart(2,"0")}</span></div>
+                    <div class="visit-report-content">
+                      <div class="timeline-top">
+                        <div class="row-inline">${UI.statusBadge(v.type)}<span class="visit-state-dot" title="Registro concluído"></span></div>
+                        <time>${safeDate(v.date, true)}</time>
+                      </div>
+                      <h4>${v.type} por ${user?.name || "Usuário"}</h4>
+                      <p>${v.notes}</p>
+                      ${v.needs?.length ? `<div class="tag-row">${v.needs.map(n => `<span class="tag">${n}</span>`).join("")}</div>` : ""}
+                      <div class="visit-report-meta">
+                        ${trip ? `<a class="context-link" href="${UI.pageLink(`pages/viagem.html?id=${trip.id}`)}">${UI.icon("briefcase", 15)} ${trip.name}</a>` : `<span>${UI.icon("briefcase",15)} Sem viagem</span>`}
+                        <span>${UI.icon("camera",15)} ${images} foto(s)</span>
+                        <span>${UI.icon("paperclip",15)} ${files} anexo(s)</span>
+                        ${v.lat && v.lng ? `<span>${UI.icon("pin",15)} localização registrada</span>` : ""}
+                      </div>
+                    </div>
+                    <button class="btn btn-pdf" data-pdf-visit="${v.id}" aria-label="Gerar PDF desta visita">${UI.icon("file",16)} PDF da visita</button>
+                  </article>`;
+              }).join("") : UI.empty("Ainda sem histórico", "A primeira visita aparecerá aqui.")}
+            </div>
+          </div>
+
+        </section>
+
+
 
         <section class="panel media-panel reveal">
           <div class="panel-head">
@@ -114,63 +210,6 @@ window.PageModules.client = {
           }
         </section>
 
-        <section class="client-history-layout reveal">
-          <div class="panel history-panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Histórico completo</span><h3>Visitas realizadas</h3></div>
-              <span class="count-pill">${visits.length} visitas</span>
-            </div>
-            <div class="visit-report-list">
-              ${visits.length ? visits.map((v, index) => {
-                const user = state.users.find(u => u.id === v.userId);
-                const trip = state.trips.find(t => t.id === v.tripId);
-                const images = (v.attachments || []).filter(a => a.type?.startsWith("image/")).length;
-                const files = (v.attachments || []).length;
-                return `
-                  <article class="visit-report-card">
-                    <div class="visit-report-index"><span>${String(visits.length - index).padStart(2,"0")}</span></div>
-                    <div class="visit-report-content">
-                      <div class="timeline-top">
-                        <div class="row-inline">${UI.statusBadge(v.type)}<span class="visit-state-dot" title="Registro concluído"></span></div>
-                        <time>${UI.date(v.date, true)}</time>
-                      </div>
-                      <h4>${v.type} por ${user?.name || "Usuário"}</h4>
-                      <p>${v.notes}</p>
-                      ${v.needs?.length ? `<div class="tag-row">${v.needs.map(n => `<span class="tag">${n}</span>`).join("")}</div>` : ""}
-                      <div class="visit-report-meta">
-                        ${trip ? `<a class="context-link" href="${UI.pageLink(`pages/viagem.html?id=${trip.id}`)}">${UI.icon("briefcase", 15)} ${trip.name}</a>` : `<span>${UI.icon("briefcase",15)} Sem viagem</span>`}
-                        <span>${UI.icon("camera",15)} ${images} foto(s)</span>
-                        <span>${UI.icon("paperclip",15)} ${files} anexo(s)</span>
-                        ${v.lat && v.lng ? `<span>${UI.icon("pin",15)} localização registrada</span>` : ""}
-                      </div>
-                    </div>
-                    <button class="btn btn-pdf" data-pdf-visit="${v.id}" aria-label="Gerar PDF desta visita">${UI.icon("file",16)} PDF da visita</button>
-                  </article>`;
-              }).join("") : UI.empty("Ainda sem histórico", "A primeira visita aparecerá aqui.")}
-            </div>
-          </div>
-
-          <div class="client-side-stack">
-            <div class="panel needs-history-panel">
-              <div class="panel-head"><div><span class="eyebrow">Mapa de necessidades</span><h3>Interesses registrados</h3></div><span class="panel-symbol">${UI.icon("chart",21)}</span></div>
-              <div class="tag-row">${(client.needs || []).length ? client.needs.map(n => `<span class="tag tag-accent">${n}</span>`).join("") : `<span class="muted">Nenhuma necessidade registrada.</span>`}</div>
-              ${needRecords.length ? `<div class="need-records">${needRecords.slice(0,5).map(n => `
-                <div class="need-record">
-                  <span class="need-priority priority-${n.priority?.toLowerCase()}"></span>
-                  <div><strong>${n.category}</strong><p>${n.description}</p><small>${UI.date(n.date, true)} · ${n.priority || "Normal"}</small></div>
-                </div>`).join("")}</div>` : ""}
-            </div>
-
-            <div class="panel attachments-panel">
-              <div class="panel-head"><div><span class="eyebrow">Documentos gerais</span><h3>Anexos do cliente</h3></div><span class="panel-symbol">${UI.icon("paperclip",21)}</span></div>
-              ${client.attachments?.length
-                ? client.attachments.map(a => `<div class="file-row">${UI.icon("paperclip")}<span><strong>${a.name}</strong><small>${Math.round(a.size/1024)} KB</small></span></div>`).join("")
-                : UI.empty("Sem anexos gerais", "Os anexos específicos de cada visita ficam preservados no respectivo relatório.")}
-            </div>
-          </div>
-        </section>
-
-
 
         <dialog id="needDialog" class="form-dialog">
           <form method="dialog" id="needForm" class="need-dialog-form">
@@ -186,6 +225,7 @@ window.PageModules.client = {
       `;
 
       UI.$("#openNeedBtn")?.addEventListener("click", () => UI.openDialog("needDialog"));
+      UI.$("#addNeedPanelBtn")?.addEventListener("click", () => UI.openDialog("needDialog"));
             UI.$("#needForm")?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);

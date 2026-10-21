@@ -4,6 +4,11 @@ window.PageModules.finance = {
     const params = new URLSearchParams(location.search);
     let selectedTrip = params.get("trip") || "all";
     let attachment = null;
+    let search = "", category = "all", dateFrom = "", dateTo = "", currentPage = 1;
+    const categoryIcon = (name) => {
+      const paths = { "Combustível": '<path d="M5 21V4h10v17M3 21h14M7 7h6v5H7zM15 8h2l2 3v7a2 2 0 0 0 4 0v-7l-2-2"/>', "Hospedagem": '<path d="M3 18V7M3 15h18v3M21 15v-4a2 2 0 0 0-2-2h-7v6M5 11a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z"/>', "Alimentação": '<path d="M4 3v6a3 3 0 0 0 6 0V3M7 3v18M17 21V3c-3 2-4 6-4 10h4"/>', "Pedágio": '<path d="M3 20 8 4h8l5 16M10 16h4M11 11h2M12 5v2"/>', "Estacionamento": '<path d="M5 20V4h8a5 5 0 0 1 0 10H5"/>' };
+      return paths[name] ? `<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>` : '<svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
+    };
 
     const XLSX_CDN = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
     let xlsxLoader = null;
@@ -124,13 +129,25 @@ window.PageModules.finance = {
     const render = () => {
       const state = Store.getState();
       const events = state.events || [];
-      const list = state.expenses.filter(e => {
+      const referenceList = state.expenses.filter(e => {
         if (selectedTrip === "all") return true;
         if (selectedTrip.startsWith("t_") && e.tripId === selectedTrip.slice(2)) return true;
         if (selectedTrip.startsWith("e_") && e.eventId === selectedTrip.slice(2)) return true;
         if (selectedTrip === e.tripId) return true; // fallback
         return false;
       });
+      const categories = [...new Set(referenceList.map(e => e.category).filter(Boolean))].sort();
+      const matchingExpenses = referenceList.filter(e => {
+        const reference = state.trips.find(t => t.id === e.tripId)?.name || events.find(ev => ev.id === e.eventId)?.name || "";
+        return (category === "all" || e.category === category) && [e.place, e.notes, e.category, reference].some(value => String(value || "").toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
+      });
+      const list = matchingExpenses.filter(e => {
+        const date = String(e.date || "").slice(0, 10);
+        return (!dateFrom || date >= dateFrom) && (!dateTo || date <= dateTo);
+      }).sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+      const pageSize = 6;
+      const pages = Math.max(1, Math.ceil(list.length / pageSize));
+      currentPage = Math.min(currentPage, pages);
       const total = list.reduce((s,e)=>s+Number(e.amount),0);
       const byCategory = Object.entries(list.reduce((acc,e) => {
         acc[e.category] = (acc[e.category] || 0) + Number(e.amount);
@@ -155,32 +172,30 @@ window.PageModules.finance = {
           <button class="btn btn-primary btn-small" id="newExpenseBtn">${UI.icon("plus", 17)} Nova despesa</button>
         </section>
 
-        <section class="finance-layout reveal">
-          <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Resumo</span><h3>Por categoria</h3></div></div>
+        <section class="finance-overview reveal">
+          <div class="panel finance-categories">
+            <div class="panel-head"><div><h3>Despesas por categoria</h3></div></div>
             <div class="category-bars">
               ${byCategory.length ? byCategory.map(([cat,value]) => {
                 const pct = total ? Math.round(value/total*100) : 0;
-                return `<div class="category-row"><div><span>${cat}</span><strong>${UI.money(value)}</strong></div><div class="progress"><span style="width:${pct}%"></span></div><small>${pct}%</small></div>`;
+                const tone = ({ "Combustível": "fuel", "Hospedagem": "stay", "Alimentação": "food" })[cat] || "other";
+                return `<div class="finance-category-row finance-category-${tone}"><span class="finance-category-icon">${categoryIcon(cat)}</span><div class="finance-category-info"><div class="finance-category-title"><span>${UI.escape(cat)}</span><strong>${UI.money(value)}</strong></div><div class="finance-category-progress"><div class="progress"><span style="width:${pct}%"></span></div><small>${pct}%</small></div></div></div>`;
               }).join("") : `<span class="muted">Sem despesas neste filtro.</span>`}
             </div>
           </div>
-
-          <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Lançamentos</span><h3>Histórico de despesas</h3></div><span class="count-pill">${list.length} registros</span></div>
-            <div class="expense-list">
-              ${list.length ? list.map(e => {
+        </section>
+          <div class="panel finance-history reveal">
+            <div class="finance-history-head"><div><h3>Histórico de despesas</h3><p>Despesas lançadas no período selecionado.</p></div><div class="finance-history-filters"><input type="search" id="financeSearch" placeholder="Buscar descrição, local ou viagem..." aria-label="Buscar despesas"><label class="finance-date-field"><span>De</span><input type="date" id="financeDateFrom" aria-label="Data inicial"></label><label class="finance-date-field"><span>Até</span><input type="date" id="financeDateTo" aria-label="Data final"></label><select id="financeCategory" aria-label="Categoria"><option value="all">Todas as categorias</option>${categories.map(cat => `<option value="${UI.escape(cat)}" ${cat === category ? "selected" : ""}>${UI.escape(cat)}</option>`).join("")}</select></div></div>
+            <p class="table-scroll-hint">Deslize a tabela para ver as demais colunas ${UI.icon("arrow", 14)}</p><div class="finance-table-wrap"><table class="finance-table"><thead><tr><th>Data</th><th>Categoria</th><th>Descrição / Local</th><th>Viagem / Evento</th><th>Valor</th></tr></thead><tbody>
+              ${list.length ? list.slice((currentPage - 1) * pageSize, currentPage * pageSize).map(e => {
                 const trip = state.trips.find(t=>t.id===e.tripId);
                 const event = events.find(ev=>ev.id===e.eventId);
-                const user = state.users.find(u=>u.id===e.userId);
                 const refName = event ? event.name : (trip ? trip.name : "Avulsa");
-                const iconTag = event ? UI.icon("calendar", 12) : UI.icon("briefcase", 12);
-                
-                return `<div class="expense-row"><span class="expense-icon">${UI.icon("receipt")}</span><div><div class="row-inline"><strong>${e.category}</strong><span class="tag subtle" style="display:flex; align-items:center; gap:4px;">${iconTag} ${refName}</span>${e.costCenter ? `<span class="tag subtle" style="background:#eef2f6; color:#475569; margin-left:6px;">${e.costCenter}</span>` : ""}</div><p>${e.place}${e.notes ? ` · ${e.notes}` : ""}</p><small>${UI.date(e.date)} · ${user?.name || "Usuário"} ${e.attachment ? "· comprovante anexado" : ""}</small></div><b>${UI.money(e.amount)}</b></div>`;
-              }).join("") : UI.empty("Nenhuma despesa", "Adicione uma despesa para iniciar o controle financeiro.")}
-            </div>
+                return `<tr><td>${e.date && !Number.isNaN(new Date(e.date).getTime()) ? UI.date(e.date) : "—"}</td><td><span class="finance-table-category"><span class="finance-category-icon">${categoryIcon(e.category)}</span>${UI.escape(e.category || "Outros")}</span></td><td><strong>${UI.escape(e.place || "—")}</strong>${e.notes ? `<small>${UI.escape(e.notes)}</small>` : ""}</td><td>${UI.escape(refName)}</td><td><strong>${UI.money(e.amount)}</strong></td></tr>`;
+              }).join("") : `<tr><td colspan="5" class="finance-table-empty">Nenhuma despesa encontrada para os filtros selecionados.</td></tr>`}
+            </tbody></table></div>
+            <div class="finance-pagination"><span>${list.length ? `Mostrando ${(currentPage - 1) * pageSize + 1} a ${Math.min(currentPage * pageSize, list.length)} de ${list.length} registros` : "0 registros"}</span><div><button type="button" id="financePrevious" ${currentPage === 1 ? "disabled" : ""} aria-label="Página anterior">‹</button><span>${currentPage} / ${pages}</span><button type="button" id="financeNext" ${currentPage === pages ? "disabled" : ""} aria-label="Próxima página">›</button></div></div>
           </div>
-        </section>
 
         <dialog id="expenseDialog" class="form-dialog">
           <form method="dialog" id="expenseForm">
@@ -220,8 +235,26 @@ window.PageModules.finance = {
         </dialog>
       `;
 
-      UI.$("#tripFilter").addEventListener("change", e => { selectedTrip = e.target.value; render(); });
-      UI.$("#newExpenseBtn").addEventListener("click", () => UI.openDialog("expenseDialog"));
+      UI.$("#tripFilter").addEventListener("change", e => { selectedTrip = e.target.value; category = "all"; currentPage = 1; render(); });
+      const searchInput = UI.$("#financeSearch");
+      searchInput.value = search;
+      UI.$("#financeDateFrom").value = dateFrom;
+      UI.$("#financeDateTo").value = dateTo;
+      searchInput.addEventListener("input", e => { const position = e.target.selectionStart; search = e.target.value; currentPage = 1; render(); const input = UI.$("#financeSearch"); input.focus(); input.setSelectionRange(position, position); });
+      UI.$("#financeCategory").addEventListener("change", e => { category = e.target.value; currentPage = 1; render(); });
+      UI.$("#financeDateFrom").addEventListener("change", e => { dateFrom = e.target.value; currentPage = 1; render(); });
+      UI.$("#financeDateTo").addEventListener("change", e => { dateTo = e.target.value; currentPage = 1; render(); });
+      UI.$("#financePrevious").addEventListener("click", () => { currentPage--; render(); });
+      UI.$("#financeNext").addEventListener("click", () => { currentPage++; render(); });
+      const openExpenseDialog = () => {
+        const reference = UI.$('#expenseForm select[name="referenceId"]');
+        const tripValue = selectedTrip.startsWith("t_") ? selectedTrip : `t_${selectedTrip}`;
+        if (selectedTrip !== "all" && !selectedTrip.startsWith("e_") && [...reference.options].some(option => option.value === tripValue)) reference.value = tripValue;
+        else if (selectedTrip.startsWith("e_") && [...reference.options].some(option => option.value === selectedTrip)) reference.value = selectedTrip;
+        UI.openDialog("expenseDialog");
+      };
+      UI.$("#newExpenseBtn").addEventListener("click", openExpenseDialog);
+      if (params.get("nova") === "1") { params.delete("nova"); history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash}`); openExpenseDialog(); }
       UI.$("#exportTripCostsBtn").addEventListener("click", () => UI.openDialog("tripExportDialog"));
       const selectAllTrips = UI.$("#selectAllTrips");
       const tripChoices = [...document.querySelectorAll(".trip-export-choice")];

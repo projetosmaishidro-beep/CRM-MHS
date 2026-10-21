@@ -1,46 +1,69 @@
 ﻿window.PageModules = window.PageModules || {};
 window.PageModules.trips = {
   init() {
+    let viewMode = "cards";
+    let searchText = "";
+    let statusFilter = "";
     const render = () => {
       const state = Store.getState();
+      const tripIds = new Set(state.trips.map(trip => trip.id));
+      const planned = state.trips.filter(trip => trip.status === "Planejada").length;
+      const active = state.trips.filter(trip => trip.status === "Em andamento").length;
+      const tripVisits = state.visits.filter(visit => tripIds.has(visit.tripId)).length;
+      const tripExpenses = state.expenses.filter(expense => tripIds.has(expense.tripId)).reduce((total, expense) => total + (Number(expense.amount) || 0), 0);
       UI.$("#pageContent").innerHTML = `
-        <section class="trip-board reveal">
-          <button class="trip-create-card" id="newTripBtn" type="button">${UI.icon("plus", 22)}<span>Nova viagem</span></button>
-          ${state.trips.map(trip => {
+        <section class="trips-filters reveal" aria-label="Filtros e visualização de viagens">
+          <label class="trips-search"><span class="sr-only">Buscar viagens</span>${UI.icon("search", 18)}<input id="tripSearch" type="search" placeholder="Buscar por viagem ou objetivo" autocomplete="off"></label>
+          <label class="trips-status-filter"><span class="sr-only">Filtrar por situação</span><select id="tripStatus"><option value="">Todas as situações</option><option>Planejada</option><option>Em andamento</option><option>Concluída</option><option>Cancelada</option></select></label>
+          <div class="trips-view-switch" role="group" aria-label="Visualização"><button type="button" data-view="cards">Cartões</button><button type="button" data-view="blocks">Blocos</button><button type="button" data-view="table">Tabela</button></div>
+          <button class="btn btn-primary trips-create-btn" id="newTripBtn" type="button">${UI.icon("plus", 18)}<span>Nova viagem</span></button>
+        </section>
+        <section class="trips-summary reveal" aria-label="Resumo das viagens">
+          <div class="trips-summary-item"><span class="trips-summary-icon">${UI.icon("briefcase", 20)}</span><div><small>Viagens planejadas</small><strong>${planned}</strong><span>de ${state.trips.length} viagens</span></div></div>
+          <div class="trips-summary-item"><span class="trips-summary-icon is-active">${UI.icon("route", 20)}</span><div><small>Em andamento</small><strong>${active}</strong><span>de ${state.trips.length} viagens</span></div></div>
+          <div class="trips-summary-item"><span class="trips-summary-icon is-visits">${UI.icon("users", 20)}</span><div><small>Total de visitas</small><strong>${tripVisits}</strong><span>em todas as viagens</span></div></div>
+          <div class="trips-summary-item"><span class="trips-summary-icon is-cost">${UI.icon("wallet", 20)}</span><div><small>Gastos totais</small><strong>${UI.money(tripExpenses)}</strong><span>em todas as viagens</span></div></div>
+        </section>
+        <div class="trips-results reveal">
+        <div class="trips-results-heading"><span id="tripResultCount" aria-live="polite"></span></div>
+        <section class="trip-board" aria-label="Viagens cadastradas">
+          ${state.trips.map((trip, index) => {
             const visits = state.visits.filter(v => v.tripId === trip.id);
             const expenses = state.expenses.filter(e => e.tripId === trip.id);
             const participants = trip.participantIds.map(id => state.users.find(u => u.id === id)).filter(Boolean);
             const progress = Math.round((trip.stops.filter(s => s.done).length / Math.max(trip.stops.length, 1)) * 100);
             return `
-              <a class="trip-card" href="${UI.pageLink(`pages/viagem.html?id=${trip.id}`)}">
+              <article class="trip-card" data-trip-index="${index}">
                 <div class="trip-card-top">
                   <span>${UI.statusBadge(trip.status)}</span>
-                  <div style="display:flex; gap:6px; align-items:center;">
-                    <span class="date-chip">${UI.shortDate(trip.startDate)} → ${UI.shortDate(trip.endDate)}</span>
+                  <div class="trip-card-actions">
+                    <span class="date-chip">${UI.icon("calendar", 14)} ${UI.shortDate(trip.startDate)} → ${UI.shortDate(trip.endDate)}</span>
                     ${window.AuthUser?.isAdmin ? `<button class="mini-trash-btn" data-delete-trip="${trip.id}" aria-label="Excluir viagem" title="Excluir viagem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ""}
                   </div>
                 </div>
                 
-                <div>
+                <a class="trip-card-content" href="${UI.pageLink(`pages/viagem.html?id=${trip.id}`)}">
                   <h3>${trip.name}</h3>
                   <p>${trip.objective}</p>
-                </div>
-                
-                <div class="trip-stats hide-mobile">
-                  <span><small>participantes</small><strong>${participants.length}</strong></span>
-                  <span><small>visitas</small><strong>${visits.length}</strong></span>
-                  <span><small>gastos</small><strong>${UI.money(expenses.reduce((s,e)=>s+Number(e.amount),0))}</strong></span>
-                </div>
-                
-                <div class="trip-stats show-mobile" style="margin-top: auto;"><span><small>Visitas</small><strong>${visits.length}</strong></span><span><small>KM rodados</small><strong>${trip.currentKm && trip.startKm ? trip.currentKm - trip.startKm : 0}</strong></span><span><small>Participantes</small><strong>${participants.length}</strong></span></div>
-                <div class="hide-mobile" style="margin-top: auto; display: flex; flex-direction: column; gap: 6px;">
-                  <div class="progress-row"><span>Roteiro</span><strong>${progress}%</strong></div>
-                  <div class="progress"><span style="width:${progress}%"></span></div>
-                  <div class="avatar-stack" style="margin-top: 2px;">${participants.map(u => `<span class="avatar mini">${u.initials}</span>`).join("")}</div>
-                </div>
-              </a>`;
+                  <div class="trips-card-stats">
+                    <span>${UI.icon("users", 17)}<span><small>Participantes</small><strong>${participants.length}</strong></span></span>
+                    <span>${UI.icon("calendar", 17)}<span><small>Visitas</small><strong>${visits.length}</strong></span></span>
+                    <span>${UI.icon("wallet", 17)}<span><small>Gastos</small><strong>${UI.money(expenses.reduce((s,e)=>s+Number(e.amount),0))}</strong></span></span>
+                  </div>
+                  <div class="trips-card-progress"><span>Roteiro <strong>${progress}%</strong></span><span class="trips-progress-track"><span style="width:${progress}%"></span></span></div>
+                </a>
+              </article>`;
           }).join("")}
         </section>
+        <div class="trips-table-wrap" hidden><table class="trips-table"><thead><tr><th>Viagem</th><th>Situação</th><th>Período</th><th>Participantes</th><th>Visitas</th><th>Gastos</th><th>Roteiro</th>${window.AuthUser?.isAdmin ? "<th><span class=\"sr-only\">Ações</span></th>" : ""}</tr></thead><tbody>${state.trips.map((trip, index) => {
+          const visits = state.visits.filter(v => v.tripId === trip.id).length;
+          const amount = state.expenses.filter(e => e.tripId === trip.id).reduce((sum, e) => sum + Number(e.amount), 0);
+          const participants = trip.participantIds.map(id => state.users.find(u => u.id === id)).filter(Boolean).length;
+          const progress = Math.round(trip.stops.filter(s => s.done).length / Math.max(trip.stops.length, 1) * 100);
+          return `<tr data-trip-index="${index}"><td><a href="${UI.pageLink(`pages/viagem.html?id=${trip.id}`)}">${trip.name}</a><small>${trip.objective}</small></td><td>${UI.statusBadge(trip.status)}</td><td>${UI.shortDate(trip.startDate)} → ${UI.shortDate(trip.endDate)}</td><td>${participants}</td><td>${visits}</td><td>${UI.money(amount)}</td><td>${progress}%</td>${window.AuthUser?.isAdmin ? `<td><button type="button" class="mini-trash-btn" data-delete-trip="${trip.id}" aria-label="Excluir viagem" title="Excluir viagem">${UI.icon("trash", 16)}</button></td>` : ""}</tr>`;
+        }).join("")}</tbody></table></div>
+        <div class="trips-empty" hidden><strong>Nenhuma viagem encontrada</strong><span>Experimente ajustar a busca ou a situação.</span></div>
+        </div>
 
         <dialog id="tripDialog" class="form-dialog large trip-dialog">
           <form method="dialog" id="tripForm">
@@ -62,13 +85,47 @@ window.PageModules.trips = {
 
       const tripDialog = UI.$("#tripDialog");
       const tripForm = UI.$("#tripForm");
+      const results = UI.$(".trips-results");
+      const board = results.querySelector(".trip-board");
+      const table = results.querySelector(".trips-table-wrap");
+      const search = UI.$("#tripSearch");
+      const status = UI.$("#tripStatus");
+      const viewButtons = UI.$(".trips-view-switch").querySelectorAll("[data-view]");
+      const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const updateResults = () => {
+        const query = normalize(searchText.trim());
+        let count = 0;
+        const matches = state.trips.map(trip => {
+          const match = (!statusFilter || trip.status === statusFilter) &&
+            (!query || normalize(`${trip.name} ${trip.objective}`).includes(query));
+          if (match) count++;
+          return match;
+        });
+        results.querySelectorAll("[data-trip-index]").forEach(item => { item.hidden = !matches[Number(item.dataset.tripIndex)]; });
+        board.hidden = viewMode === "table" || count === 0;
+        table.hidden = viewMode !== "table" || count === 0;
+        board.classList.toggle("trips-blocks", viewMode === "blocks");
+        results.querySelector(".trips-empty").hidden = count !== 0;
+        results.querySelector("#tripResultCount").textContent = `${count} ${count === 1 ? "viagem encontrada" : "viagens encontradas"}`;
+        viewButtons.forEach(button => {
+          const active = button.dataset.view === viewMode;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+      search.value = searchText;
+      status.value = statusFilter;
+      search.addEventListener("input", () => { searchText = search.value; updateResults(); });
+      status.addEventListener("change", () => { statusFilter = status.value; updateResults(); });
+      viewButtons.forEach(button => button.addEventListener("click", () => { viewMode = button.dataset.view; updateResults(); }));
+      updateResults();
       UI.$("#newTripBtn").addEventListener("click", () => {
         tripForm.reset();
         UI.openDialog("tripDialog");
         requestAnimationFrame(() => tripForm.querySelector("input[name=name]")?.focus());
       });
       
-      UI.$(".trip-board")?.addEventListener("click", async e => {
+      UI.$(".trips-results")?.addEventListener("click", async e => {
         const trashBtn = e.target.closest(".mini-trash-btn");
         if (trashBtn) {
           e.preventDefault();

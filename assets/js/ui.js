@@ -18,6 +18,7 @@
       search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
       filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
       grid: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
+      sidebar: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
       list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
       chevron: '<path d="m9 18 6-6-6-6"/>',
       pin: '<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
@@ -73,6 +74,17 @@
 
     app.innerHTML = `
       <div class="app-shell">
+        <aside class="sidebar commercial-sidebar" aria-label="Menu lateral">
+          <div class="commercial-sidebar-head"><button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Recolher menu lateral" aria-expanded="true" aria-controls="sidebarNavigation">${icon("sidebar", 20)}</button></div>
+          <a class="sidebar-logo" href="${pageLink("index.html")}" aria-label="Mais Hidro Soluções - início"><img src="${pageLink("assets/images/logo-mais.jpg")}" alt="Mais Hidro Soluções"></a>
+          <div class="sidebar-caption"><span></span><strong>Central comercial</strong></div>
+          <nav class="commercial-sidebar-nav" id="sidebarNavigation" aria-label="Navegação principal">
+            <span class="sidebar-section-label">Navegação</span>
+            <button type="button" id="sidebarSearchBtn" title="Buscar" aria-label="Buscar">${icon("search", 20)}<span>Buscar</span></button>
+            ${nav.map(item => `<a class="${activePage === item.id ? "active" : ""}" href="${pageLink(item.href)}" title="${item.label}" aria-label="${item.label}" ${activePage === item.id ? 'aria-current="page"' : ""} ${item.target ? `target="${item.target}" rel="noopener"` : ""}>${icon(item.icon, 20)}<span>${item.label}</span></a>`).join("")}
+          </nav>
+          <button class="sidebar-profile" id="sidebarProfileBtn" type="button" aria-label="Menu do usuário"><span class="sidebar-profile-avatar">${profileInitials}</span><span class="sidebar-profile-info"><strong>${profileName}</strong><small>${profileRole}</small></span>${icon("chevron", 16)}</button>
+        </aside>
         <div class="workspace">
           <header class="topbar">
             <div class="topbar-brand-area">
@@ -88,13 +100,6 @@
                 <h1>${title}</h1>
               </div>
             </div>
-
-            <nav class="desktop-nav" aria-label="Navegação principal">
-              ${nav.map(item => `
-                <a class="${activePage === item.id ? "active" : ""}" href="${pageLink(item.href)}" title="${item.label}" ${item.target ? `target="${item.target}" rel="noopener"` : ""}>
-                  ${icon(item.icon, 17)}<span>${item.label}</span>
-                </a>`).join("")}
-            </nav>
 
             <div class="topbar-actions">
               <button class="icon-btn" id="globalSearchBtn" aria-label="Buscar">${icon("search")}</button>
@@ -208,9 +213,27 @@
       </div>
     `;
 
+    const shell = $(".app-shell");
+    const sidebarToggle = $("#sidebarToggle");
+    const setSidebarCollapsed = collapsed => {
+      shell.classList.toggle("sidebar-collapsed", collapsed);
+      sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+      sidebarToggle.setAttribute("aria-label", collapsed ? "Expandir menu lateral" : "Recolher menu lateral");
+    };
+    try { setSidebarCollapsed(localStorage.getItem("central_sidebar_collapsed") === "true"); } catch { setSidebarCollapsed(false); }
+    sidebarToggle.addEventListener("click", () => {
+      const collapsed = !shell.classList.contains("sidebar-collapsed");
+      setSidebarCollapsed(collapsed);
+      try { localStorage.setItem("central_sidebar_collapsed", String(collapsed)); } catch { /* A navegação continua disponível sem persistência. */ }
+    });
+    $("#sidebarProfileBtn")?.addEventListener("click", event => {
+      event.stopPropagation();
+      $("#profilePopover").classList.toggle("open");
+    });
     $("#mobileMenuBtn")?.addEventListener("click", () => toggleDrawer(true));
     $$("[data-close-drawer]").forEach(el => el.addEventListener("click", () => toggleDrawer(false)));
     $("#globalSearchBtn")?.addEventListener("click", openSearch);
+    $("#sidebarSearchBtn")?.addEventListener("click", openSearch);
     $$("[data-close-dialog]").forEach(el => el.addEventListener("click", () => el.closest("dialog")?.close()));
     $("#profileMenuBtn")?.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -486,7 +509,9 @@
 
   function date(value, withTime = false) {
     if (!value) return "—";
-    const d = new Date(value);
+    const calendarDate = /^\d{4}-\d{2}-\d{2}/.exec(String(value));
+    const d = calendarDate && !withTime ? new Date(`${calendarDate[0]}T12:00:00`) : new Date(value);
+    if (!Number.isFinite(d.getTime())) return "—";
     const opts = withTime
       ? { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
       : { day: "2-digit", month: "short", year: "numeric" };
@@ -495,7 +520,11 @@
 
   function shortDate(value) {
     if (!value) return "—";
-    return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(new Date(`${value}T12:00:00`));
+    const calendarDate = /^\d{4}-\d{2}-\d{2}/.exec(String(value));
+    const d = calendarDate ? new Date(`${calendarDate[0]}T12:00:00`) : new Date(value);
+    return Number.isFinite(d.getTime())
+      ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(d)
+      : "—";
   }
 
   function initials(name = "") {
@@ -524,10 +553,9 @@
     $$(".panel").forEach((panel, index) => panel.classList.add(`panel-tone-${(index % 4) + 1}`));
   }
 
-  function loadingRender(renderFn, delay = 220) {
+  function loadingRender(renderFn, delay = 0) {
     const content = $("#pageContent");
-    content.innerHTML = `<section class="content-section">${skeleton(6)}</section>`;
-    setTimeout(() => {
+    const finishRender = () => {
       try {
         renderFn();
         decorateVisuals();
@@ -538,7 +566,13 @@
         content.innerHTML = `<section class="content-section">${empty("Não foi possível abrir esta página", "Atualize a página. Se o erro persistir, verifique os dados do registro no banco.")}</section>`;
         content.classList.add("ready");
       }
-    }, delay);
+    };
+    if (delay > 0) {
+      content.innerHTML = `<section class="content-section">${skeleton(6)}</section>`;
+      setTimeout(finishRender, delay);
+    } else {
+      finishRender();
+    }
   }
 
   function statusBadge(status) {
@@ -721,6 +755,36 @@
       : inner;
   }
 
+  async function initVisitsMap(element, points) {
+    try {
+      const L = await loadLeaflet();
+      if (!element.isConnected) return null;
+      if (!L) throw new Error("Mapa indisponível");
+      element.innerHTML = "";
+      const map = L.map(element, { scrollWheelZoom: false });
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
+      const bounds = [];
+      points.forEach(point => {
+        const position = [point.lat, point.lng];
+        bounds.push(position);
+        const popup = document.createElement("div");
+        const name = document.createElement("strong");
+        const detail = document.createElement("div");
+        name.textContent = point.name;
+        detail.textContent = point.detail;
+        popup.append(name, detail);
+        L.circleMarker(position, { radius: 7, color: "#fff", weight: 2, fillColor: "#0b95b5", fillOpacity: 1 }).addTo(map).bindPopup(popup);
+      });
+      if (bounds.length === 1) map.setView(bounds[0], 10);
+      else map.fitBounds(bounds, { padding: [25, 25], maxZoom: 10 });
+      setTimeout(() => { if (element.isConnected) map.invalidateSize(); }, 100);
+      return map;
+    } catch {
+      if (element.isConnected) element.textContent = "Não foi possível carregar o mapa. Verifique sua conexão.";
+      return null;
+    }
+  }
+
   function setupManualMap(mapEl, latInput, lngInput, onChange) {
     if (!mapEl) return;
     mapEl.classList.add("leaflet-mini-map");
@@ -741,7 +805,7 @@
   return {
     $, $$, icon, root, pageLink, mountShell, toast, money, date, shortDate, initials,
     skeleton, loadingRender, statusBadge, empty, openDialog, closeDialog,
-    filesToAttachments, miniMap, setupManualMap, initMaps, initRevealObserver, decorateVisuals,
+    filesToAttachments, miniMap, setupManualMap, initMaps, initVisitsMap, initRevealObserver, decorateVisuals,
     escape, externalUrl,
     // Camada de dados: implementada em assets/js/api.js e reexposta aqui
     // para manter o contrato usado pelas paginas (UI.createSupabase*, etc.).

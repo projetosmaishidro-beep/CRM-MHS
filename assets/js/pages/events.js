@@ -25,19 +25,27 @@ window.PageModules.events = {
       ];
 
       UI.$("#pageContent").innerHTML = `
-        <section class="trip-quick-metrics reveal" style="margin-bottom: 24px;">
-          <article><span>Investimento Global</span><strong style="color:var(--primary);">${UI.money(totalInvested)}</strong><small>Total alocado em eventos</small></article>
-          <article><span>Histórico</span><strong>${concludedEvents.length}</strong><small>Eventos realizados</small></article>
-          <article><span>Radar</span><strong>${upcomingEvents.length}</strong><small>Próximos eventos</small></article>
+        <section class="events-metrics reveal" aria-label="Resumo de eventos">
+          <article><span class="events-metric-icon">${UI.icon("database", 22)}</span><div><span>Investimento global</span><strong>${UI.money(totalInvested)}</strong><small>Total alocado em eventos</small></div></article>
+          <article><span class="events-metric-icon">${UI.icon("calendar", 22)}</span><div><span>Histórico</span><strong>${concludedEvents.length}</strong><small>Eventos realizados</small></div></article>
+          <article><span class="events-metric-icon">${UI.icon("clock", 22)}</span><div><span>Próximos eventos</span><strong>${upcomingEvents.length}</strong><small>Eventos agendados</small></div></article>
         </section>
 
-        <section class="trip-board reveal">
-          <button class="trip-create-card" id="newEventBtn" type="button" style="border-style:dashed;">${UI.icon("calendar", 22)}<span>Novo Evento</span></button>
+        <div class="events-toolbar reveal">
+          <div class="events-tabs" role="group" aria-label="Filtrar eventos por situação">
+            <button type="button" class="active" data-event-filter="all" aria-pressed="true">Todos</button>
+            <button type="button" data-event-filter="done" aria-pressed="false">Realizados</button>
+            <button type="button" data-event-filter="upcoming" aria-pressed="false">Próximos</button>
+          </div>
+          <label class="events-search">${UI.icon("search", 18)}<span class="sr-only">Buscar evento</span><input id="eventSearch" type="search" placeholder="Buscar evento..."></label>
+          <label class="events-date-filter"><span class="sr-only">Filtrar por data</span><select id="eventDateFilter"><option value="all">Todas as datas</option><option value="month">Este mês</option><option value="year">Este ano</option></select></label>
+          <button class="btn btn-primary events-new" id="newEventBtn" type="button">${UI.icon("plus", 18)} Novo evento</button>
+        </div>
+        <section class="trip-board events-board reveal">
           ${sortedEvents.length === 0 ? `
-            <div style="grid-column:1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:48px 16px; color:var(--muted); text-align:center;">
-              ${UI.icon("calendar", 40)}
-              <p style="font-size:15px; font-weight:600;">Nenhum evento registrado ainda</p>
-              <small>Clique em "Novo Evento" para começar, ou aguarde a sincronização com o banco de dados.</small>
+            <div class="events-empty">
+              <span class="events-empty-icon">${UI.icon("calendar", 24)}</span>
+              <div><strong>Nenhum evento registrado ainda</strong><p>Cadastre um evento para começar a acompanhar seu planejamento.</p></div>
             </div>` : sortedEvents.map(ev => {
             const evExpenses = expenses.filter(e => e.eventId === ev.id);
             const totalEvCost = evExpenses.reduce((s,e) => s + Number(e.amount), 0);
@@ -45,7 +53,7 @@ window.PageModules.events = {
             const editionBadge = ev._edition > 1 ? `<span class="tag tag-accent" style="font-size:10px; padding:2px 6px;">${ev._edition}ª Edição</span>` : "";
             
             return `
-              <a class="trip-card ${ev.status === 'Realizado' ? 'opacity-80' : ''}" href="${UI.pageLink(`pages/evento.html?id=${ev.id}`)}">
+              <a class="trip-card event-list-card ${ev.status === 'Realizado' ? 'opacity-80' : ''}" href="${UI.pageLink(`pages/evento.html?id=${ev.id}`)}">
                 <div class="trip-card-top">
                   <div style="display:flex; gap:6px; align-items:center;">
                     ${UI.statusBadge(ev.status)}
@@ -75,20 +83,23 @@ window.PageModules.events = {
                 </div>
               </a>`;
           }).join("")}
+          <div class="events-empty events-no-results" hidden><span class="events-empty-icon">${UI.icon("search", 24)}</span><div><strong>Nenhum evento encontrado</strong><p>Tente alterar a busca ou os filtros.</p></div></div>
         </section>
 
-        <dialog id="eventDialog" class="form-dialog large trip-dialog">
+        <dialog id="eventDialog" class="form-dialog large trip-dialog event-dialog">
           <form method="dialog" id="eventForm">
             <div class="dialog-head trip-dialog-head"><div><span class="eyebrow">Planejamento</span><h2>Novo Evento</h2><p>Cadastre os dados de uma feira ou evento corporativo.</p></div><button class="icon-btn" value="cancel" aria-label="Fechar novo evento">${UI.icon("x")}</button></div>
             <div class="trip-form-scroll">
-            <div class="form-grid trip-form-grid">
+            <div class="event-form-layout">
+            <div class="form-grid trip-form-grid event-details-fields">
               <label class="field span-2"><span>Nome do Evento</span><input name="name" required placeholder="Ex.: Agrishow 2026"></label>
               <label class="field"><span>Data de início</span><input name="startDate" type="date" required></label>
               <label class="field"><span>Data final</span><input name="endDate" type="date" required></label>
               <label class="field"><span>Tipo de Participação</span><select name="role"><option>Participante</option><option>Expositor</option></select></label>
               <label class="field"><span>Local (Cidade/Estado)</span><input name="location" required placeholder="Ex.: Ribeirão Preto, SP"></label>
               <label class="field span-2"><span>Descrição Estratégica</span><textarea name="notes" rows="3" required placeholder="Qual o foco desta participação?"></textarea></label>
-              <fieldset class="field span-2 checklist trip-checklist"><legend>Equipe Participante</legend><p class="checklist-hint">Selecione quem irá ao evento.</p>${(Store.getState().users || []).map(u => `<label><input type="checkbox" name="participant" value="${u.id}"><span class="avatar mini">${u.initials}</span><span class="checklist-name">${u.name}</span></label>`).join("")}</fieldset>
+            </div>
+            <fieldset class="field checklist trip-checklist event-team"><legend>Equipe participante</legend><p class="checklist-hint">Selecione quem irá ao evento.</p><label class="event-team-search">${UI.icon("search", 16)}<input id="eventTeamSearch" type="search" placeholder="Buscar colaborador..." aria-label="Buscar colaborador"></label><div class="event-team-list">${(state.users || []).map(u => `<label><input type="checkbox" name="participant" value="${u.id}"><span class="avatar mini">${u.initials}</span><span class="checklist-name">${u.name}</span></label>`).join("")}</div><p class="event-team-empty" hidden>Nenhum colaborador encontrado.</p></fieldset>
             </div>
             </div>
             <div class="dialog-actions trip-dialog-actions"><span class="trip-form-status" id="eventFormStatus">O evento será salvo no banco de dados.</span><div><button class="btn btn-secondary" value="cancel">Cancelar</button><button class="btn btn-primary" value="default">Criar Evento</button></div></div>
@@ -98,8 +109,48 @@ window.PageModules.events = {
 
       const eventDialog = UI.$("#eventDialog");
       const eventForm = UI.$("#eventForm");
+      const teamSearch = UI.$("#eventTeamSearch");
+      const filterTeam = () => {
+        const query = teamSearch.value.trim().toLocaleLowerCase("pt-BR");
+        let visible = 0;
+        eventForm.querySelectorAll(".event-team-list label").forEach(row => {
+          row.hidden = !row.textContent.toLocaleLowerCase("pt-BR").includes(query);
+          if (!row.hidden) visible++;
+        });
+        eventForm.querySelector(".event-team-empty").hidden = visible > 0;
+      };
+      teamSearch.addEventListener("input", filterTeam);
+      let activeFilter = "all";
+      const filterEvents = () => {
+        const query = UI.$("#eventSearch").value.trim().toLocaleLowerCase("pt-BR");
+        const dateFilter = UI.$("#eventDateFilter").value;
+        const now = new Date();
+        let visible = 0;
+        document.querySelectorAll(".event-list-card").forEach((card, index) => {
+          const event = sortedEvents[index];
+          const date = new Date(`${String(event.startDate || "").slice(0, 10)}T12:00:00`);
+          const matchesDate = dateFilter === "all" || (!Number.isNaN(date.getTime()) && date.getFullYear() === now.getFullYear() && (dateFilter === "year" || date.getMonth() === now.getMonth()));
+          const matchesStatus = activeFilter === "all" || (activeFilter === "done" ? event.status === "Realizado" : event.status !== "Realizado");
+          const matchesQuery = [event.name, event.location, event.notes].some(value => String(value || "").toLocaleLowerCase("pt-BR").includes(query));
+          card.hidden = !(matchesDate && matchesStatus && matchesQuery);
+          if (!card.hidden) visible++;
+        });
+        UI.$(".events-no-results").hidden = !sortedEvents.length || visible > 0;
+      };
+      document.querySelectorAll("[data-event-filter]").forEach(button => button.addEventListener("click", () => {
+        activeFilter = button.dataset.eventFilter;
+        document.querySelectorAll("[data-event-filter]").forEach(item => {
+          const selected = item === button;
+          item.classList.toggle("active", selected);
+          item.setAttribute("aria-pressed", String(selected));
+        });
+        filterEvents();
+      }));
+      UI.$("#eventSearch").addEventListener("input", filterEvents);
+      UI.$("#eventDateFilter").addEventListener("change", filterEvents);
       UI.$("#newEventBtn").addEventListener("click", () => {
         eventForm.reset();
+        filterTeam();
         UI.openDialog("eventDialog");
         requestAnimationFrame(() => eventForm.querySelector("input[name=name]")?.focus());
       });
