@@ -259,8 +259,12 @@
         const client = window.AuthClient || await getSupabaseClient();
         if (client) await client.auth.signOut();
       } catch { /* ignore */ }
+      // Os dados comerciais em cache não podem ficar no aparelho após sair.
+      try { await window.Api?.clearSnapshotCache?.(); } catch { /* ignore */ }
       localStorage.removeItem(CONNECTION_STORAGE_KEY);
-      const loginPath = isSubpage() ? "../login.html" : "login.html";
+      // Calculado aqui: dentro de mountShell, `isSubpage` é uma variável local
+      // booleana que esconde a função de mesmo nome do módulo.
+      const loginPath = location.pathname.includes("/pages/") ? "../login.html" : "login.html";
       window.location.replace(loginPath);
     });
 

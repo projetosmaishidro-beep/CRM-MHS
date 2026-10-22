@@ -198,7 +198,8 @@ window.PageModules["new-visit"] = {
             nome_fantasia: name,
             contato_nome: fd.get("leadContact"),
             telefone: fd.get("leadPhone"),
-            municipio: fd.get("leadCity") || "Nǜo informado",
+            // Cidade vazia fica nula no banco; a interface exibe "Não informado".
+            municipio: String(fd.get("leadCity") || "").trim() || null,
             uf: fd.get("leadState") || "CE",
             latitude: geo.lat,
             longitude: geo.lng
@@ -219,8 +220,12 @@ window.PageModules["new-visit"] = {
         const visitPayload = {
           clientId,
           tripId: fd.get("tripId") || null,
+          type: fd.get("type") || "Acompanhamento",
           notes: fd.get("notes"),
           needs,
+          // Localização do aparelho no momento da visita, quando capturada.
+          lat: geo.lat,
+          lng: geo.lng,
           attachments: await Promise.all(attachments.map(async (file, index) => ({
             name: file.name,
             size: file.size,

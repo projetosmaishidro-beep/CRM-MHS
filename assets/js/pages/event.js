@@ -494,7 +494,7 @@ window.PageModules.event = {
           UI.updateSupabaseEvent(eventId, { links }).then(() => {
              UI.toast("Links do evento atualizados com sucesso.");
              setTimeout(() => location.reload(), 350);
-          }).catch(err => { console.error(err); UI.toast("Erro ao salvar links.", "error"); alert("Erro ao salvar links.\n" + err.message); });
+          }).catch(err => { console.error(err); UI.toast("Erro ao salvar links.", "error"); });
         }
       }
 
@@ -510,7 +510,7 @@ window.PageModules.event = {
           UI.updateSupabaseEvent(eventId, { participantIds }).then(() => {
              UI.toast("Equipe do evento atualizada.");
              setTimeout(() => location.reload(), 350);
-          }).catch(err => { console.error(err); UI.toast("Erro ao salvar equipe.", "error"); alert("Erro ao salvar equipe.\n" + err.message); });
+          }).catch(err => { console.error(err); UI.toast("Erro ao salvar equipe.", "error"); });
         }
       }
 
@@ -531,29 +531,45 @@ window.PageModules.event = {
           UI.updateSupabaseEvent(eventId, { contacts }).then(() => {
              UI.toast("Contatos do evento atualizados.");
              setTimeout(() => location.reload(), 350);
-          }).catch(err => { console.error(err); UI.toast("Erro ao salvar contatos.", "error"); alert("Erro ao salvar contatos.\n" + err.message); });
+          }).catch(err => { console.error(err); UI.toast("Erro ao salvar contatos.", "error"); });
         }
       }
     });
+
+    // Aceita o formato brasileiro digitado ("150,90", "1.234,56", "1.500") e o
+    // formato numérico que editExpense coloca no campo ("150.9").
+    const parseMoney = (value) => {
+      const text = String(value ?? "").trim().replace(/[R$\s]/g, "");
+      if (!text) return NaN;
+      if (text.includes(",")) return Number(text.replace(/\./g, "").replace(",", "."));
+      if (/^\d{1,3}(\.\d{3})+$/.test(text)) return Number(text.replace(/\./g, ""));
+      return Number(text);
+    };
 
     window.saveExpense = () => {
         const form = document.getElementById("eventExpenseForm");
         const btn = document.getElementById("btnSaveExpense");
         const originalText = btn ? btn.textContent : "Salvar";
-        if (btn) { btn.disabled = true; btn.textContent = "Salvando..."; }
-        
+
         const fd = new FormData(form);
         const expenseId = fd.get("id");
-        
+        const amount = parseMoney(fd.get("amount"));
+        if (!Number.isFinite(amount) || amount <= 0) {
+          UI.toast("Informe um valor válido, por exemplo 150,90.", "error");
+          return;
+        }
+        if (btn) { btn.disabled = true; btn.textContent = "Salvando..."; }
+
+        // O autor é registrado pelo banco a partir da sessão. Na edição, a
+        // data original do lançamento é mantida.
         const payload = {
           eventId: eventId,
-          userId: Store.getState().session?.user?.id || "u1",
           category: fd.get("category"),
           costCenter: fd.get("costCenter"),
-          amount: Number(String(fd.get("amount")).replace(/\./g, '').replace(',', '.')),
+          amount: Math.round(amount * 100) / 100,
           place: fd.get("place"),
           notes: fd.get("notes"),
-          date: new Date().toISOString()
+          ...(expenseId ? {} : { date: new Date().toISOString() })
         };
 
         const req = expenseId ? UI.updateSupabaseExpense(expenseId, payload) : UI.createSupabaseExpense(payload);
@@ -561,7 +577,7 @@ window.PageModules.event = {
         req.then(() => {
            UI.toast("Custo registrado no evento.");
            setTimeout(() => location.reload(), 350);
-        }).catch(err => { console.error(err); UI.toast("Erro ao salvar custo.", "error"); alert("Erro ao salvar custo.\n" + err.message); if (btn) { btn.disabled = false; btn.textContent = originalText; } });
+        }).catch(err => { console.error(err); UI.toast("Erro ao salvar custo.", "error"); if (btn) { btn.disabled = false; btn.textContent = originalText; } });
     };
 
     window.addEventListener("store:changed", render);
