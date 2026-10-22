@@ -19,8 +19,42 @@ window.Store = (() => {
 
   function setState(nextState) {
     state = nextState;
+    indexCache = new WeakMap();
     window.dispatchEvent(new CustomEvent("store:changed", { detail: state }));
     return state;
+  }
+
+  // Indices em memoria para as telas evitarem buscas lineares repetidas
+  // (ex.: filtrar todas as visitas para cada viagem). Sao calculados uma vez
+  // por colecao e descartados sempre que o estado muda.
+  let indexCache = new WeakMap();
+
+  function memoIndex(collection, cacheKey, build) {
+    const rows = getState()[collection];
+    if (!Array.isArray(rows)) return new Map();
+    let perArray = indexCache.get(rows);
+    if (!perArray) { perArray = new Map(); indexCache.set(rows, perArray); }
+    if (!perArray.has(cacheKey)) perArray.set(cacheKey, build(rows));
+    return perArray.get(cacheKey);
+  }
+
+  /* Map id -> registro. */
+  function byId(collection) {
+    return memoIndex(collection, "id", (rows) => new Map(rows.map((row) => [row.id, row])));
+  }
+
+  /* Map valor do campo -> lista de registros (na ordem da colecao). */
+  function groupBy(collection, field) {
+    return memoIndex(collection, `group:${field}`, (rows) => {
+      const groups = new Map();
+      rows.forEach((row) => {
+        const key = row[field];
+        if (key === undefined || key === null || key === "") return;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(row);
+      });
+      return groups;
+    });
   }
 
   function update(mutator) {
@@ -340,6 +374,8 @@ window.Store = (() => {
   return {
     getState,
     setState,
+    byId,
+    groupBy,
     reset,
     setRemoteClients,
     setRemoteSnapshot,

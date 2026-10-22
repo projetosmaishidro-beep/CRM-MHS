@@ -6,8 +6,8 @@ window.PageModules.users = {
       <section class="user-grid reveal">
         ${state.users && state.users.length ? state.users.map(u => {
           const trips = state.trips.filter(t => t.participantIds.includes(u.id));
-          const visits = state.visits.filter(v => v.userId === u.id);
-          const expenses = state.expenses.filter(e => e.userId === u.id);
+          const visits = (Store.groupBy("visits", "userId").get(u.id) || []);
+          const expenses = (Store.groupBy("expenses", "userId").get(u.id) || []);
           return `<a class="user-card" href="${UI.pageLink(`pages/usuario.html?id=${u.id}`)}" style="display:flex; flex-direction:column; gap:18px;">
             <div style="display:flex; gap:14px; align-items:center;">
               <div style="position:relative;">

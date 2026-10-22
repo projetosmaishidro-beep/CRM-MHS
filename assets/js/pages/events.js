@@ -49,7 +49,7 @@ window.PageModules.events = {
             </div>` : sortedEvents.map(ev => {
             const evExpenses = expenses.filter(e => e.eventId === ev.id);
             const totalEvCost = evExpenses.reduce((s,e) => s + Number(e.amount), 0);
-            const participants = (ev.participantIds || []).map(id => state.users.find(u => u.id === id)).filter(Boolean);
+            const participants = (ev.participantIds || []).map(id => Store.byId("users").get(id)).filter(Boolean);
             const editionBadge = ev._edition > 1 ? `<span class="tag tag-accent" style="font-size:10px; padding:2px 6px;">${ev._edition}ª Edição</span>` : "";
             
             return `

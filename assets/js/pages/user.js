@@ -50,7 +50,7 @@ window.PageModules.user = {
         <div class="panel-head"><div><span class="eyebrow">Clientes atendidos</span><h3>Visitas realizadas</h3></div></div>
         <div class="visit-list">
           ${visits.length ? visits.map(v => {
-            const client = state.clients.find(c => c.id === v.clientId);
+            const client = Store.byId("clients").get(v.clientId);
             return `<a class="visit-row" href="${UI.pageLink(`pages/cliente.html?id=${client?.id||""}`)}"><span class="visit-icon">${UI.icon("pin")}</span><div class="visit-main"><div class="row-inline"><strong>${client?.name||"Cliente"}</strong>${UI.statusBadge(v.type)}</div><p>${v.notes}</p><small>${UI.date(v.date,true)}</small></div><div class="visit-date">${UI.icon("chevron")}</div></a>`;
           }).join("") : UI.empty("Sem visitas", "Nenhuma visita realizada por este usuário.")}
         </div>

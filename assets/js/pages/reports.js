@@ -35,7 +35,7 @@ window.PageModules.reports = {
       }, 0);
       const visitsByUser = state.users.map(u => ({
         user: u,
-        visits: state.visits.filter(v => v.userId === u.id).length,
+        visits: (Store.groupBy("visits", "userId").get(u.id) || []).length,
         trips: state.trips.filter(t => t.participantIds.includes(u.id)).length
       }));
       const maxVisits = Math.max(...visitsByUser.map(x=>x.visits), 1);
@@ -72,8 +72,8 @@ window.PageModules.reports = {
             <div class="table-wrap"><table>
               <thead><tr><th>Viagem</th><th>Status</th><th>Participantes</th><th>Visitas</th><th>Km</th><th>Gastos</th></tr></thead>
               <tbody>${state.trips.map(t => {
-                const visits = state.visits.filter(v=>v.tripId===t.id).length;
-                const expenses = state.expenses.filter(e=>e.tripId===t.id).reduce((s,e)=>s+Number(e.amount),0);
+                const visits = (Store.groupBy("visits", "tripId").get(t.id) || []).length;
+                const expenses = (Store.groupBy("expenses", "tripId").get(t.id) || []).reduce((s,e)=>s+Number(e.amount),0);
                 const records = t.odometerRecords || [];
                 const tkm = records.length >= 2 ? Math.max(...records.map(r=>r.km)) - Math.min(...records.map(r=>r.km)) : (t.startKm && t.currentKm ? t.currentKm-t.startKm : 0);
                 return `<tr><td><a href="${UI.pageLink(`pages/viagem.html?id=${t.id}`)}"><strong>${t.name}</strong></a></td><td>${UI.statusBadge(t.status)}</td><td>${t.participantIds.length}</td><td>${visits}</td><td>${tkm.toFixed(1)}</td><td>${UI.money(expenses)}</td></tr>`;
@@ -86,8 +86,8 @@ window.PageModules.reports = {
       UI.$("#exportCsvBtn")?.addEventListener("click", () => {
         const rows = [["Viagem","Status","Participantes","Visitas","Quilometros","Gastos"]];
         state.trips.forEach(t => {
-          const visits = state.visits.filter(v=>v.tripId===t.id).length;
-          const expenses = state.expenses.filter(e=>e.tripId===t.id).reduce((s,e)=>s+Number(e.amount),0);
+          const visits = (Store.groupBy("visits", "tripId").get(t.id) || []).length;
+          const expenses = (Store.groupBy("expenses", "tripId").get(t.id) || []).reduce((s,e)=>s+Number(e.amount),0);
           const records = t.odometerRecords || [];
           const tkm = records.length >= 2 ? Math.max(...records.map(r=>r.km)) - Math.min(...records.map(r=>r.km)) : (t.startKm && t.currentKm ? t.currentKm-t.startKm : 0);
           rows.push([t.name,t.status,t.participantIds.length,visits,tkm.toFixed(1),expenses.toFixed(2)]);
@@ -105,8 +105,8 @@ window.PageModules.reports = {
       const trip = state.trips.find(t => t.id === tripId);
       if(!trip) return;
 
-      const visits = state.visits.filter(v => v.tripId === trip.id);
-      const expenses = state.expenses.filter(e => e.tripId === trip.id);
+      const visits = (Store.groupBy("visits", "tripId").get(trip.id) || []);
+      const expenses = (Store.groupBy("expenses", "tripId").get(trip.id) || []);
       const participants = state.users.filter(u => trip.participantIds.includes(u.id));
       
       const records = trip.odometerRecords || [];
@@ -134,7 +134,7 @@ window.PageModules.reports = {
                   <thead><tr><th style="width:140px;">Data/Hora</th><th style="width:250px;">Cliente Visitado</th><th style="width:130px;">Contexto</th><th>Anotações e Relatório</th></tr></thead>
                   <tbody>
                     ${visits.map(v => {
-                      const client = state.clients.find(c => c.id === v.clientId);
+                      const client = Store.byId("clients").get(v.clientId);
                       return `<tr>
                         <td style="white-space:nowrap; vertical-align:top;"><strong>${UI.date(v.date)}</strong><br><small style="color:var(--muted)">${new Date(v.date).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</small></td>
                         <td style="vertical-align:top; white-space:normal;"><strong>${client?.name || 'Desconhecido'}</strong><br><small style="color:var(--muted)">${client?.city || ''}</small></td>

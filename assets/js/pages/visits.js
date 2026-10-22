@@ -23,14 +23,20 @@ window.PageModules.visits = {
     const hasCoordinates = visit => visit.lat != null && visit.lng != null && Number.isFinite(Number(visit.lat)) && Number.isFinite(Number(visit.lng)) && Math.abs(Number(visit.lat)) <= 90 && Math.abs(Number(visit.lng)) <= 180;
     const clientLink = visit => UI.pageLink(`pages/cliente.html?id=${encodeURIComponent(visit.clientId || "")}`);
 
+    // Datas convertidas e ordenadas uma única vez: trocar o período ou a
+    // página passa a ser só um filtro sobre esta lista.
+    const MAP_POINT_LIMIT = 500;
+    const timed = state.visits
+      .map(visit => ({ visit, time: parseVisitDate(visit.date)?.getTime() ?? NaN }))
+      .sort((a, b) => (Number.isFinite(b.time) ? b.time : -Infinity) - (Number.isFinite(a.time) ? a.time : -Infinity));
+
     function render() {
       if (map) { map.remove(); map = null; }
       const now = Date.now();
-      const visits = state.visits.filter(visit => {
-        if (period === "all") return true;
-        const time = parseVisitDate(visit.date)?.getTime();
-        return Number.isFinite(time) && time <= now && time >= now - Number(period) * 86400000;
-      }).sort((a, b) => (parseVisitDate(b.date)?.getTime() ?? -Infinity) - (parseVisitDate(a.date)?.getTime() ?? -Infinity));
+      const visits = (period === "all"
+        ? timed
+        : timed.filter(({ time }) => Number.isFinite(time) && time <= now && time >= now - Number(period) * 86400000)
+      ).map(({ visit }) => visit);
       const withTrip = visits.filter(visit => visit.tripId).length;
       const withoutTrip = visits.length - withTrip;
       const prospecting = visits.filter(visit => visit.type === "Prospecção").length;
@@ -50,7 +56,7 @@ window.PageModules.visits = {
               <div class="visits-summary-item"><span class="visits-summary-icon visits-icon-blue">${UI.icon("briefcase", 21)}</span><div><small>Com viagem</small><strong>${withTrip}</strong><span>Visitas vinculadas</span></div></div>
               <div class="visits-summary-item"><span class="visits-summary-icon visits-icon-red">${UI.icon("users", 21)}</span><div><small>Prospecções</small><strong>${prospecting}</strong><span>Visitas de prospecção</span></div></div>
             </section>
-            <section class="visits-panel visits-map-panel"><div class="visits-panel-head"><div><h3>Distribuição das visitas</h3><p>${located.length} com localização registrada</p></div><span class="visits-period-label">${periodText}</span></div><div id="visitsMap" class="visits-map" aria-label="Mapa das visitas registradas">${located.length ? "Carregando mapa…" : "Nenhuma visita com localização registrada neste período."}</div></section>
+            <section class="visits-panel visits-map-panel"><div class="visits-panel-head"><div><h3>Distribuição das visitas</h3><p>${located.length} com localização registrada${located.length > MAP_POINT_LIMIT ? ` · mapa exibe as ${MAP_POINT_LIMIT} mais recentes` : ""}</p></div><span class="visits-period-label">${periodText}</span></div><div id="visitsMap" class="visits-map" aria-label="Mapa das visitas registradas">${located.length ? "Carregando mapa…" : "Nenhuma visita com localização registrada neste período."}</div></section>
             <section class="visits-panel visits-attention"><div class="visits-panel-head"><div><h3>Pontos de atenção</h3><p>Dados do período selecionado</p></div></div><div class="visits-attention-list"><div><span class="visits-attention-icon">${UI.icon("pin", 18)}</span><p><strong>${missingLocation} ${missingLocation === 1 ? "visita sem localização" : "visitas sem localização"}</strong><small>Sem coordenadas registradas</small></p></div><div><span class="visits-attention-icon">${UI.icon("briefcase", 18)}</span><p><strong>${withoutTrip} ${withoutTrip === 1 ? "visita sem viagem" : "visitas sem viagem"}</strong><small>Não vinculadas a uma viagem</small></p></div></div></section>
           </div>
           <section class="visits-panel visits-history-dashboard" id="visitsHistory"><div class="visits-panel-head"><div><h3>Últimas visitas</h3><p>Histórico do período selecionado</p></div><span class="visits-period-label">${visits.length} ${visits.length === 1 ? "registro" : "registros"}</span></div><div class="visits-table-wrap"><table class="visits-table"><thead><tr><th>Cliente</th><th>Tipo</th><th>Vínculo</th><th>Data</th><th>Responsável</th><th><span class="visits-sr-only">Abrir cliente</span></th></tr></thead><tbody>${rows.map(visit => { const client = clientFor(visit); const user = userFor(visit); return `<tr><td><a href="${clientLink(visit)}">${escape(client?.name || "Cliente não identificado")}</a></td><td><span class="visits-type">${escape(visit.type || "Visita")}</span></td><td>${visit.tripId ? "Com viagem" : "Sem viagem"}</td><td>${escape(formatVisitDate(visit.date))}</td><td>${escape(user?.name || "Não informado")}</td><td><a class="visits-row-link" href="${clientLink(visit)}" aria-label="Abrir cliente ${escape(client?.name || "da visita")}">${UI.icon("chevron", 16)}</a></td></tr>`; }).join("")}</tbody></table>${rows.length ? "" : '<p class="visits-empty-inline">Nenhuma visita registrada neste período.</p>'}</div><div class="visits-pagination"><span>${visits.length ? `Mostrando ${(page - 1) * pageSize + 1} a ${Math.min(page * pageSize, visits.length)} de ${visits.length}` : "Nenhum registro"}</span><div><button type="button" id="visitsPrev" aria-label="Página anterior" ${page <= 1 ? "disabled" : ""}>${UI.icon("arrow_left", 16)}</button><strong>${page} / ${pages}</strong><button type="button" id="visitsNext" aria-label="Próxima página" ${page >= pages ? "disabled" : ""}>${UI.icon("arrow", 16)}</button></div></div></section>
@@ -63,7 +69,7 @@ window.PageModules.visits = {
       UI.$("#visitsNext").addEventListener("click", () => { if (page < pages) { page++; render(); } });
       if (located.length) {
         const element = UI.$("#visitsMap");
-        const points = located.map(visit => ({ lat: Number(visit.lat), lng: Number(visit.lng), name: clientFor(visit)?.name || "Cliente não identificado", detail: formatVisitDate(visit.date) }));
+        const points = located.slice(0, MAP_POINT_LIMIT).map(visit => ({ lat: Number(visit.lat), lng: Number(visit.lng), name: clientFor(visit)?.name || "Cliente não identificado", detail: formatVisitDate(visit.date) }));
         UI.initVisitsMap(element, points).then(instance => { if (element.isConnected) map = instance; else instance?.remove(); });
       }
     }
