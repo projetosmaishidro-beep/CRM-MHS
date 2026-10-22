@@ -176,7 +176,24 @@ window.Api = (() => {
     const client = await operationalClient();
     const { data, error } = await client.schema("api").rpc(name, args);
     if (error) throw new Error(error.message || "Falha ao salvar no Supabase.");
+    // Toda escrita invalida o retrato em cache: a proxima leitura (inclusive
+    // a recarga que as telas fazem depois de salvar) busca o banco.
+    await invalidateSnapshotCache();
     return rpcValue(data);
+  }
+
+  // Executa tarefas assincronas com no maximo `limit` em andamento.
+  async function runLimited(tasks, limit) {
+    const results = new Array(tasks.length);
+    let next = 0;
+    const worker = async () => {
+      while (next < tasks.length) {
+        const index = next++;
+        results[index] = await tasks[index]();
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+    return results;
   }
 
   const tripFromApi = (row) => {
@@ -207,19 +224,24 @@ window.Api = (() => {
     return match ? decodeURIComponent(match[1]) : null;
   }
 
+  const SIGN_BATCH_SIZE = 500;
+  const SIGN_CONCURRENCY = 4;
+
   async function refreshAttachmentUrls(client, attachmentLists) {
     const items = attachmentLists.flat().filter((item) => attachmentPath(item));
     const paths = [...new Set(items.map(attachmentPath))];
     if (!paths.length) return;
     const signed = new Map();
-    for (let index = 0; index < paths.length; index += 100) {
-      const { data, error } = await client.storage.from(ATTACHMENT_BUCKET).createSignedUrls(paths.slice(index, index + 100), SIGNED_URL_TTL_SECONDS);
+    const batches = [];
+    for (let index = 0; index < paths.length; index += SIGN_BATCH_SIZE) batches.push(paths.slice(index, index + SIGN_BATCH_SIZE));
+    await runLimited(batches.map((batch) => async () => {
+      const { data, error } = await client.storage.from(ATTACHMENT_BUCKET).createSignedUrls(batch, SIGNED_URL_TTL_SECONDS);
       if (error) {
         console.warn("[Central] Não foi possível renovar os links dos anexos:", error);
-        continue;
+        return;
       }
       (data || []).forEach((row) => { if (row.signedUrl && !row.error) signed.set(row.path, row.signedUrl); });
-    }
+    }), SIGN_CONCURRENCY);
     items.forEach((item) => {
       const path = attachmentPath(item);
       if (!signed.has(path)) return;
@@ -231,52 +253,265 @@ window.Api = (() => {
 
   const eventFromApi = (row) => ({ id: row.evento_id, name: row.nome || "Evento", location: row.local || "", startDate: row.data_inicio ? String(row.data_inicio).slice(0, 10) : "", endDate: row.data_fim ? String(row.data_fim).slice(0, 10) : "", status: ({ PLANEJADO: "Planejado", EM_ANDAMENTO: "Em andamento", REALIZADO: "Realizado", CANCELADO: "Cancelado" })[row.status] || row.status || "Planejado", role: row.tipo_participacao === "EXPOSITOR" ? "Expositor" : "Participante", notes: row.notas_estrategicas || "", participantIds: asArray(row.participantes), attachments: asArray(row.anexos), links: asArray(row.links), contacts: asArray(row.contatos), createdAt: row.criado_em, userId: row.criado_por || "", remote: true });
 
+  // ------------------------------------------------------------------
+  // Leitura paginada das views
+  // ------------------------------------------------------------------
+  // O PostgREST limita cada resposta (max rows; 1000 no padrão do Supabase).
+  // Sem paginar, carteira e visitas eram cortadas em silêncio. Cada view é
+  // lida em blocos paralelos até o total informado pelo banco, com ordenação
+  // estável (desempate pela chave) para nenhuma linha ser pulada ou repetida.
+  const PAGE_SIZE = 1000;
+  const PAGE_CONCURRENCY = 6;
+  const SNAPSHOT_VIEWS = [
+    { key: "clients", view: "vw_carteira_crm", id: "empresa_id", order: "empresa", ascending: true },
+    { key: "trips", view: "vw_viagens", id: "viagem_id", order: "inicio_em", ascending: true },
+    { key: "visits", view: "vw_visitas_crm", id: "visita_id", order: "realizada_em", ascending: false },
+    { key: "needs", view: "vw_necessidades", id: "necessidade_id", order: "criado_em", ascending: false },
+    { key: "expenses", view: "vw_despesas_crm", id: "despesa_id", order: "data_despesa", ascending: false },
+    { key: "events", view: "vw_eventos", id: "evento_id", order: "data_inicio", ascending: false },
+    { key: "users", view: "vw_equipe", id: "membro_id", order: "nome", ascending: true }
+  ];
+
+  async function fetchAllRows(api, spec) {
+    const page = (from, to, withCount) => api.from(spec.view)
+      .select("*", withCount ? { count: "exact" } : undefined)
+      .order(spec.order, { ascending: spec.ascending })
+      .order(spec.id, { ascending: true })
+      .range(from, to);
+
+    const first = await page(0, PAGE_SIZE - 1, true);
+    if (first.error) return { error: first.error, rows: [] };
+    const rows = [...(first.data || [])];
+    const total = Number.isFinite(first.count) ? first.count : null;
+    // O servidor pode limitar abaixo de PAGE_SIZE: o passo real é o que veio.
+    const step = rows.length;
+    if (step === 0) return { rows, total: total ?? 0 };
+
+    if (total !== null && total > rows.length) {
+      const ranges = [];
+      for (let from = step; from < total; from += step) ranges.push([from, Math.min(from + step, total) - 1]);
+      const pages = await runLimited(ranges.map(([from, to]) => () => page(from, to, false)), PAGE_CONCURRENCY);
+      for (const result of pages) {
+        if (result.error) return { error: result.error, rows };
+        rows.push(...(result.data || []));
+      }
+    }
+    // Sem contagem, ou se o total mudou durante a leitura: continua em
+    // sequência enquanto vierem páginas cheias.
+    while (total === null ? rows.length % step === 0 : rows.length < total) {
+      const result = await page(rows.length, rows.length + step - 1, false);
+      if (result.error) return { error: result.error, rows };
+      if (!result.data?.length) break;
+      rows.push(...result.data);
+      if (result.data.length < step) break;
+    }
+    // Inserções durante a leitura podem deslocar o offset: remove repetidos.
+    const seen = new Set();
+    const unique = rows.filter((row) => {
+      const id = row[spec.id];
+      if (id === null || id === undefined) return true;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+    return { rows: unique, total: total ?? unique.length };
+  }
+
+  // ------------------------------------------------------------------
+  // Retrato em cache local (IndexedDB), separado por usuário
+  // ------------------------------------------------------------------
+  // Até SNAPSHOT_FRESH_MS o retrato é usado sem consultar o banco. Depois,
+  // e até SNAPSHOT_MAX_AGE_MS, a tela abre com ele e o banco é lido em
+  // segundo plano para a próxima navegação. Qualquer escrita invalida o
+  // cache (em todas as abas, via localStorage) e o logout o apaga.
+  const CACHE_DB_NAME = "central-comercial-cache";
+  const CACHE_STORE = "snapshots";
+  const CACHE_SCHEMA = 1;
+  const SNAPSHOT_FRESH_MS = 2 * 60 * 1000;
+  const SNAPSHOT_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+  const RESIGN_AFTER_MS = 45 * 60 * 1000;
+  const INVALIDATED_KEY = "central_comercial_cache_invalidated_at";
+  let cacheDbPromise = null;
+  let backgroundRefresh = null;
+
+  function openCacheDb() {
+    if (!cacheDbPromise) {
+      cacheDbPromise = new Promise((resolve) => {
+        try {
+          if (!window.indexedDB) return resolve(null);
+          const request = indexedDB.open(CACHE_DB_NAME, CACHE_SCHEMA);
+          request.onupgradeneeded = () => {
+            if (!request.result.objectStoreNames.contains(CACHE_STORE)) request.result.createObjectStore(CACHE_STORE);
+          };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => resolve(null);
+          request.onblocked = () => resolve(null);
+        } catch {
+          resolve(null);
+        }
+      });
+    }
+    return cacheDbPromise;
+  }
+
+  async function cacheOperation(mode, run) {
+    const db = await openCacheDb();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      try {
+        const transaction = db.transaction(CACHE_STORE, mode);
+        const request = run(transaction.objectStore(CACHE_STORE));
+        transaction.oncomplete = () => resolve(request?.result ?? null);
+        transaction.onerror = () => resolve(null);
+        transaction.onabort = () => resolve(null);
+      } catch {
+        resolve(null);
+      }
+    });
+  }
+
+  const readSnapshotCache = (userId) => cacheOperation("readonly", (store) => store.get(userId));
+  const lastInvalidation = () => { try { return Number(localStorage.getItem(INVALIDATED_KEY)) || 0; } catch { return 0; } };
+
+  async function invalidateSnapshotCache() {
+    try { localStorage.setItem(INVALIDATED_KEY, String(Date.now())); } catch { /* armazenamento indisponível */ }
+    await cacheOperation("readwrite", (store) => store.clear());
+  }
+
+  async function saveSnapshot(userId, record) {
+    // Uma leitura iniciada antes de uma escrita não pode sobrescrever o cache.
+    if (!userId || record.fetchedAt <= lastInvalidation()) return;
+    await cacheOperation("readwrite", (store) => store.put(record, userId));
+  }
+
+  async function fingerprintOf(raw) {
+    const text = JSON.stringify(raw);
+    try {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+      return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    } catch {
+      return `len:${text.length}`;
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Montagem do retrato usado pelas telas
+  // ------------------------------------------------------------------
+  const ACTIVITY_LIMIT = 20;
+  const moneyFormat = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const timeOf = (value) => { const time = new Date(value).getTime(); return Number.isFinite(time) ? time : -Infinity; };
+  const latest = (rows, dateOf, limit) => rows
+    .map((row) => [timeOf(dateOf(row)), row])
+    .filter(([time]) => time > -Infinity)
+    .sort((left, right) => right[0] - left[0])
+    .slice(0, limit)
+    .map(([, row]) => row);
+
+  // "Últimos registros" do painel: derivado das visitas, despesas e viagens.
+  function buildActivities({ clientsById, trips, visits, expenses }) {
+    const items = [
+      ...latest(visits, (visit) => visit.date, ACTIVITY_LIMIT).map((visit) => ({ id: `visit-${visit.id}`, userId: visit.userId, date: visit.date, text: `Visita (${visit.type}) em ${clientsById.get(visit.clientId)?.name || "cliente não identificado"}` })),
+      ...latest(expenses, (expense) => expense.date, ACTIVITY_LIMIT).map((expense) => ({ id: `expense-${expense.id}`, userId: expense.userId, date: expense.date, text: `Despesa de ${moneyFormat.format(expense.amount)} em ${expense.category}` })),
+      ...latest(trips, (trip) => trip.createdAt, ACTIVITY_LIMIT).map((trip) => ({ id: `trip-${trip.id}`, userId: trip.ownerId, date: trip.createdAt, text: `Viagem cadastrada: ${trip.name}` }))
+    ];
+    return latest(items, (item) => item.date, ACTIVITY_LIMIT);
+  }
+
+  function buildSnapshot(raw) {
+    const clients = raw.clients.map(mapRemoteClient);
+    const clientsById = new Map(clients.map((client) => [client.id, client]));
+    raw.needs.forEach((row) => {
+      const client = clientsById.get(row.empresa_id);
+      if (!client) return;
+      const need = { id: row.necessidade_id, clientId: row.empresa_id, visitId: row.visita_id, category: row.categoria, description: row.descricao, priority: row.prioridade, status: row.status, date: row.criado_em };
+      client.needRecords.push(need);
+      if (!client.needs.includes(need.category)) client.needs.push(need.category);
+    });
+    const users = raw.users.map((row) => {
+      const name = row.nome || row.email || "Membro da equipe";
+      return { id: row.usuario_id || row.membro_id, name, role: row.cargo || row.papel || "Equipe Comercial", initials: initials(name), email: row.email || "", active: row.ativo !== false, remote: true };
+    });
+    const trips = raw.trips.map(tripFromApi);
+    const visits = raw.visits.map(visitFromApi);
+    const expenses = raw.expenses.map(expenseFromApi);
+    const events = raw.events.map(eventFromApi);
+    return { clients, trips, visits, expenses, events, users, activities: buildActivities({ clientsById, trips, visits, expenses }) };
+  }
+
+  const attachmentListsOf = (snapshot) => [snapshot.trips, snapshot.visits, snapshot.expenses, snapshot.events].flat().map((row) => row.attachments || []);
+
+  async function fetchSnapshot(client) {
+    const fetchedAt = Date.now();
+    const api = client.schema("api");
+    const results = await Promise.all(SNAPSHOT_VIEWS.map((spec) => fetchAllRows(api, spec)));
+    const raw = {};
+    const failures = [];
+    SNAPSHOT_VIEWS.forEach((spec, index) => {
+      raw[spec.key] = results[index].rows;
+      if (results[index].error) failures.push({ view: spec.view, error: results[index].error });
+    });
+    // Cada tela continua recebendo os dados das views que responderam: uma
+    // falha pontual (ex.: despesas) não impede as demais de serem exibidas.
+    if (failures.length) console.error("[Central] Views que não puderam ser carregadas:", failures);
+    const snapshot = buildSnapshot(raw);
+    try {
+      await refreshAttachmentUrls(client, attachmentListsOf(snapshot));
+    } catch (error) {
+      console.warn("[Central] Falha ao renovar os links dos anexos:", error);
+    }
+    return { snapshot, failures, record: { schema: CACHE_SCHEMA, fetchedAt, signedAt: Date.now(), fingerprint: await fingerprintOf(raw), snapshot } };
+  }
+
+  function startBackgroundRefresh(client, userId, previousFingerprint) {
+    if (backgroundRefresh) return backgroundRefresh;
+    backgroundRefresh = (async () => {
+      try {
+        const { failures, record } = await fetchSnapshot(client);
+        if (failures.length) return;
+        await saveSnapshot(userId, record);
+        // O Store da tela aberta não é trocado em segundo plano: as telas
+        // guardam referências (ex.: índices de lista) ao retrato atual.
+        if (record.fingerprint !== previousFingerprint) window.dispatchEvent(new CustomEvent("api:snapshot-updated"));
+      } catch (error) {
+        console.warn("[Central] Atualização em segundo plano falhou:", error);
+      } finally {
+        backgroundRefresh = null;
+      }
+    })();
+    return backgroundRefresh;
+  }
+
   async function hydrateSupabaseSnapshot() {
     try {
       const client = await operationalClient();
-      const api = client.schema("api");
-      const [clients, trips, visits, needs, expenses, events, users] = await Promise.all([
-        api.from("vw_carteira_crm").select("*").order("empresa"),
-        api.from("vw_viagens").select("*").order("inicio_em"),
-        api.from("vw_visitas_crm").select("*").order("realizada_em", { ascending: false }),
-        api.from("vw_necessidades").select("*").order("criado_em", { ascending: false }),
-        api.from("vw_despesas_crm").select("*").order("data_despesa", { ascending: false }),
-        api.from("vw_eventos").select("*").order("data_inicio", { ascending: false }),
-        api.from("vw_equipe").select("*").order("nome")
-      ]);
-      // Cada tela deve continuar recebendo os dados da sua própria view. Uma
-      // falha pontual, por exemplo em despesas, não pode impedir o detalhe de
-      // um evento já disponível em vw_eventos de ser exibido.
-      const viewNames = ["vw_carteira_crm", "vw_viagens", "vw_visitas_crm", "vw_necessidades", "vw_despesas_crm", "vw_eventos", "vw_equipe"];
-      const results = [clients, trips, visits, needs, expenses, events, users];
-      const failures = results
-        .map((result, index) => ({ view: viewNames[index], error: result.error }))
-        .filter((result) => result.error);
-      if (failures.length) console.error("[Central] Views que não puderam ser carregadas:", failures);
-      const remoteClients = (clients.data || []).map(mapRemoteClient);
-      (needs.data || []).forEach((row) => {
-        const clientRow = remoteClients.find((item) => item.id === row.empresa_id);
-        if (!clientRow) return;
-        const need = { id: row.necessidade_id, clientId: row.empresa_id, visitId: row.visita_id, category: row.categoria, description: row.descricao, priority: row.prioridade, status: row.status, date: row.criado_em };
-        clientRow.needRecords.push(need);
-        if (!clientRow.needs.includes(need.category)) clientRow.needs.push(need.category);
-      });
-      const remoteUsers = (users.data || []).map((row) => {
-        const name = row.nome || row.email || "Membro da equipe";
-        return { id: row.usuario_id || row.membro_id, name, role: row.cargo || row.papel || "Equipe Comercial", initials: initials(name), email: row.email || "", active: row.ativo !== false, remote: true };
-      });
-      const remoteTrips = (trips.data || []).map(tripFromApi);
-      const remoteVisits = (visits.data || []).map(visitFromApi);
-      const remoteExpenses = (expenses.data || []).map(expenseFromApi);
-      const remoteEvents = (events.data || []).map(eventFromApi);
-      try {
-        await refreshAttachmentUrls(client, [remoteTrips, remoteVisits, remoteExpenses, remoteEvents].flat().map((row) => row.attachments || []));
-      } catch (error) {
-        console.warn("[Central] Falha ao renovar os links dos anexos:", error);
+      const { data: sessionData } = await client.auth.getSession();
+      const userId = sessionData.session?.user?.id || null;
+      const now = Date.now();
+      const cached = userId ? await readSnapshotCache(userId) : null;
+      const usable = cached && cached.schema === CACHE_SCHEMA && cached.fetchedAt > lastInvalidation() && now - cached.fetchedAt < SNAPSHOT_MAX_AGE_MS;
+
+      if (usable) {
+        if (now - cached.signedAt > RESIGN_AFTER_MS) {
+          try {
+            await refreshAttachmentUrls(client, attachmentListsOf(cached.snapshot));
+            cached.signedAt = Date.now();
+            await saveSnapshot(userId, cached);
+          } catch (error) {
+            console.warn("[Central] Falha ao renovar os links dos anexos do cache:", error);
+          }
+        }
+        Store.setRemoteSnapshot(cached.snapshot);
+        const ageMs = now - cached.fetchedAt;
+        if (ageMs > SNAPSHOT_FRESH_MS) startBackgroundRefresh(client, userId, cached.fingerprint);
+        return { count: cached.snapshot.clients.length, source: "cache", ageMs };
       }
-      Store.setRemoteSnapshot({ clients: remoteClients, trips: remoteTrips, visits: remoteVisits, expenses: remoteExpenses, events: remoteEvents, users: remoteUsers, activities: [] });
+
+      const { snapshot, failures, record } = await fetchSnapshot(client);
+      Store.setRemoteSnapshot(snapshot);
+      if (!failures.length) await saveSnapshot(userId, record);
       return {
-        count: remoteClients.length,
+        count: snapshot.clients.length,
+        source: "network",
         ...(failures.length ? { warning: `Falha ao carregar: ${failures.map((failure) => failure.view).join(", ")}. Consulte o Console para o detalhe retornado pelo Supabase.` } : {})
       };
     } catch (error) {
@@ -315,7 +550,7 @@ window.Api = (() => {
     CONNECTION_STORAGE_KEY, readConnection, isRestrictedSupabaseKey,
     loadSupabaseLibrary, getSupabaseClient,
     mapRemoteClient, mapRemoteTrip,
-    hydrateSupabaseSnapshot,
+    hydrateSupabaseSnapshot, clearSnapshotCache: invalidateSnapshotCache,
     createClientRecord, updateClientRecord, archiveClientRecord, createVisit, createNeed, createTrip, updateTrip, deleteTrip, createExpense, updateExpense, deleteExpense, createEvent, updateEvent, deleteEvent,
     uploadPrivateFile
   };

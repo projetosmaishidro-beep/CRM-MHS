@@ -136,6 +136,10 @@
         const { data } = await client.auth.getSession();
         if (data.session?.user) {
           window.location.replace("index.html");
+        } else {
+          // Sem sessão (expirou ou saiu): apaga os dados comerciais em cache
+          // deste aparelho. O nome precisa ser o mesmo usado em assets/js/api.js.
+          try { window.indexedDB?.deleteDatabase("central-comercial-cache"); } catch { /* indisponível */ }
         }
       } catch {
         // Silently ignore — user will log in manually

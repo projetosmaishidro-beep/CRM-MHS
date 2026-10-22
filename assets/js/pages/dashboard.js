@@ -35,10 +35,10 @@ window.PageModules.dashboard = {
         <div class="panel">
           <div class="panel-head"><div><span class="eyebrow">Atividade</span><h3>Últimos registros</h3></div></div>
           <div class="timeline compact">
-            ${state.activities.slice(0, 5).map(a => {
-              const user = state.users.find(u => u.id === a.userId);
-              return `<div class="timeline-item"><span class="avatar mini">${user?.initials || "?"}</span><div><strong>${user?.name || "Usuário"}</strong><p>${a.text}</p><small>${UI.date(a.date, true)}</small></div></div>`;
-            }).join("")}
+            ${state.activities.length ? state.activities.slice(0, 5).map(a => {
+              const user = Store.byId("users").get(a.userId);
+              return `<div class="timeline-item"><span class="avatar mini">${UI.escape(user?.initials || "?")}</span><div><strong>${UI.escape(user?.name || "Usuário")}</strong><p>${UI.escape(a.text)}</p><small>${UI.date(a.date, true)}</small></div></div>`;
+            }).join("") : UI.empty("Nenhum registro recente", "Visitas, despesas e viagens aparecem aqui assim que forem lançadas.")}
           </div>
         </div>
       </section>
