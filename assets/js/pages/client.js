@@ -130,46 +130,6 @@ window.PageModules.client = {
 
         </section>
 
-        <section class="client-history-layout reveal">
-          <div class="panel history-panel" id="clientVisitHistory">
-            <div class="panel-head">
-              <div><span class="eyebrow">Histórico completo</span><h3>Visitas realizadas</h3></div>
-              <span class="count-pill">${visits.length} visitas</span>
-            </div>
-            <div class="visit-report-list">
-              ${visits.length ? visits.map((v, index) => {
-                const user = state.users.find(u => u.id === v.userId);
-                const trip = state.trips.find(t => t.id === v.tripId);
-                const images = (v.attachments || []).filter(a => a.type?.startsWith("image/")).length;
-                const files = (v.attachments || []).length;
-                return `
-                  <article class="visit-report-card">
-                    <div class="visit-report-index"><span>${String(visits.length - index).padStart(2,"0")}</span></div>
-                    <div class="visit-report-content">
-                      <div class="timeline-top">
-                        <div class="row-inline">${UI.statusBadge(v.type)}<span class="visit-state-dot" title="Registro concluído"></span></div>
-                        <time>${safeDate(v.date, true)}</time>
-                      </div>
-                      <h4>${v.type} por ${user?.name || "Usuário"}</h4>
-                      <p>${v.notes}</p>
-                      ${v.needs?.length ? `<div class="tag-row">${v.needs.map(n => `<span class="tag">${n}</span>`).join("")}</div>` : ""}
-                      <div class="visit-report-meta">
-                        ${trip ? `<a class="context-link" href="${UI.pageLink(`pages/viagem.html?id=${trip.id}`)}">${UI.icon("briefcase", 15)} ${trip.name}</a>` : `<span>${UI.icon("briefcase",15)} Sem viagem</span>`}
-                        <span>${UI.icon("camera",15)} ${images} foto(s)</span>
-                        <span>${UI.icon("paperclip",15)} ${files} anexo(s)</span>
-                        ${v.lat && v.lng ? `<span>${UI.icon("pin",15)} localização registrada</span>` : ""}
-                      </div>
-                    </div>
-                    <button class="btn btn-pdf" data-pdf-visit="${v.id}" aria-label="Gerar PDF desta visita">${UI.icon("file",16)} PDF da visita</button>
-                  </article>`;
-              }).join("") : UI.empty("Ainda sem histórico", "A primeira visita aparecerá aqui.")}
-            </div>
-          </div>
-
-        </section>
-
-
-
         <section class="panel media-panel reveal">
           <div class="panel-head">
             <div><span class="eyebrow">Registro visual</span><h3>Fotos e vídeos das visitas</h3><p class="panel-subtitle">Todo material capturado pelos usuários aparece reunido aqui, em ordem cronológica.</p></div>
@@ -210,6 +170,44 @@ window.PageModules.client = {
           }
         </section>
 
+
+        <section class="client-history-layout reveal">
+          <div class="panel history-panel" id="clientVisitHistory">
+            <div class="panel-head">
+              <div><span class="eyebrow">Histórico completo</span><h3>Visitas realizadas</h3></div>
+              <span class="count-pill">${visits.length} visitas</span>
+            </div>
+            <div class="visit-report-list">
+              ${visits.length ? visits.map((v, index) => {
+                const user = state.users.find(u => u.id === v.userId);
+                const trip = state.trips.find(t => t.id === v.tripId);
+                const images = (v.attachments || []).filter(a => a.type?.startsWith("image/")).length;
+                const files = (v.attachments || []).length;
+                return `
+                  <article class="visit-report-card">
+                    <div class="visit-report-index"><span>${String(visits.length - index).padStart(2,"0")}</span></div>
+                    <div class="visit-report-content">
+                      <div class="timeline-top">
+                        <div class="row-inline">${UI.statusBadge(v.type)}<span class="visit-state-dot" title="Registro concluído"></span></div>
+                        <time>${safeDate(v.date, true)}</time>
+                      </div>
+                      <h4>${v.type} por ${user?.name || "Usuário"}</h4>
+                      <p>${v.notes}</p>
+                      ${v.needs?.length ? `<div class="tag-row">${v.needs.map(n => `<span class="tag">${n}</span>`).join("")}</div>` : ""}
+                      <div class="visit-report-meta">
+                        ${trip ? `<a class="context-link" href="${UI.pageLink(`pages/viagem.html?id=${trip.id}`)}">${UI.icon("briefcase", 15)} ${trip.name}</a>` : `<span>${UI.icon("briefcase",15)} Sem viagem</span>`}
+                        <span>${UI.icon("camera",15)} ${images} foto(s)</span>
+                        <span>${UI.icon("paperclip",15)} ${files} anexo(s)</span>
+                        ${v.lat && v.lng ? `<span>${UI.icon("pin",15)} localização registrada</span>` : ""}
+                      </div>
+                    </div>
+                    <button class="btn btn-pdf" data-pdf-visit="${v.id}" aria-label="Gerar PDF desta visita">${UI.icon("file",16)} PDF da visita</button>
+                  </article>`;
+              }).join("") : UI.empty("Ainda sem histórico", "A primeira visita aparecerá aqui.")}
+            </div>
+          </div>
+
+        </section>
 
         <dialog id="needDialog" class="form-dialog">
           <form method="dialog" id="needForm" class="need-dialog-form">

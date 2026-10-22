@@ -616,7 +616,14 @@
     // animação sem ficarem presos em opacity: 0.
     const pageContent = $("#pageContent");
     if (pageContent && !revealMutationObserver && "MutationObserver" in window) {
-      revealMutationObserver = new MutationObserver(() => observeRevealItems(pageContent));
+      revealMutationObserver = new MutationObserver(records => {
+        records.forEach(record => record.removedNodes.forEach(node => {
+          if (node.nodeType !== 1 || node.isConnected) return;
+          if (node.matches(".reveal")) revealObserver?.unobserve(node);
+          node.querySelectorAll(".reveal").forEach(el => revealObserver?.unobserve(el));
+        }));
+        observeRevealItems(pageContent);
+      });
       revealMutationObserver.observe(pageContent, { childList: true, subtree: true });
     }
   }
@@ -662,10 +669,11 @@
     return output;
   }
 
+  let leafletPromise;
   function loadLeaflet() {
-    return new Promise((resolve, reject) => {
-      if (window.L) return resolve(window.L);
-      if (document.getElementById("leaflet-css")) return resolve(null);
+    if (window.L) return Promise.resolve(window.L);
+    if (leafletPromise) return leafletPromise;
+    leafletPromise = new Promise((resolve, reject) => {
 
       const css = document.createElement("link");
       css.id = "leaflet-css";
@@ -677,12 +685,25 @@
       script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
       script.crossOrigin = "";
 
-      script.onload = () => resolve(window.L);
-      script.onerror = reject;
+      const fail = () => {
+        clearTimeout(timeout);
+        script.onload = script.onerror = null;
+        script.remove();
+        css.remove();
+        reject(new Error("Não foi possível carregar o mapa."));
+      };
+      const timeout = setTimeout(fail, 15000);
+      script.onload = () => {
+        if (!window.L) return fail();
+        clearTimeout(timeout);
+        resolve(window.L);
+      };
+      script.onerror = fail;
 
       document.head.appendChild(css);
       document.head.appendChild(script);
-    });
+    }).catch(error => { leafletPromise = null; throw error; });
+    return leafletPromise;
   }
 
   function initMaps() {
@@ -692,7 +713,7 @@
     loadLeaflet().then((L) => {
       if (!L) return;
       mapElements.forEach(el => {
-        if (el._leaflet_id) return;
+        if (!el.isConnected || el._leaflet_id) return;
         
         const lat = parseFloat(el.dataset.lat);
         const lng = parseFloat(el.dataset.lng);
@@ -738,10 +759,14 @@
             }
           });
           
-          setTimeout(() => map.invalidateSize(), 150);
+          setTimeout(() => { if (el.isConnected) map.invalidateSize(); }, 150);
         }
       });
-    }).catch(console.error);
+    }).catch(() => {
+      mapElements.forEach(el => {
+        if (el.isConnected && !el._leaflet_id) el.textContent = "Mapa indisponível. Tente novamente mais tarde.";
+      });
+    });
   }
 
   function miniMap(lat, lng, label = "Localização registrada", linkUrl = null) {

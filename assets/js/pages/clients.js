@@ -34,8 +34,9 @@ window.PageModules.clients = {
       const counts = { Todos: state.clients.length, Cliente: 0, Lead: 0, "Sem visitas": 0 };
       state.clients.forEach(client => { if (client.status === "Cliente") counts.Cliente++; if (["Lead", "Prospect"].includes(client.status)) counts.Lead++; if (!visitsByClient.get(client.id)?.length) counts["Sem visitas"]++; });
       const regions = [...new Set(state.clients.map(client => String(client.state || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const query = normalize(search.trim());
+      const usersById = new Map(state.users.map(user => [user.id, user]));
       const list = state.clients.filter(client => {
-        const query = normalize(search.trim());
         const matchesText = !query || normalize([client.name, client.company, client.city, client.segment, clientCategory(client)].join(" ")).includes(query);
         const matchesStatus = statusFilter === "Todos" || (statusFilter === "Sem visitas" ? !visitsByClient.get(client.id)?.length : statusFilter === "Lead" ? ["Lead", "Prospect"].includes(client.status) : client.status === statusFilter);
         return matchesText && matchesStatus && (category === "Todos" || clientCategory(client) === category) && (!region || String(client.state || "").trim() === region);
@@ -52,7 +53,7 @@ window.PageModules.clients = {
           client,
           visitCount: visits.length,
           lastLabel: last ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(last) : visits.length ? "Data indisponível" : "Sem visitas",
-          ownerName: state.users.find(user => user.id === client.ownerId)?.name || "Não informado",
+          ownerName: usersById.get(client.ownerId)?.name || "Não informado",
           location: [client.city, client.state].filter(value => value && value !== "Não informado").join(", ") || "Local não informado"
         };
       });
